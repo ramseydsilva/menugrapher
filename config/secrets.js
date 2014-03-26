@@ -102,5 +102,10 @@ module.exports = {
     client_secret: process.env.PAYPAL_SECRET || 'Your Client Secret',
     returnUrl: process.env.PAYPAL_RETURN_URL || 'http://localhost:3000/api/paypal/success',
     cancelUrl: process.env.PAYPAL_CANCEL_URL || 'http://localhost:3000/api/paypal/cancel'
+  },
+
+  imgur: {
+      client_id: process.env.IMGUR_ID || 'f31ccea0c9c4a31',
+      client_secret: process.env.IMGUR_SECRET || '452e58af35b29db19068b43d8fbefd226d00c191'
   }
 };

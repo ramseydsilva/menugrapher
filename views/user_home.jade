@@ -1,0 +1,12 @@
+extends layout
+
+block content
+    form(method='POST', action='/upload', enctype='multipart/form-data')
+        input(type='hidden', name='_csrf', value=token)
+        input(type='file', name='image')
+        br
+        input(type='submit', value='Upload', class='btn btn-success')
+    hr
+    p.lead Recent uploads
+    for post in posts
+        include includes/post

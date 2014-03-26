@@ -2,23 +2,24 @@
  * Module dependencies.
  */
 
-var express = require('express');
-var MongoStore = require('connect-mongo')(express);
-var flash = require('express-flash');
-var path = require('path');
-var mongoose = require('mongoose');
-var passport = require('passport');
-var expressValidator = require('express-validator');
-var connectAssets = require('connect-assets');
+var express = require('express'),
+    MongoStore = require('connect-mongo')(express),
+    flash = require('express-flash'),
+    path = require('path'),
+    mongoose = require('mongoose'),
+    passport = require('passport'),
+    expressValidator = require('express-validator'),
+    connectAssets = require('connect-assets');
 
 /**
  * Load controllers.
  */
 
-var homeController = require('./controllers/home');
-var userController = require('./controllers/user');
-var apiController = require('./controllers/api');
-var contactController = require('./controllers/contact');
+var homeController = require('./controllers/home'),
+    postController = require('./controllers/post'),
+    userController = require('./controllers/user'),
+    apiController = require('./controllers/api'),
+    contactController = require('./controllers/contact');
 
 /**
  * API keys + Passport configuration.
@@ -72,17 +73,23 @@ app.use(express.session({
     auto_reconnect: true
   })
 }));
+
+app.use(express.bodyParser());
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: month }));
+
+//Enable csrf
 app.use(express.csrf());
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.use(function(req, res, next) {
   res.locals.user = req.user;
   res.locals.token = req.csrfToken();
   res.locals.secrets = secrets;
   next();
 });
+
 app.use(flash());
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: month }));
 app.use(function(req, res, next) {
   // Keep track of previous URL
   if (req.method !== 'GET') return next();
@@ -103,6 +110,8 @@ app.use(express.errorHandler());
  */
 
 app.get('/', homeController.index);
+app.post('/upload', postController.newPost);
+app.get('/post/:post', postController.viewPost);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
