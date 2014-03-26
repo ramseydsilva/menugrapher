@@ -26,8 +26,8 @@ module.exports = {
 
   facebookAuth: true,
   facebook: {
-    clientID: process.env.FACEBOOK_ID || 'Your App ID',
-    clientSecret: process.env.FACEBOOK_SECRET || 'Your App Secret',
+    clientID: process.env.FACEBOOK_ID || '608729062539613',
+    clientSecret: process.env.FACEBOOK_SECRET || 'c151fad957f6e4ac0a562fa991f0dd9b',
     callbackURL: '/auth/facebook/callback',
     passReqToCallback: true
   },
@@ -42,16 +42,16 @@ module.exports = {
 
   twitterAuth: true,
   twitter: {
-    consumerKey: process.env.TWITTER_KEY || 'Your Consumer Key',
-    consumerSecret: process.env.TWITTER_SECRET  || 'Your Consumer Secret',
+    consumerKey: process.env.TWITTER_KEY || 'e5U5lflijon5dukQ2KmHfA',
+    consumerSecret: process.env.TWITTER_SECRET  || '7KwrDlhd2Bt1CXZJsmEJg7IYbD3zCtrwZpFN2czpI',
     callbackURL: '/auth/twitter/callback',
     passReqToCallback: true
   },
 
   googleAuth: true,
   google: {
-    clientID: process.env.GOOGLE_ID || 'Your Client ID',
-    clientSecret: process.env.GOOGLE_SECRET || 'Your Client Secret',
+    clientID: process.env.GOOGLE_ID || '775503769978-iempb0534c54fav8d5n4damgdf3h14ub.apps.googleusercontent.com',
+    clientSecret: process.env.GOOGLE_SECRET || 'G_KEi-ghGY1waxb5XK9WjISJ',
     callbackURL: '/auth/google/callback',
     passReqToCallback: true
   },
