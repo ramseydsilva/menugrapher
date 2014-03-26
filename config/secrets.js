@@ -75,7 +75,7 @@ module.exports = {
   },
 
   clockwork: {
-    apiKey: process.env.CLOCKWORK_KEY || 'Your Clockwork SMS API Key'
+    apiKey: process.env.CLOCKWORK_KEY || '0ce82e5de7668ec70ef4ef942641c66367921232'
   },
 
   tumblr: {

@@ -3,11 +3,12 @@ extends layout
 block content
   h1 Welcome to Menugrapher
   p.lead
-    | Making restaurant menus more visual
-    br
-    ul
-      li Upload, organize, show case all your food pics in one place
+    ul(class="lead")
+      li Upload, organize, show case your food pics in one place
       li Browse pics of menu items before you order
-    | Click here to get started
     br
-    | It's fast, fun and easy
+    a(class="btn btn-success active", href="signup")
+      i(class="fa fa-arrow-circle-o-right")
+      | Get started
+    br
+    | It's fast, fun and easy!
