@@ -22,6 +22,12 @@ var homeController = require('./controllers/home'),
     contactController = require('./controllers/contact');
 
 /**
+ * Load middlewares.
+ */
+
+var middleware = require('./middleware');
+
+/**
  * API keys + Passport configuration.
  */
 
@@ -59,45 +65,54 @@ app.use(connectAssets({
   helperContext: app.locals
 }));
 app.use(express.compress());
-app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.cookieParser());
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(expressValidator());
+app.use(express.bodyParser());
 app.use(express.methodOverride());
-app.use(express.session({
-  secret: secrets.sessionSecret,
-  store: new MongoStore({
+
+var sessionStore = new MongoStore({
     url: secrets.db,
     auto_reconnect: true
-  })
+});
+app.use(express.session({
+  secret: secrets.sessionSecret,
+  store: sessionStore
 }));
 
-app.use(express.bodyParser());
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: month }));
+app.use(express.favicon(path.join(__dirname, 'public/img/favicon.ico')));
 
-//Enable csrf
-app.use(express.csrf());
+
+var csrf = function(req, res, next) {
+    app.use(express.csrf());
+    res.locals.token = req.csrfToken();
+    next();
+}
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(function(req, res, next) {
-  res.locals.user = req.user;
-  res.locals.token = req.csrfToken();
-  res.locals.secrets = secrets;
-  next();
-});
-
 app.use(flash());
+
+// Keep track of previous URL
 app.use(function(req, res, next) {
-  // Keep track of previous URL
   if (req.method !== 'GET') return next();
   var path = req.path.split('/')[1];
   if (/(auth|login|logout|signup)$/.test(path)) return next();
   req.session.returnTo = req.path;
   next();
 });
+
+// Attach user info to req
+app.use(function(req, res, next) {
+  res.locals.user = req.user;
+  res.locals.secrets = secrets;
+  next();
+});
+
 app.use(app.router);
 app.use(function(req, res) {
   res.status(404);
@@ -110,9 +125,19 @@ app.use(express.errorHandler());
  */
 
 app.get('/', homeController.index);
-app.post('/upload', postController.newPost);
+app.get('/contact', contactController.getContact);
+app.post('/contact', contactController.postContact);
+
+// User routes
+app.get('/dashboard', middleware.redirectToLoginIfNotLoggedIn, homeController.dashboard);
+app.get('/post/new', middleware.redirectToLoginIfNotLoggedIn, postController.newPost);
+app.post('/post/new', middleware.redirectToLoginIfNotLoggedIn, postController.newPostSubmit);
+
+// Post routes
 app.get('/post/:post', postController.viewPost);
-app.get('/login', userController.getLogin);
+
+// Account routes
+app.get('/login', middleware.redirectToDashboardIfLoggedIn, userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
 app.get('/forgot', userController.getForgot);
@@ -121,13 +146,13 @@ app.get('/reset/:token', userController.getReset);
 app.post('/reset/:token', userController.postReset);
 app.get('/signup', userController.getSignup);
 app.post('/signup', userController.postSignup);
-app.get('/contact', contactController.getContact);
-app.post('/contact', contactController.postContact);
 app.get('/account', passportConf.isAuthenticated, userController.getAccount);
 app.post('/account/profile', passportConf.isAuthenticated, userController.postUpdateProfile);
 app.post('/account/password', passportConf.isAuthenticated, userController.postUpdatePassword);
 app.post('/account/delete', passportConf.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConf.isAuthenticated, userController.getOauthUnlink);
+
+// Api routes
 app.get('/api', apiController.getApi);
 app.get('/api/lastfm', apiController.getLastfm);
 app.get('/api/nyt', apiController.getNewYorkTimes);
@@ -192,11 +217,72 @@ app.get('/auth/venmo/callback', passport.authorize('venmo', { failureRedirect: '
   res.redirect('/api/venmo');
 });
 
+// Listen to server
+var server = require('http').Server(app),
+    ss = require('socket.io-stream'),
+    fs = require('fs'),
+    passportSocketIo = require("passport.socketio");
+
+var passportAuthorization = passportSocketIo.authorize({
+    cookieParser: express.cookieParser,
+    key:    'connect.sid',          // the cookie where express (or connect) stores its session id.
+    secret: secrets.sessionSecret,               // the session secret to parse the cookie
+    store:   sessionStore,          // the session store that express uses
+    fail: function(data, err, someBool, accept) {
+        console.log("Failed handshake");
+        accept(null, false);        // second param takes boolean on whether or not to allow handshake
+    },
+    success: function(data, accept) {
+        console.log("Successful handshake");
+        accept(null, true);
+    }
+});
+
+var io = require('socket.io').listen(server);
+io.configure(function() {
+    io.set("authorization", passportAuthorization);
+});
+
+io.on('connection', function(socket){ 
+    socket.on('connect', function() {
+        console.log("Socket connected");
+    });
+    socket.on('disconnect', function(){
+        console.log("Socket disconnected");
+    });
+    ss(socket).on('image-upload', function(stream, data) {
+        var post = require('./models/post'),
+            filename = path.basename(data.name.name),
+            filepath = path.join(__dirname, '/public/uploads/original/' + path.basename(data.name.name)),
+            url = '/uploads/original/' + filename;
+        stream.pipe(fs.createWriteStream(filepath));
+        stream.on('end', function() {
+            var postData = {
+                user: {
+                    uid: socket.handshake.user.id,
+                    name: socket.handshake.user.profile.name
+                },
+                pic: {
+                    originalPath: filepath,
+                    originalUrl: url,
+                    thumbPath: "",
+                    thumbUrl: "",
+                }
+            };
+            var newPost = new post(postData);
+            newPost.save(function(err, newPost, numberAffected) {
+                console.log("New post saved");
+                socket.emit("image-upload-complete", {imageUrl: url, postUrl: newPost.url});
+            });
+        });
+    });
+});
+
 /**
  * Start Express server.
  */
 
-app.listen(app.get('port'), function() {
+server.listen(app.get('port'), function() {
   console.log("✔ Express server listening on port %d in %s mode", app.get('port'), app.settings.env);
 });
 

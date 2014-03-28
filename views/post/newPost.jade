@@ -1,0 +1,12 @@
+extends ../layout
+
+block content
+    p.lead New Post
+    hr
+    input(id='image', type='file', name='image')
+    br
+    input(id='upload', type='submit', value='Upload', class='btn btn-success')
+    div(id="image-container")
+    br
+    div(id="progress-bar", class="progress progress-info progress-striped active")
+        div(id="progress", class="bar")

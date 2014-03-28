@@ -1,16 +1,16 @@
 var post = require('../models/post');
 
 exports.index = function(req, res) {
-    if (req.user) {
-        post.find(function(err, posts) {
-            res.render('user_home', {
-                title: 'Home',
-                posts: posts
-            });
-        });
-    } else {
-        res.render('home', {
+    res.render('home', {
         title: 'Home'
-        });
-    }
+    });
 };
+
+exports.dashboard = function(req, res) {
+    post.find().sort('-createdAt').exec(function(err, posts) {
+        res.render('home/dashboard', {
+            title: 'Dashboard',
+            posts: posts
+        });
+    });
+}

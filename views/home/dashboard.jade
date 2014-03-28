@@ -1,0 +1,7 @@
+extends ../layout
+
+block content
+    p.lead Recent uploads
+    hr
+    for post in posts
+        include ../includes/post
