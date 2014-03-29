@@ -3,11 +3,22 @@ extends ../layout
 block content
     div(class='panel panel-default')
         div(class='panel-body')
-            br
-            input(id='image', type='file', name='image')
-            br
-            input(id='upload', type='submit', value='Upload', class='btn btn-warning')
-            div(id="image-container")
-            br
-            div(id="progress-bar", class="progress progress-info progress-striped active")
-                div(id="progress", class="progress-bar")
+            div(class='container-fluid')
+                div(class='row-fluid')
+                    div(class='col-sm-6')
+                        form(class='form-horizontal')
+                            fieldset
+                                legend From computer
+                                input(id='image', type='file', name='image' multiple)
+                    div(class='col-sm-6')
+                        form(class='form-horizontal')
+                            fieldset
+                                legend From internet
+                                input(type='text', class='image-url form-control')
+                div(class='row-fluid')
+                    div(class='col-sm-12')
+                        input(id='upload', type='submit', value='Upload', class='btn btn-warning')
+                        br
+                        br
+                        div(id='uploads')
+

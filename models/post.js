@@ -36,8 +36,10 @@ var postSchema = new mongoose.Schema({
 
 postSchema.virtual('url').get(function() {
     return "/post/" + this._id;
-}).set(function() {
-    this.url = "/post/" + this._id;
+});
+
+postSchema.virtual('editUrl').get(function() {
+    return this.url + '/edit';
 });
 
 postSchema.pre('save', function(next) {

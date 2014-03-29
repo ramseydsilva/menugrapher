@@ -18,7 +18,6 @@ define([
     "socket.io-stream",
     "bootstrap"
 ], function($, _, io, ss) {
-    var stream = ss.createStream();
     var socket = io.connect('//' + window.location.host);
 
     socket.on('error', function (reason){
@@ -32,22 +31,26 @@ define([
             socket.emit("subscribe", { room: $(roomItem).attr('room') });
         });
 
-        socket.on('post-update', function(data) {
+        var handleSocketEvent = function(data) {
             switch(data.action) {
                 case "redirect":
                     window.location = data.url;
                     break;
-                case "update":
+                case "html":
                     _.each(data.elements, function(value, key) {
                         $(key).html(value);
                     });
                     break;
+                case "append":
+                    _.each(data.elements, function(value, key) {
+                        $(key).append(value);
+                    });
+                    break;
             }
-        });
+        }
 
-        socket.on("image-upload-complete", function(data) {
-            window.location = data.redirectUrl;
-        });
+        socket.on('post-update', handleSocketEvent);
+        socket.on("image-upload-complete", handleSocketEvent);
 
     });
 
@@ -58,19 +61,46 @@ define([
             }
         });
 
+        function getProgressBar() {
+            var elementId = Math.floor((Math.random()*10000000000000000)+1); // Generate random id
+            var uploadBox = $('<div class="upload_box" id="' + elementId + '"></div>');
+            var progressBar = $('<div class="progress progress-info progress-striped active"><div class="progress-bar"></div></div>');
+            uploadBox.html(progressBar);
+            $('#uploads').append(uploadBox);
+            return progressBar;
+        }
+
         $('#upload').on('click', function(e){
             e.preventDefault();
-            var file = $("#image")[0].files[0];
-            if (!!file) {
-                var blobStream = ss.createBlobReadStream(file),
+            _.each($("#image")[0].files, function(file) {
+                var progressBar = getProgressBar(),
+                    stream = ss.createStream(),
+                    blobStream = ss.createBlobReadStream(file),
                     size = 0;
-                ss(socket).emit('image-upload', stream, { name: file, size: file.size });
+                ss(socket).emit('image-upload', stream, { elementId: progressBar.parent()[0].id, name: file, size: file.size });
                 blobStream.on('data', function(chunk) {
                     size += chunk.length;
-                    $('#progress').css("width", Math.floor(size / file.size * 100) + '%');
+                    progressBar.find('.progress-bar').css("width", Math.floor(size / file.size * 100) + '%');
                 });
                 blobStream.pipe(stream);
-            }
+            });
+            // Clear input values
+            var newInput = $('#image').clone();
+            $('#image').replaceWith(newInput);
+
+            // Grab image from url input
+            $('.image-url').each(function(index, image_input) {
+                if(!!$(image_input).val()) {
+                    var progressBar = getProgressBar(),
+                        stream = ss.createStream(),
+                        size = 0;
+                    ss(socket).emit('image-upload', stream, { elementId: progressBar.parent()[0].id, link: $(image_input).val() });
+                    stream.on('data', function(data) {
+                        console.log('data');
+                    });
+                    $(image_input).val('');
+                }
+            });
         });
 
         $('.post-update').on('click', function(e) {
@@ -80,6 +110,5 @@ define([
                 description: $('.post-description').val()
             });
         });
-
     });
 });

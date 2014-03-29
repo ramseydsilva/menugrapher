@@ -1,19 +1,23 @@
 'use strict';
 
-var passport = require('passport');
-
-var homeController = require('./controllers/home'),
-    postController = require('./controllers/post'),
-    userController = require('./controllers/user'),
-    apiController = require('./controllers/api'),
-    contactController = require('./controllers/contact');
-
-var homeMiddleware = require('./middleware'),
-    postMiddleware = require('./middleware/post');
-
-var passportConf = require('./config/passport');
+var passport = require('passport'),
+    passportConf = require('./config/passport');
 
 var routes = function(app) {
+
+    var homeController = require('./controllers/home'),
+        postController = require('./controllers/post'),
+        userController = require('./controllers/user'),
+        apiController = require('./controllers/api'),
+        contactController = require('./controllers/contact');
+
+    var homeMiddleware = require('./middleware'),
+        postMiddleware = require('./middleware/post');
+
+    /**
+     * Application sockets
+     */
+    postController.socketio(app);
 
     /**
      * Application routes.

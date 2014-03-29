@@ -13,39 +13,22 @@ var express = require('express'),
     connectAssets = require('connect-assets');
 
 /**
- * Load controllers.
- */
-
-var homeController = require('./controllers/home'),
-    postController = require('./controllers/post'),
-    userController = require('./controllers/user'),
-    apiController = require('./controllers/api'),
-    contactController = require('./controllers/contact');
-
-/**
- * Load middlewares.
- */
-
-var homeMiddleware = require('./middleware'),
-    postMiddleware = require('./middleware/post');
-
-/**
  * API keys + Passport configuration.
  */
 
-var secrets = require('./config/secrets');
+var app = express();
+app.secrets = require('./config/secrets');
 
 /**
  * Create Express server.
  */
 
-var app = express();
 
 /**
  * Mongoose configuration.
  */
 
-mongoose.connect(secrets.db);
+mongoose.connect(app.secrets.db);
 mongoose.connection.on('error', function() {
   console.error('✗ MongoDB Connection Error. Please make sure MongoDB is running.');
 });
@@ -67,20 +50,23 @@ app.use(connectAssets({
 }));
 app.use(express.compress());
 app.use(express.logger('dev'));
+
+app.cookieParser = express.cookieParser;  // Attach this to app to be called from socket.js
 app.use(express.cookieParser());
+
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(expressValidator());
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 
-var sessionStore = new MongoStore({
-    url: secrets.db,
+app.sessionStore = new MongoStore({
+    url: app.secrets.db,
     auto_reconnect: true
 });
 app.use(express.session({
-  secret: secrets.sessionSecret,
-  store: sessionStore
+  secret: app.secrets.sessionSecret,
+  store: app.sessionStore
 }));
 
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: month }));
@@ -106,11 +92,10 @@ app.use(function(req, res, next) {
 // Attach locals
 app.use(function(req, res, next) {
     res.locals.user = req.user;
-    res.locals.secrets = secrets;
+    res.locals.secrets = app.secrets;
     res.locals.token = req.csrfToken();
     next();
 });
-
 
 app.use(app.router);
 app.use(function(req, res) {
@@ -118,103 +103,19 @@ app.use(function(req, res) {
   res.render('404');
 });
 app.use(express.errorHandler());
+
+
+app.server = require('http').Server(app),
+app.socketio = require('./socket').socketio(app);
+app.rootDir = __dirname;
+
 var routes = require('./routes')(app);
-
-// Listen to server
-var server = require('http').Server(app),
-    ss = require('socket.io-stream'),
-    fs = require('fs'),
-    passportSocketIo = require("passport.socketio");
-
-var passportAuthorization = passportSocketIo.authorize({
-    cookieParser: express.cookieParser,
-    key:    'connect.sid',          // the cookie where express (or connect) stores its session id.
-    secret: secrets.sessionSecret,               // the session secret to parse the cookie
-    store:   sessionStore,          // the session store that express uses
-    fail: function(data, err, someBool, accept) {
-        console.log("Failed handshake");
-        accept(null, true);        // second param takes boolean on whether or not to allow handshake
-    },
-    success: function(data, accept) {
-        console.log("Successful handshake");
-        accept(null, true);
-    }
-});
-
-var io = require('socket.io').listen(server);
-io.configure(function() {
-    io.set("authorization", passportAuthorization);
-});
-
-io.on('connection', function(socket){ 
-    socket.on('connect', function() {
-        console.log("Socket connected");
-    });
-
-    socket.on('subscribe', function(data) {
-        socket.join(data.room);
-    });
-
-    socket.in('post').on('post-update', function(data) {
-        var post = require('./models/post');
-        console.log(data);
-        post.findOne({ _id: data.id }, function(err, post) {
-            post.title = data.title;
-            post.description = data.description;
-            post.save(function(err, post, numberAffected) {
-                socket.in('post-'+ post.id).emit('post-update', {
-                    action: 'redirect',
-                    url: post.url
-                });  // Emit to emitting socket, get them to redirect to post page on successful edit
-
-                var elementsToUpdate = {};
-                elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
-                elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
-
-                socket.broadcast.to('post-' + post.id).emit('post-update', {
-                    action: 'update',
-                    elements: elementsToUpdate
-                });  // Emit to other sockets to update their info
-            });
-        });
-    });
-
-    socket.on('disconnect', function(){
-        console.log("Socket disconnected");
-    });
-    ss(socket).on('image-upload', function(stream, data) {
-        var post = require('./models/post'),
-            filename = path.basename(data.name.name),
-            filepath = path.join(__dirname, '/public/uploads/original/' + path.basename(data.name.name)),
-            url = '/uploads/original/' + filename;
-        stream.pipe(fs.createWriteStream(filepath));
-        stream.on('end', function() {
-            var postData = {
-                user: {
-                    uid: socket.handshake.user.id,
-                    name: socket.handshake.user.profile.name
-                },
-                pic: {
-                    originalPath: filepath,
-                    originalUrl: url,
-                    thumbPath: "",
-                    thumbUrl: "",
-                }
-            };
-            var newPost = new post(postData);
-            newPost.save(function(err, newPost, numberAffected) {
-                console.log("New post saved");
-                socket.emit("image-upload-complete", { redirectUrl: newPost.url + '/edit' });
-            });
-        });
-    });
-});
 
 /**
  * Start Express server.
  */
 
-server.listen(app.get('port'), function() {
+app.server.listen(app.get('port'), function() {
   console.log("✔ Express server listening on port %d in %s mode", app.get('port'), app.settings.env);
 });
 
