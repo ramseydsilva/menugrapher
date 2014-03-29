@@ -9,8 +9,8 @@ block content
                     li Finally a place where foodies can feel at home!
                     li Unashamedly post, organize and share all your food pics
                     li Easily locate trending menu items near you
-
-            a(class="btn btn-success", href="signup")
-                i(class="fa fa-arrow-circle-o-right")
-                | Signup
-                a.btn.btn-link(href='/login') or Login
+            if !user
+                a(class="btn btn-success", href="signup")
+                    i(class="fa fa-arrow-circle-o-right")
+                    | Signup
+                    a.btn.btn-link(href='/login') or Login
