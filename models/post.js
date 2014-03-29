@@ -46,6 +46,12 @@ postSchema.virtual('deleteUrl').get(function() {
     return this.url + 'delete';
 });
 
+postSchema.method({
+    userHasRights: function(user) {
+        return user && this.user.uid == user.id;
+    }
+});
+
 postSchema.pre('save', function(next) {
     this.updatedAt = new Date;
     next();

@@ -18,7 +18,8 @@ exports.new = function(req, res) {
 exports.post = function(req, res) {
     res.render('post/post', {
         title: "Post",
-        post: res.locals.post
+        post: res.locals.post,
+        userHasRights: res.locals.post.userHasRights(req.user)
     });
 };
 
@@ -47,7 +48,7 @@ exports.delete = function(req, res) {
 exports.deletePost = function(req, res) {
     res.locals.post.remove(function(err, post) {
         if (err) res.redirect(post.deleteUrl);  // TODO: Handle error
-        res.redirect('/dashboard/');
+        res.redirect(req.body.redirect);
     });
 };
 

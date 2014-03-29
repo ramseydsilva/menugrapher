@@ -5,7 +5,7 @@ block content
         div(class='panel-heading')
             block panel-heading
                 span(class='post-title') #{post.title} &nbsp;
-                if post.user.uid == user.id
+                if userHasRights
                     ul(class='list-inline pull-right')
                         li
                             a(class='' href=post.editUrl) Edit
