@@ -28,18 +28,22 @@ define([
     socket.on('connect', function (data){
         console.info('successfully established a working connection \o/');
 
-        socket.emit("subscribe", { room: "post" });
+        $('[room]').each(function(index, roomItem) {
+            socket.emit("subscribe", { room: $(roomItem).attr('room') });
+        });
 
-        if ($('.post').length) {
-            socket.on('update-' + $('.post').get(0).id, function(data) {
-                if ($('.post-update').length)
-                    window.location = $('.post').attr('url');
-
-                _.each(data, function(value, key) {
-                    $(key).html(value);
-                });
-            });
-        }
+        socket.on('post-update', function(data) {
+            switch(data.action) {
+                case "redirect":
+                    window.location = data.url;
+                    break;
+                case "update":
+                    _.each(data.elements, function(value, key) {
+                        $(key).html(value);
+                    });
+                    break;
+            }
+        });
 
         socket.on("image-upload-complete", function(data) {
             window.location = data.redirectUrl;

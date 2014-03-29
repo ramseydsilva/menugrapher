@@ -245,7 +245,6 @@ io.on('connection', function(socket){
     });
 
     socket.on('subscribe', function(data) {
-        console.log('client subscribed to ', data.room);
         socket.join(data.room);
     });
 
@@ -256,13 +255,19 @@ io.on('connection', function(socket){
             post.title = data.title;
             post.description = data.description;
             post.save(function(err, post, numberAffected) {
-                socket.in('post').emit('update-' + post.id);  // Emit to emitting socket
+                socket.in('post-'+ post.id).emit('post-update', {
+                    action: 'redirect',
+                    url: post.url
+                });  // Emit to emitting socket, get them to redirect to post page on successful edit
 
                 var elementsToUpdate = {};
                 elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
                 elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
 
-                socket.broadcast.to('post').emit('update-' + post.id, elementsToUpdate );  // Emit to other sockets
+                socket.broadcast.to('post-' + post.id).emit('post-update', {
+                    action: 'update',
+                    elements: elementsToUpdate
+                });  // Emit to other sockets to update their info
             });
         });
     });
