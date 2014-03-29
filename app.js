@@ -124,6 +124,7 @@ app.use(express.errorHandler());
  */
 
 app.get('/', homeController.index);
+app.get('/dashboard', homeMiddleware.redirectToLoginIfNotLoggedIn, homeController.dashboard);
 app.get('/contact', contactController.getContact);
 app.post('/contact', contactController.postContact);
 
