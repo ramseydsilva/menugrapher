@@ -95,8 +95,8 @@ define([
                         stream = ss.createStream(),
                         size = 0;
                     ss(socket).emit('image-upload', stream, { elementId: progressBar.parent()[0].id, link: $(image_input).val() });
-                    stream.on('data', function(data) {
-                        console.log('data');
+                    socket.on('downloadProgress', function(data) {
+                        progressBar.find('.progress-bar').css('width', data.progress);
                     });
                     $(image_input).val('');
                 }

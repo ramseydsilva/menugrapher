@@ -94,20 +94,27 @@ exports.socketio = function(app) {
                     https = require('https'),
                     download = fs.createWriteStream(filepath);
                 var httpProtocol = !data.link.indexOf('https') ? https : http;
-                download.on('open', function(fd) {
-                    httpProtocol.get(data.link, function(res) {
-                        res.pipe(download);
+                var httpStream = httpProtocol.get(data.link, function(res) {
+                    res.pipe(download);
+                    var totalSize = res.headers['content-length'];
+                    var downloadedSize = 0;
+                    res.on('data', function(buffer) {
+                        downloadedSize += buffer.length;
+                        console.log(buffer.size, totalSize);
+                        socket.emit('downloadProgress', {'progress': downloadedSize/totalSize * 100 + '%' });
                     });
                 });
                 download.on('finish', savePost);
-                stream.pipe(download);
-
             } else {
                 var filename = path.basename(data.name.name);
                 filepath = path.join(app.rootDir, '/public/uploads/original/' + filename),
                 url = '/uploads/original/' + filename;
                 elementId = data.elementId;
-                stream.pipe(fs.createWriteStream(filepath));
+                var upload = fs.createWriteStream(filepath);
+                stream.pipe(upload);
+                stream.on('data', function() {
+                    console.log('writing to file upload');
+                });
                 stream.on('end', savePost);
             }
         });
