@@ -1,0 +1,12 @@
+extends ../layout
+
+block content
+    div(class='post', id=post.id)
+        input(class='post-title', class='borderless', type='text', value=post.title)
+        hr
+        img(src=post.pic.originalUrl, width=300)
+        br
+        br
+        textarea(class='post-description', class='borderless')= post.description
+        br
+        a(class='post-update', class="btn btn-success") Update

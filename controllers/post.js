@@ -9,7 +9,7 @@ var fs = require('fs'),
 exports.viewPost = function(req, res) {
     post.findOne({_id: req.param('post')}, function(err, post) {
         if (post) {
-            res.render('post/view', {
+            res.render('post/post', {
                 title: "Post",
                 post: post
             });

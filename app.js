@@ -230,7 +230,7 @@ var passportAuthorization = passportSocketIo.authorize({
     store:   sessionStore,          // the session store that express uses
     fail: function(data, err, someBool, accept) {
         console.log("Failed handshake");
-        accept(null, false);        // second param takes boolean on whether or not to allow handshake
+        accept(null, true);        // second param takes boolean on whether or not to allow handshake
     },
     success: function(data, accept) {
         console.log("Successful handshake");
@@ -247,6 +247,30 @@ io.on('connection', function(socket){
     socket.on('connect', function() {
         console.log("Socket connected");
     });
+
+    socket.on('subscribe', function(data) {
+        console.log('client subscribed to ', data.room);
+        socket.join(data.room);
+    });
+
+    socket.in('post').on('post-update', function(data) {
+        var post = require('./models/post');
+        console.log(data);
+        post.findOne({ _id: data.id }, function(err, post) {
+            post.title = data.title;
+            post.description = data.description;
+            post.save(function(err, post, numberAffected) {
+                console.log('post saved');
+                socket.broadcast.to('post').emit('update-' + post.id, {
+                    elements: {
+                        '.post-title': post.title,
+                        '.post-description': post.description
+                    }
+                });
+            });
+        });
+    });
+
     socket.on('disconnect', function(){
         console.log("Socket disconnected");
     });

@@ -27,6 +27,7 @@ var postSchema = new mongoose.Schema({
         uid: String,
         name: String
     },
+    title: String,
     description: String,
     item: { type: mongoose.Schema.ObjectId, ref : 'item' },
     createdAt: { type: Date, default: Date.now },

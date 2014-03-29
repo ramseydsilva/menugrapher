@@ -2,6 +2,7 @@ require.config({
     paths: {
         "jquery": "lib/jquery-2.1.0.min",
         "bootstrap": "lib/bootstrap.min",
+        "underscore": "lib/underscore-min",
         "socket.io": "/socket.io/socket.io",
         "socket.io-stream": "lib/socket.io-stream"
     },
@@ -12,24 +13,33 @@ require.config({
 
 define([
     "jquery",
+    "underscore",
     "socket.io",
     "socket.io-stream",
     "bootstrap"
-], function($, io, ss) {
+], function($, _, io, ss) {
     var stream = ss.createStream();
-
     var socket = io.connect('//' + window.location.host);
 
     socket.on('error', function (reason){
       console.error('Unable to connect Socket.IO', reason);
     });
 
-    socket.on('connect', function (){
+    socket.on('connect', function (data){
         console.info('successfully established a working connection \o/');
-    });
 
-    socket.on("image-upload-complete", function(data) {
-        window.location = data.postUrl;
+        socket.emit("subscribe", { room: "post" });
+
+        socket.on('update-' + $('.post').get(0).id, function(data) {
+            _.each(data.elements, function(value, key) {
+                $(key).val(value);
+            });
+        });
+
+        socket.on("image-upload-complete", function(data) {
+            window.location = data.postUrl;
+        });
+
     });
 
     $(document).ready(function() {
@@ -45,5 +55,14 @@ define([
             });
             blobStream.pipe(stream);
         });
+
+        $('.post-update').on('click', function(e) {
+            socket.emit('post-update', {
+                id: $('.post').get(0).id,
+                title: $('.post-title').val(),
+                description: $('.post-description').val()
+            });
+        });
+
     });
 });
