@@ -127,9 +127,6 @@ app.get('/', homeController.index);
 app.get('/contact', contactController.getContact);
 app.post('/contact', contactController.postContact);
 
-// User routes
-app.get('/dashboard', homeMiddleware.redirectToLoginIfNotLoggedIn, homeController.dashboard);
-
 // Post routes
 app.get('/post/new', homeMiddleware.redirectToLoginIfNotLoggedIn, postController.new);
 app.get('/post/:post', postMiddleware.postExists, postController.post);
@@ -295,7 +292,7 @@ io.on('connection', function(socket){
             var newPost = new post(postData);
             newPost.save(function(err, newPost, numberAffected) {
                 console.log("New post saved");
-                socket.emit("image-upload-complete", {imageUrl: url, postUrl: newPost.url});
+                socket.emit("image-upload-complete", { redirectUrl: newPost.url + '/edit' });
             });
         });
     });

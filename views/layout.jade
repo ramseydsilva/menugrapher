@@ -14,7 +14,11 @@ html
       include partials/navigation
       .container
         include partials/flash
+        if user
+            include partials/dashboard
+
         block content
+
     include partials/footer
     script.
       var _gaq = _gaq || [];

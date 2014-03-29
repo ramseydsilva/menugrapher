@@ -7,15 +7,7 @@ block content
       li Upload, organize, show case your food pics in one place
       li Browse pics of menu items before you order
     br
-    if user
-        a(class="btn btn-success", href="/post/new")
-            i(class="fa fa-camera")
-            | Upload Picture
-        a(class="btn btn-info", href="/dashboard")
-            i(class="fa fa-list")
-            | Dashboard
-    else
-        a(class="btn btn-success", href="signup")
-            i(class="fa fa-arrow-circle-o-right")
-            | Signup
-        a.btn.btn-link(href='/login') or Login
+    a(class="btn btn-success", href="signup")
+        i(class="fa fa-arrow-circle-o-right")
+        | Signup
+    a.btn.btn-link(href='/login') or Login

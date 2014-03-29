@@ -30,33 +30,43 @@ define([
 
         socket.emit("subscribe", { room: "post" });
 
-        socket.on('update-' + $('.post').get(0).id, function(data) {
-            if ($('.post-update').length)
-                window.location = $('.post').attr('url');
+        if ($('.post').length) {
+            socket.on('update-' + $('.post').get(0).id, function(data) {
+                if ($('.post-update').length)
+                    window.location = $('.post').attr('url');
 
-            _.each(data, function(value, key) {
-                $(key).html(value);
+                _.each(data, function(value, key) {
+                    $(key).html(value);
+                });
             });
-        });
+        }
 
         socket.on("image-upload-complete", function(data) {
-            window.location = data.postUrl;
+            window.location = data.redirectUrl;
         });
 
     });
 
     $(document).ready(function() {
+        $(document).keyup(function(e) {
+            if ($('.post-update').length && e.keyCode == 27) {
+                window.location = window.location + '../';
+            }
+        });
+
         $('#upload').on('click', function(e){
             e.preventDefault();
-            var file = $("#image")[0].files[0],
-                blobStream = ss.createBlobReadStream(file),
-                size = 0;
-            ss(socket).emit('image-upload', stream, { name: file, size: file.size });
-            blobStream.on('data', function(chunk) {
-                size += chunk.length;
-                $('#progress').css("width", Math.floor(size / file.size * 100) + '%');
-            });
-            blobStream.pipe(stream);
+            var file = $("#image")[0].files[0];
+            if (!!file) {
+                var blobStream = ss.createBlobReadStream(file),
+                    size = 0;
+                ss(socket).emit('image-upload', stream, { name: file, size: file.size });
+                blobStream.on('data', function(chunk) {
+                    size += chunk.length;
+                    $('#progress').css("width", Math.floor(size / file.size * 100) + '%');
+                });
+                blobStream.pipe(stream);
+            }
         });
 
         $('.post-update').on('click', function(e) {
