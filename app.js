@@ -9,6 +9,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     expressValidator = require('express-validator'),
+    slashes = require('connect-slashes'),
     connectAssets = require('connect-assets');
 
 /**
@@ -25,7 +26,8 @@ var homeController = require('./controllers/home'),
  * Load middlewares.
  */
 
-var middleware = require('./middleware');
+var homeMiddleware = require('./middleware'),
+    postMiddleware = require('./middleware/post');
 
 /**
  * API keys + Passport configuration.
@@ -85,12 +87,8 @@ app.use(express.session({
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: month }));
 app.use(express.favicon(path.join(__dirname, 'public/img/favicon.ico')));
 
-
-var csrf = function(req, res, next) {
-    app.use(express.csrf());
-    res.locals.token = req.csrfToken();
-    next();
-}
+app.use(slashes());
+app.use(express.csrf());
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -106,11 +104,12 @@ app.use(function(req, res, next) {
   next();
 });
 
-// Attach user info to req
+// Attach locals
 app.use(function(req, res, next) {
-  res.locals.user = req.user;
-  res.locals.secrets = secrets;
-  next();
+    res.locals.user = req.user;
+    res.locals.secrets = secrets;
+    res.locals.token = req.csrfToken();
+    next();
 });
 
 app.use(app.router);
@@ -129,15 +128,15 @@ app.get('/contact', contactController.getContact);
 app.post('/contact', contactController.postContact);
 
 // User routes
-app.get('/dashboard', middleware.redirectToLoginIfNotLoggedIn, homeController.dashboard);
-app.get('/post/new', middleware.redirectToLoginIfNotLoggedIn, postController.newPost);
-app.post('/post/new', middleware.redirectToLoginIfNotLoggedIn, postController.newPostSubmit);
+app.get('/dashboard', homeMiddleware.redirectToLoginIfNotLoggedIn, homeController.dashboard);
 
 // Post routes
-app.get('/post/:post', postController.viewPost);
+app.get('/post/new', homeMiddleware.redirectToLoginIfNotLoggedIn, postController.new);
+app.get('/post/:post', postMiddleware.postExists, postController.post);
+app.get('/post/:post/edit', postMiddleware.postExists, postMiddleware.userCanEdit, postController.edit);
 
 // Account routes
-app.get('/login', middleware.redirectToDashboardIfLoggedIn, userController.getLogin);
+app.get('/login', homeMiddleware.redirectToDashboardIfLoggedIn, userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
 app.get('/forgot', userController.getForgot);
@@ -260,13 +259,13 @@ io.on('connection', function(socket){
             post.title = data.title;
             post.description = data.description;
             post.save(function(err, post, numberAffected) {
-                console.log('post saved');
-                socket.broadcast.to('post').emit('update-' + post.id, {
-                    elements: {
-                        '.post-title': post.title,
-                        '.post-description': post.description
-                    }
-                });
+                socket.in('post').emit('update-' + post.id);  // Emit to emitting socket
+
+                var elementsToUpdate = {};
+                elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
+                elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
+
+                socket.broadcast.to('post').emit('update-' + post.id, elementsToUpdate );  // Emit to other sockets
             });
         });
     });

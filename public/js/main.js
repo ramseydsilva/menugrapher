@@ -31,8 +31,11 @@ define([
         socket.emit("subscribe", { room: "post" });
 
         socket.on('update-' + $('.post').get(0).id, function(data) {
-            _.each(data.elements, function(value, key) {
-                $(key).val(value);
+            if ($('.post-update').length)
+                window.location = $('.post').attr('url');
+
+            _.each(data, function(value, key) {
+                $(key).html(value);
             });
         });
 

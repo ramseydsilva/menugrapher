@@ -1,4 +1,4 @@
-a(href=post.url)
-    h3= post.title
-    if post.pic
+div(class="post", id=post.id)
+    a(href=post.url)
+        h3(class='post-title')= post.title
         img(src=post.pic.originalUrl, width=300)

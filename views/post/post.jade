@@ -1,12 +1,12 @@
 extends ../layout
 
 block content
-    div(class='post', id=post.id)
-        input(class='post-title', class='borderless', type='text', value=post.title)
-        hr
-        img(src=post.pic.originalUrl, width=300)
-        br
-        br
-        textarea(class='post-description', class='borderless')= post.description
-        br
-        a(class='post-update', class="btn btn-success") Update
+    div(class='panel panel-default post' id=post.id, url=post.url)
+        div(class='post-title panel-heading') #{post.title} &nbsp;
+            if post.user.uid == user.id
+                a(class='pull-right' href='./edit') Edit
+        div(class='panel-body')
+            img(src=post.pic.originalUrl, width='100%')
+            br
+            br
+            p(class='post-description')= post.description

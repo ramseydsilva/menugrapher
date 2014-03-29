@@ -6,21 +6,7 @@ var fs = require('fs'),
     path = require('path'),
     util = require('util');
 
-exports.viewPost = function(req, res) {
-    post.findOne({_id: req.param('post')}, function(err, post) {
-        if (post) {
-            res.render('post/post', {
-                title: "Post",
-                post: post
-            });
-        } else {
-            res.status(404);
-            res.render('404');
-        }
-    });
-};
-
-exports.newPost = function(req, res) {
+exports.new = function(req, res) {
     post.find(function(err, posts) {
         res.render('post/newPost', {
             title: 'New Post'
@@ -28,6 +14,16 @@ exports.newPost = function(req, res) {
     });
 }
 
-exports.newPostSubmit = function(req, res) {
-    var form = req.body;
+exports.post = function(req, res) {
+    res.render('post/post', {
+        title: "Post",
+        post: res.locals.post
+    });
 };
+
+exports.edit = function(req, res) {
+    res.render('post/edit', {
+        title: "Edit Post",
+        post: res.locals.post 
+    });
+}

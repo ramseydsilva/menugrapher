@@ -57,7 +57,8 @@
     "socket.io": "~0.9.16",
     "socket.io-stream": "~0.5.3",
     "passport.socketio": "~3.0.1",
-    "longjohn": "~0.2.3"
+    "longjohn": "~0.2.3",
+    "connect-slashes": "^1.2.0"
   },
   "devDependencies": {
     "mocha": "~1.17.1",
