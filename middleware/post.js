@@ -16,7 +16,7 @@ middleware.postExists = function(req, res, next) {
 }
 
 middleware.userHasRights = function(req, res, next) {
-    if (res.locals.post.user.uid == req.user.id) {
+    if (res.locals.post.userHasRights(req.user)) {
         next();
     } else {
         res.status(405);

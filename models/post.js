@@ -55,7 +55,7 @@ postSchema.virtual('userUrl').get(function() {
 
 postSchema.method({
     userHasRights: function(user) {
-        return user && this.user.uid == user.id;
+        return !!user && this.user.uid == user.id;
     }
 });
 
