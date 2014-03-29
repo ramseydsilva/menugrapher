@@ -1,0 +1,15 @@
+extends post
+
+block panel-heading
+    ul(class='list-inline pull-right with-buttons')
+        li(class='text-danger')
+            span(class='hidden-xs') Are you sure you want to 
+            span Delete this post?
+        li
+            form(action='.', method='post')
+                input(type='hidden', name='_csrf', value=token)
+                button(class='btn btn-sm btn-danger') Yes
+        li
+            a(class='btn btn-success btn-sm' href='#{post.url}') No
+    div(class='clearfix')
+

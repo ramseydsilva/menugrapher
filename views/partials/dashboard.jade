@@ -1,16 +1,15 @@
-div(class='panel panel-default container-full dashboard')
+div(class='panel panel-default dashboard')
     div(class='panel-body')
-        div(class="row")
-            div(class='col-sm-8')
-                if title != 'Home'
-                    ul(class='pager')
-                        li(class='previous')
-                            a(href='javascript:history.back()') &larr; Go Back
-            div(class='col-sm-2')
-                a(class="container-full btn btn-success", href="/post/new")
-                    i(class="fa fa-camera")
-                    | Upload Picture
-            div(class='col-sm-2')
-                a(class="container-full btn btn-info", href="/dashboard")
-                    i(class="fa fa-list")
-                    | Dashboard
+        if title != 'Home'
+            ul(class='pager pull-left')
+                li(class='previous')
+                    if back
+                        a(href='#{back.href}') &larr; #{back.text}
+                    else
+                        a(href='javascript:history.back()') &larr; Go Back
+        a(class="pull-right btn btn-success", href="/post/new")
+            i(class="fa fa-camera")
+            span(class='hidden-xs') Upload Picture
+        a(class="pull-right btn btn-info", href="/dashboard")
+            i(class="fa fa-list")
+            span(class='hidden-xs') Dashboard

@@ -25,9 +25,31 @@ exports.post = function(req, res) {
 exports.edit = function(req, res) {
     res.render('post/edit', {
         title: "Edit Post",
-        post: res.locals.post 
+        post: res.locals.post,
+        back: {
+            text: 'Back to Post',
+            href: res.locals.post.url
+        }
     });
-}
+};
+
+exports.delete = function(req, res) {
+    res.render('post/delete', {
+        title: "Delete Post",
+        post: res.locals.post,
+        back: {
+            text: 'Back to Post',
+            href: res.locals.post.url
+        }
+    });
+};
+
+exports.deletePost = function(req, res) {
+    res.locals.post.remove(function(err, post) {
+        if (err) res.redirect(post.deleteUrl);  // TODO: Handle error
+        res.redirect('/dashboard/');
+    });
+};
 
 // Enables socket connection for post methods
 exports.socketio = function(app) {

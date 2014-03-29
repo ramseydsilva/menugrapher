@@ -35,11 +35,15 @@ var postSchema = new mongoose.Schema({
 }, schemaOptions);
 
 postSchema.virtual('url').get(function() {
-    return "/post/" + this._id;
+    return "/post/" + this._id + '/';
 });
 
 postSchema.virtual('editUrl').get(function() {
-    return this.url + '/edit';
+    return this.url + 'edit';
+});
+
+postSchema.virtual('deleteUrl').get(function() {
+    return this.url + 'delete';
 });
 
 postSchema.pre('save', function(next) {

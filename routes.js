@@ -31,7 +31,9 @@ var routes = function(app) {
     // Post routes
     app.get('/post/new', homeMiddleware.redirectToLoginIfNotLoggedIn, postController.new);
     app.get('/post/:post', postMiddleware.postExists, postController.post);
-    app.get('/post/:post/edit', postMiddleware.postExists, postMiddleware.userCanEdit, postController.edit);
+    app.get('/post/:post/edit', postMiddleware.postExists, postMiddleware.userHasRights, postController.edit);
+    app.get('/post/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.delete);
+    app.post('/post/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.deletePost);
 
     // Account routes
     app.get('/login', homeMiddleware.redirectToDashboardIfLoggedIn, userController.getLogin);

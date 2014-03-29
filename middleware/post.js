@@ -15,7 +15,7 @@ middleware.postExists = function(req, res, next) {
     });
 }
 
-middleware.userCanEdit = function(req, res, next) {
+middleware.userHasRights = function(req, res, next) {
     if (res.locals.post.user.uid == req.user.id) {
         next();
     } else {
