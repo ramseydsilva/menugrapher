@@ -12,7 +12,10 @@ block content
                         li
                             a(class='text-danger' href=post.deleteUrl) Delete
         div(class='panel-body')
-            p(class='text-primary') Uploaded by <a href='#{post.userUrl}'>#{post.user.name}</a> #{time}
+            p(class='text-primary') Uploaded 
+                if post.user.name
+                    | by <a href='#{post.userUrl}'>#{post.user.name}</a> 
+                | #{time}
 
             img(src=post.pic.originalUrl, width='100%')
             br
