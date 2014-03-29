@@ -4,9 +4,10 @@ div(class='panel panel-default dashboard')
             ul(class='pager pull-left')
                 li(class='previous')
                     if back
-                        a(href='#{back.href}') &larr; #{back.text}
+                        a(id='back', href='#{back.href}') &larr; #{back.text}
                     else
-                        a(href='javascript:history.back()') &larr; Go Back
+                        a(href='javascript:history.back()') &larr; 
+                            span(class='hidden-xs') Go Back
         a(class="pull-right btn btn-success", href="/post/new")
             i(class="fa fa-camera")
             span(class='hidden-xs') Upload Picture

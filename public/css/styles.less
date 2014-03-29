@@ -120,6 +120,40 @@ hr {
     width: 100%;
 }
 
+.container-half {
+    margin: 2px;
+    width: 48%;
+    float: left;
+    height: 150px;
+    overflow: hidden;
+    position: relative;
+}
+
+.post-box {
+    position: relative;
+    overflow: hidden;
+}
+
+.post-box .post-box-title {
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    padding: 0 5px;
+    color: white;
+    width: 100%;
+    visibility: hidden;
+}
+
+.post-box:hover {
+    .post-box-title {
+        visibility: visible;
+    }
+}
+
+.post-box img {
+    top: 0;
+}
+
 .dashboard.panel .panel-body {
     padding: 5px;
 }
@@ -146,4 +180,10 @@ a.text-danger:hover {
 
 .panel-heading ul.with-buttons {
     margin: -10px 0 -8px 0;
+}
+
+@grid-gutter-width: 5px;
+
+.row {
+    margin-bottom: 3px;
 }

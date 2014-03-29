@@ -1,0 +1,7 @@
+- var elementsInRow = 12/cols
+- each _, x in posts
+    - if ((x % elementsInRow == 0))
+        div(class='row')
+            - each post, y in posts.slice(x, x+elementsInRow)
+                div(class="col-sm-#{cols} post-box post",id=post.id, room='post-#{post.id}')
+                    include post

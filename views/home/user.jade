@@ -3,9 +3,6 @@ extends ../layout
 block content
     div(class='panel panel-default')
         div(class='panel-body')
-            div(class='container')
-                div(class='row')
-                    div(class='col-md-6')
-                        p.lead Posts by #{user.profile.name}
-                        for post in posts
-                            include ../includes/post
+            p.lead Posts by #{user.profile.name}
+            - var cols = 3
+            include ../includes/posts

@@ -1,6 +1,3 @@
-if post
-    div(class="post",id=post.id, room='post-#{post.id}')
-        a(href=post.url)
-            h3(class='post-title')= post.title
-            if post.pic
-                img(src=post.pic.originalUrl, class='container-full')
+a(href=post.url)
+    span(class='text-info post-box-title post-title')= post.title
+    img(src=post.pic.originalUrl, class='container-full')

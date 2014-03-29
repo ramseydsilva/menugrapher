@@ -56,8 +56,8 @@ define([
 
     $(document).ready(function() {
         $(document).keyup(function(e) {
-            if ($('.post-update').length && e.keyCode == 27) {
-                window.location = window.location + '../';
+            if ($('#back').length && e.keyCode == 27) {
+                window.location = $('#back').attr('href');
             }
         });
 
