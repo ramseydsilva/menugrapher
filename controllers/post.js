@@ -5,6 +5,7 @@ var fs = require('fs'),
     post = require('../models/post'),
     formidable = require('formidable'),
     path = require('path'),
+    moment = require('moment'),
     util = require('util');
 
 exports.new = function(req, res) {
@@ -19,7 +20,8 @@ exports.post = function(req, res) {
     res.render('post/post', {
         title: "Post",
         post: res.locals.post,
-        userHasRights: res.locals.post.userHasRights(req.user)
+        userHasRights: res.locals.post.userHasRights(req.user),
+        time: moment(res.locals.post.createdAt).fromNow()
     });
 };
 

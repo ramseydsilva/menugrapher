@@ -7,18 +7,35 @@ exports.index = function(req, res) {
     });
 };
 
+exports.user = function(req, res) {
+    async.parallel([
+        function(cb) {
+            post.find({'user.uid': req.params.user }).sort('-_id').exec(function(err, posts) {
+                userPosts = posts;
+                cb();
+            });
+        },
+    ], function(results) {
+        res.render('home/user', {
+            posts: userPosts,
+            user: res.locals.user
+        });
+    });
+
+};
+
 exports.dashboard = function(req, res) {
     var myPosts, recentPosts;
 
     async.parallel([
         function(cb) {
-            post.find({ 'user.uid': req.user.id }).sort('-createdAt').exec(function(err, posts){
+            post.find({ 'user.uid': req.user.id }).sort('-_id').exec(function(err, posts){
                 myPosts = posts;
                 cb();
             });
         },
         function(cb) {
-            recentPosts = post.find({ 'user.uid': {'$ne': req.user.id }}).sort('-createdAt').exec(function(err, posts){
+            recentPosts = post.find({ 'user.uid': {'$ne': req.user.id }}).sort('-_id').exec(function(err, posts){
                 recentPosts = posts;
                 cb();
             });

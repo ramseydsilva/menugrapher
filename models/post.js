@@ -30,7 +30,6 @@ var postSchema = new mongoose.Schema({
     title: String,
     description: String,
     item: { type: mongoose.Schema.ObjectId, ref : 'item' },
-    createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date }
 }, schemaOptions);
 
@@ -44,6 +43,14 @@ postSchema.virtual('editUrl').get(function() {
 
 postSchema.virtual('deleteUrl').get(function() {
     return this.url + 'delete';
+});
+
+postSchema.virtual('createdAt').get(function() {
+    return this._id.getTimestamp();
+});
+
+postSchema.virtual('userUrl').get(function() {
+    return '/user/' + this.user.uid + '/';
 });
 
 postSchema.method({

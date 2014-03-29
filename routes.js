@@ -11,7 +11,7 @@ var routes = function(app) {
         apiController = require('./controllers/api'),
         contactController = require('./controllers/contact');
 
-    var homeMiddleware = require('./middleware'),
+    var homeMiddleware = require('./middleware/home'),
         postMiddleware = require('./middleware/post');
 
     /**
@@ -25,6 +25,7 @@ var routes = function(app) {
 
     app.get('/', homeController.index);
     app.get('/dashboard', homeMiddleware.redirectToLoginIfNotLoggedIn, homeController.dashboard);
+    app.get('/user/:user', homeMiddleware.userExists, homeController.user);
     app.get('/contact', contactController.getContact);
     app.post('/contact', contactController.postContact);
 
