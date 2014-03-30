@@ -1,0 +1,10 @@
+extends ../layout
+
+block content
+    div(class='panel panel-default')
+        div(class='panel-body')
+            p.lead Restaurants
+            hr
+            for restaurant in restaurants
+                p.lead
+                    a(href='#{restaurant.url}')= restaurant.name

@@ -59,7 +59,10 @@
     "passport.socketio": "~3.0.1",
     "longjohn": "~0.2.3",
     "connect-slashes": "^1.2.0",
-    "moment": "^2.5.1"
+    "moment": "^2.5.1",
+    "express-restify-mongoose": "^0.6.7",
+    "supergoose": "^0.2.3",
+    "node-rest-client": "^0.8.3"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

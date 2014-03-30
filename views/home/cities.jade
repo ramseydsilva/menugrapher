@@ -1,0 +1,10 @@
+extends ../layout
+
+block content
+    div(class='panel panel-default')
+        div(class='panel-body')
+            p.lead Cities
+            hr
+            for city in cities
+                p.lead
+                    a(href='#{city.url}')= city.name

@@ -4,6 +4,9 @@ var fs = require('fs'),
     async = require('async'),
     ss = require('socket.io-stream'),
     post = require('../models/post'),
+    city = require('../models/city'),
+    category = require('../models/category'),
+    restaurant = require('../models/restaurant'),
     formidable = require('formidable'),
     path = require('path'),
     moment = require('moment'),
@@ -135,19 +138,7 @@ module.exports.respond = function(app, socket) {
         });
     });
 
-    var savePost = function(filepath, url, elementId) {
-        var postData = {
-            user: {
-                uid: socket.handshake.user.id,
-                name: socket.handshake.user.profile.name
-            },
-            pic: {
-                originalPath: filepath,
-                originalUrl: url,
-                thumbPath: "",
-                thumbUrl: "",
-            }
-        };
+    var savePost = function(postData, elementId) {
         var newPost = new post(postData);
         newPost.save(function(err, newPost, numberAffected) {
             console.log("New post saved");
@@ -246,6 +237,7 @@ module.exports.respond = function(app, socket) {
                     var http = require('http'),
                         https = require('https'),
                         download = fs.createWriteStream(filepath);
+
                     var httpProtocol = !data.link.indexOf('https') ? https : http;
                     var httpStream = httpProtocol.get(data.link, function(res) {
                         res.pipe(download);
@@ -268,7 +260,52 @@ module.exports.respond = function(app, socket) {
                 }
             }
         ], function(err, filepath, url, elementId) {
-            savePost(filepath, url, elementId);
+
+            // Create city, restaurant, category first before saving post
+            async.parallel({
+                getOrCreateCity: function(next) {
+                    city.findOrCreate({name: data.city}, function(err, doc) {
+                        next(err, doc);
+                    });
+                },
+                getOrCreateRestaurant: function(next) {
+                    restaurant.findOrCreate({name: data.restaurant}, function(err, doc) {
+                        next(err, doc);
+                    });
+                },
+                getOrCreateCategory: function(next) {
+                    category.findOrCreate({name: data.category}, function(err, doc) {
+                        next(err, doc);
+                    });
+                }
+            },
+            function(err, results) {
+                var city = results.getOrCreateCity;
+                var restaurant = results.getOrCreateRestaurant;
+                var category = results.getOrCreateCategory;
+
+                if (!!city && !!restaurant && !!!restaurant._city) {
+                    restaurant._city = city.id;
+                    restaurant.save();
+                }
+
+                savePost({
+                    user: {
+                        uid: socket.handshake.user.id,
+                        name: socket.handshake.user.profile.name
+                    },
+                    pic: {
+                        originalPath: filepath,
+                        originalUrl: url,
+                        thumbPath: "",
+                        thumbUrl: "",
+                    },
+                    _city: results.getOrCreateCity.id,
+                    _restaurant: results.getOrCreateRestaurant.id,
+                    _category: results.getOrCreateCategory.id
+                }, elementId);
+            });
+
         });
     });
 

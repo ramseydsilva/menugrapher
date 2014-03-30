@@ -3,11 +3,13 @@ require.config({
         "jquery": "lib/jquery-2.1.0.min",
         "bootstrap": "lib/bootstrap.min",
         "underscore": "lib/underscore-min",
+        "typeahead": "lib/bootstrap3-typeahead.min",
         "socket.io": "/socket.io/socket.io",
         "socket.io-stream": "lib/socket.io-stream"
     },
     shim: {
-        "bootstrap": ["jquery"]
+        "bootstrap": ["jquery"],
+        "typeahead": ["jquery"]
     }
 });
 
@@ -16,7 +18,8 @@ define([
     "underscore",
     "socket.io",
     "socket.io-stream",
-    "bootstrap"
+    "bootstrap",
+    "typeahead"
 ], function($, _, io, ss) {
     var socket = io.connect('//' + window.location.host);
 
@@ -80,25 +83,39 @@ define([
 
     });
 
+    function getProgressBar() {
+        var elementId = Math.floor((Math.random()*10000000000000000)+1); // Generate random id
+        var uploadBox = $('<div class="col-sm-3 upload_box" id="' + elementId + '"></div>');
+        var progressBar = $('<div class="progress progress-info progress-striped active"><div class="progress-bar"></div></div>');
+        uploadBox.html(progressBar);
+
+        $('#uploads').append(uploadBox);
+        if($('#uploads .upload_box, #uploads .post-box').length % 4 == 0)
+            $('#uploads').append('<div class="clearfix"></div>');
+
+        return progressBar;
+    }
+
+    function fetchJson(api, query, callback) {
+        $.ajax({
+            url: api + "?name=~" + query,
+            dataType: "json",
+            success: function (data) {
+                var result = !!data.length ? [] : [query];
+                result = _.union(result, _.map(data, function(d) {
+                    return d.name;
+                }));
+                callback(result);
+            }
+        });
+    };
+
     $(document).ready(function() {
         $(document).keyup(function(e) {
             if ($('#back').length && e.keyCode == 27) {
                 window.location = $('#back').attr('href');
             }
         });
-
-        function getProgressBar() {
-            var elementId = Math.floor((Math.random()*10000000000000000)+1); // Generate random id
-            var uploadBox = $('<div class="col-sm-3 upload_box" id="' + elementId + '"></div>');
-            var progressBar = $('<div class="progress progress-info progress-striped active"><div class="progress-bar"></div></div>');
-            uploadBox.html(progressBar);
-
-            $('#uploads').append(uploadBox);
-            if($('#uploads .upload_box, #uploads .post-box').length % 4 == 0)
-                $('#uploads').append('<div class="clearfix"></div>');
-
-            return progressBar;
-        }
 
         $('#upload').on('click', function(e){
             e.preventDefault();
@@ -107,7 +124,14 @@ define([
                     stream = ss.createStream(),
                     blobStream = ss.createBlobReadStream(file),
                     size = 0;
-                ss(socket).emit('image-upload', stream, { elementId: progressBar.parent()[0].id, name: file, size: file.size });
+                ss(socket).emit('image-upload', stream, { 
+                    elementId: progressBar.parent()[0].id,
+                    name: file,
+                    size: file.size,
+                    city: $('#city').val(),
+                    restaurant: $('#restaurant').val(),
+                    category: $('#category').val()
+                });
                 blobStream.on('data', function(chunk) {
                     size += chunk.length;
                     progressBar.find('.progress-bar').css("width", Math.floor(size / file.size * 100) + '%');
@@ -124,7 +148,13 @@ define([
                     var progressBar = getProgressBar(),
                         stream = ss.createStream(),
                         size = 0;
-                    ss(socket).emit('image-upload', stream, { elementId: progressBar.parent()[0].id, link: $(image_input).val() });
+                    ss(socket).emit('image-upload', stream, {
+                        elementId: progressBar.parent()[0].id,
+                        link: $(image_input).val(),
+                        city: $('#city').val(),
+                        restaurant: $('#restaurant').val(),
+                        category: $('#category').val()
+                    });
                     socket.on('downloadProgress', function(data) {
                         progressBar.find('.progress-bar').css('width', data.progress);
                     });
@@ -140,5 +170,36 @@ define([
                 description: $('.post-description').val()
             });
         });
+
+        $('#city').typeahead({
+            displayKey: "name",
+            minLength: 3,
+            items: "all",
+            autoSelect: false,
+            source: function(query, callback) {
+                fetchJson($('#city').attr('api'), query, callback);
+            }
+        });
+
+        $('#restaurant').typeahead({
+            displayKey: "name",
+            minLength: 3,
+            items: "all",
+            autoSelect: false,
+            source: function(query, callback) {
+                fetchJson($('#restaurant').attr('api'), query, callback);
+            }
+        });
+
+        $('#category').typeahead({
+            displayKey: "name",
+            minLength: 3,
+            items: "all",
+            autoSelect: false,
+            source: function(query, callback) {
+                fetchJson($('#category').attr('api'), query, callback);
+            }
+        });
+
     });
 });

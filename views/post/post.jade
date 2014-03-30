@@ -15,7 +15,17 @@ block content
             p(class='text-primary') Uploaded 
                 if post.user.name
                     | by <a href='#{post.userUrl}'>#{post.user.name}</a> 
-                | #{time}
+                | #{time} 
+
+                if post._category
+                    | of 
+                    a(class='text-warning', href='#{post._category.url}') #{post._category.name} 
+                if post._city
+                    | in 
+                    a(class='text-info', href='#{post._city.url}') #{post._city.name} 
+                if post._restaurant
+                    | at 
+                    a(class='text-danger', href='#{post._restaurant.url}') #{post._restaurant.name} 
 
             img(src=post.pic.originalUrl, width='100%')
             br

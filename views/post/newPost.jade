@@ -16,10 +16,14 @@ block content
                                 legend From internet
                                 input(type='text', class='image-url form-control', placeholder='Paste a url')
                 div(class='clearfix')
-                br
-                br
-                div(class='row-fluid')
+
+                div(class='row-padded row-fluid')
                     div(class='col-sm-12')
                         input(id='upload', type='submit', value='Upload', class='btn btn-warning')
-                div(id='uploads', class='row-fluid')
 
+                div(class='clearfix')
+                include ../includes/categorize
+                div(class='clearfix')
+
+                div(class='row-padded row-fluid')
+                    div(id='uploads', class='row-fluid')

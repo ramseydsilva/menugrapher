@@ -1,3 +1,5 @@
+'use strict';
+
 var post = require('../models/post'),
     user = require('../models/User'),
     async = require('async');
@@ -12,20 +14,19 @@ exports.user = function(req, res) {
     var breadcrumbs = [
         { text: 'Dashboard', url: '/dashboard', class: ''},
         { text: 'Users', url: '/users/', class: ''},
-        { text: res.locals.user.profile.name, url: '/user/' + req.params.user, class: 'active'}
+        { text: res.locals.user.profile.name, url: '/user/' + res.locals.user.id, class: 'active'}
     ];
 
-    async.parallel([
-        function(cb) {
+    async.parallel({
+        posts: function(next) {
             post.find({'user.uid': req.params.user }).sort('-_id').exec(function(err, posts) {
-                userPosts = posts;
-                cb();
+                next(err, posts);
             });
         },
-    ], function(results) {
+    }, function(err, results) {
         res.render('home/user', {
             breadcrumbs: breadcrumbs,
-            posts: userPosts,
+            posts: results.posts,
             user: res.locals.user
         });
     });

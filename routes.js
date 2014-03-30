@@ -1,17 +1,29 @@
 'use strict';
 
 var passport = require('passport'),
-    passportConf = require('./config/passport');
+    passportConf = require('./config/passport'),
+    post = require('./models/post'),
+    city = require('./models/city'),
+    restaurant = require('./models/restaurant'),
+    category = require('./models/category'),
+    restify = require('express-restify-mongoose');
 
 var routes = function(app) {
 
     var homeController = require('./controllers/home'),
+        cityController = require('./controllers/city'),
+        categoryController = require('./controllers/category'),
+        restaurantController = require('./controllers/restaurant'),
         postController = require('./controllers/post'),
         userController = require('./controllers/user'),
+        socialApiController = require('./controllers/social'),
         apiController = require('./controllers/api'),
         contactController = require('./controllers/contact');
 
     var homeMiddleware = require('./middleware/home'),
+        cityMiddleware = require('./middleware/city'),
+        categoryMiddleware = require('./middleware/category'),
+        restaurantMiddleware = require('./middleware/restaurant'),
         postMiddleware = require('./middleware/post');
 
     /**
@@ -33,6 +45,20 @@ var routes = function(app) {
     app.get('/posts/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.delete);
     app.post('/posts/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.deletePost);
 
+    // City, Restaurant, Category
+    app.get('/cities', cityController.cities);
+    app.get('/cities/:city', cityMiddleware.cityExists, cityController.city);
+    app.get('/restaurants', restaurantController.restaurants);
+    app.get('/restaurants/:restaurant', restaurantMiddleware.restaurantExists, restaurantController.restaurant);
+    app.get('/categories', categoryController.categories);
+    app.get('/categories/:category', categoryMiddleware.categoryExists, categoryController.category);
+
+    // API routes
+    restify.serve(app, city);
+    restify.serve(app, restaurant);
+    restify.serve(app, category);
+    restify.serve(app, post);
+
     // Account routes
     app.get('/login', homeMiddleware.redirectToDashboardIfLoggedIn, userController.getLogin);
     app.post('/login', userController.postLogin);
@@ -50,27 +76,27 @@ var routes = function(app) {
     app.get('/account/unlink/:provider', passportConf.isAuthenticated, userController.getOauthUnlink);
 
     // Api routes
-    app.get('/api', apiController.getApi);
-    app.get('/api/lastfm', apiController.getLastfm);
-    app.get('/api/nyt', apiController.getNewYorkTimes);
-    app.get('/api/aviary', apiController.getAviary);
-    app.get('/api/paypal', apiController.getPayPal);
-    app.get('/api/paypal/success', apiController.getPayPalSuccess);
-    app.get('/api/paypal/cancel', apiController.getPayPalCancel);
-    app.get('/api/steam', apiController.getSteam);
-    app.get('/api/scraping', apiController.getScraping);
-    app.get('/api/twilio', apiController.getTwilio);
-    app.post('/api/twilio', apiController.postTwilio);
-    app.get('/api/clockwork', apiController.getClockwork);
-    app.post('/api/clockwork', apiController.postClockwork);
-    app.get('/api/foursquare', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.getFoursquare);
-    app.get('/api/tumblr', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.getTumblr);
-    app.get('/api/facebook', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.getFacebook);
-    app.get('/api/github', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.getGithub);
-    app.get('/api/twitter', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.getTwitter);
-    app.get('/api/venmo', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.getVenmo);
-    app.post('/api/venmo', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.postVenmo);
-    app.get('/api/linkedin', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.getLinkedin);
+    app.get('/api', socialApiController.getApi);
+    app.get('/api/lastfm', socialApiController.getLastfm);
+    app.get('/api/nyt', socialApiController.getNewYorkTimes);
+    app.get('/api/aviary', socialApiController.getAviary);
+    app.get('/api/paypal', socialApiController.getPayPal);
+    app.get('/api/paypal/success', socialApiController.getPayPalSuccess);
+    app.get('/api/paypal/cancel', socialApiController.getPayPalCancel);
+    app.get('/api/steam', socialApiController.getSteam);
+    app.get('/api/scraping', socialApiController.getScraping);
+    app.get('/api/twilio', socialApiController.getTwilio);
+    app.post('/api/twilio', socialApiController.postTwilio);
+    app.get('/api/clockwork', socialApiController.getClockwork);
+    app.post('/api/clockwork', socialApiController.postClockwork);
+    app.get('/api/foursquare', passportConf.isAuthenticated, passportConf.isAuthorized, socialApiController.getFoursquare);
+    app.get('/api/tumblr', passportConf.isAuthenticated, passportConf.isAuthorized, socialApiController.getTumblr);
+    app.get('/api/facebook', passportConf.isAuthenticated, passportConf.isAuthorized, socialApiController.getFacebook);
+    app.get('/api/github', passportConf.isAuthenticated, passportConf.isAuthorized, socialApiController.getGithub);
+    app.get('/api/twitter', passportConf.isAuthenticated, passportConf.isAuthorized, socialApiController.getTwitter);
+    app.get('/api/venmo', passportConf.isAuthenticated, passportConf.isAuthorized, socialApiController.getVenmo);
+    app.post('/api/venmo', passportConf.isAuthenticated, passportConf.isAuthorized, socialApiController.postVenmo);
+    app.get('/api/linkedin', passportConf.isAuthenticated, passportConf.isAuthorized, socialApiController.getLinkedin);
 
     /**
      * OAuth routes for sign-in.

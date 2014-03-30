@@ -1,14 +1,13 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    supergoose = require('supergoose'),
+    city = require('./city'),
+    category = require('./category'),
+    restaurant = require('./restaurant');
 
 var schemaOptions = {
     toObject: { virtuals: true },
     toJSON: { virtuals: true }
 };
-
-var restaurantSchema = new mongoose.Schema({
-    name: String
-}, schemaOptions);
-var restaurant = mongoose.model("restaurant", restaurantSchema);
 
 var itemSchema = new mongoose.Schema({
     name: String,
@@ -29,7 +28,10 @@ var postSchema = new mongoose.Schema({
     },
     title: String,
     description: String,
-    item: { type: mongoose.Schema.ObjectId, ref : 'item' },
+    _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
+    _restaurant: { type: mongoose.Schema.ObjectId, ref : 'restaurant' },
+    _category: { type: mongoose.Schema.ObjectId, ref : 'category' },
+    _item: { type: mongoose.Schema.ObjectId, ref : 'item' },
     updatedAt: { type: Date }
 }, schemaOptions);
 
@@ -65,5 +67,12 @@ postSchema.pre('save', function(next) {
 });
 
 var post = mongoose.model('post', postSchema);
+
+city.schema.plugin(supergoose, {instance: mongoose});
+city.schema.parentOf('post', 'posts').enforceWith('_city');
+restaurant.schema.plugin(supergoose, {instance: mongoose});
+restaurant.schema.parentOf('post', 'posts').enforceWith('_restaurant');
+category.schema.plugin(supergoose, {instance: mongoose});
+category.schema.parentOf('post', 'posts').enforceWith('_category');
 
 module.exports = post;
