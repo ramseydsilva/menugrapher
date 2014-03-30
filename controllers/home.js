@@ -8,6 +8,12 @@ exports.index = function(req, res) {
 };
 
 exports.user = function(req, res) {
+    var breadcrumbs = [
+        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Users', url: '/users/', class: ''},
+        { text: res.locals.user.profile.name, url: '/user/' + req.params.user, class: 'active'}
+    ];
+
     async.parallel([
         function(cb) {
             post.find({'user.uid': req.params.user }).sort('-_id').exec(function(err, posts) {
@@ -17,6 +23,7 @@ exports.user = function(req, res) {
         },
     ], function(results) {
         res.render('home/user', {
+            breadcrumbs: breadcrumbs,
             posts: userPosts,
             user: res.locals.user
         });
@@ -26,6 +33,7 @@ exports.user = function(req, res) {
 
 exports.dashboard = function(req, res) {
     var myPosts, recentPosts;
+    var breadcrumbs = [{ text: 'Dashboard', url: '/dashboard', class: 'active'}];
 
     async.parallel([
         function(cb) {
@@ -43,6 +51,7 @@ exports.dashboard = function(req, res) {
     ], function(results) {
         res.render('home/dashboard', {
             title: 'Dashboard',
+            breadcrumbs: breadcrumbs,
             myPosts: myPosts,
             recentPosts: recentPosts
         });

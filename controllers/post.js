@@ -9,16 +9,28 @@ var fs = require('fs'),
     util = require('util');
 
 exports.new = function(req, res) {
-    post.find(function(err, posts) {
-        res.render('post/newPost', {
-            title: 'New Post'
-        });
+    var breadcrumbs = [
+        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Posts', url: '/posts/', class: ''},
+        { text: 'New', url: '/post/new', class: 'active'}
+    ];
+
+    res.render('post/newPost', {
+        title: 'New Post',
+        breadcrumbs: breadcrumbs
     });
 }
 
 exports.post = function(req, res) {
+    var breadcrumbs = [
+        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Posts', url: '/posts/', class: ''},
+        { text: res.locals.post.title, url: res.locals.post.url, class: 'active'}
+    ];
+
     res.render('post/post', {
         title: "Post",
+        breadcrumbs: breadcrumbs,
         post: res.locals.post,
         userHasRights: res.locals.post.userHasRights(req.user),
         time: moment(res.locals.post.createdAt).fromNow()
@@ -26,8 +38,16 @@ exports.post = function(req, res) {
 };
 
 exports.edit = function(req, res) {
+    var breadcrumbs = [
+        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Posts', url: '/posts/', class: ''},
+        { text: res.locals.post.title, url: res.locals.post.url, class: ''},
+        { text: 'Edit', url: res.locals.post.editUrl, class: 'active'}
+    ];
+
     res.render('post/edit', {
         title: "Edit Post",
+        breadcrumbs: breadcrumbs,
         post: res.locals.post,
         back: {
             text: 'Back to Post',
@@ -37,8 +57,16 @@ exports.edit = function(req, res) {
 };
 
 exports.delete = function(req, res) {
+    var breadcrumbs = [
+        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Posts', url: '/posts/', class: ''},
+        { text: res.locals.post.title, url: res.locals.post.url, class: ''},
+        { text: 'Delete', url: res.locals.post.deleteUrl, class: 'active'}
+    ];
+
     res.render('post/delete', {
         title: "Delete Post",
+        breadcrumbs: breadcrumbs,
         post: res.locals.post,
         back: {
             text: 'Back to Post',
