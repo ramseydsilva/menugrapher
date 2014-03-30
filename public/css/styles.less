@@ -132,9 +132,10 @@ hr {
 .post-box {
     position: relative;
     overflow: hidden;
+    margin-bottom: 4px;
 }
 
-.post-box a {
+.container-relative, .post-box a.main-link {
     display: block;
     position: relative;
     float: left;
@@ -150,10 +151,33 @@ hr {
     background-color: rgba(0, 0, 0, 0.3);
 }
 
+.post-box .post-box-options {
+    position: absolute;
+    top: 0;
+    float: right;
+    width: 100%;
+    padding: 3px;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.post-box-options.showOptionsAlwaystrue {
+    visibility: hidden;
+}
+
+.post-box-options a {
+    float: right;
+    color: white;
+    padding: 0 1px;
+    z-index: 10;
+}
+
 .post-box:hover {
     .post-box-title {
         background-color: rgba(0, 0, 0, 0.4);
         color: white;
+    }
+    .showOptionsAlwaystrue {
+        visibility: visible;
     }
 }
 
@@ -173,18 +197,6 @@ hr {
     margin-bottom: 10px;
 }
 
-.upload_box {
-    float: left;
-    width: 200px;
-    max-height: 250px;
-    overflow: hidden;
-    margin: 5px;
-    border: 1px solid #ecf0f1;
-    border-radius: 4px;
-    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
-}
-
 a.text-danger:hover {
     color: #e74c3c !important;
 }
@@ -195,14 +207,14 @@ a.text-danger:hover {
 
 @grid-gutter-width: 5px;
 
-.row {
-    margin-bottom: 3px;
-}
-
 .back:hover {
     background-color: #11AE90;
 }
 
 .breadcrumb {
     margin: 0 0 10px 0;
+}
+
+#upload {
+    margin-bottom: 30px;
 }

@@ -7,6 +7,7 @@ var fs = require('fs'),
     formidable = require('formidable'),
     path = require('path'),
     moment = require('moment'),
+    jade = require('jade'),
     util = require('util');
 
 exports.posts = function(req, res) {
@@ -142,11 +143,25 @@ exports.socketio = function(app) {
             newPost.save(function(err, newPost, numberAffected) {
                 console.log("New post saved");
 
-                var elementsToUpdate = {};
-                elementsToUpdate['#' + elementId] = '<a href="' + newPost.editUrl + '"><img class="container-full" src="' + newPost.pic.originalUrl + '" /></a>';
-                socket.emit("image-upload-complete", {
-                    action: 'html',
-                    elements: elementsToUpdate
+                // Generate post html to send to client
+                fs.readFile(path.join(app.get('views'), 'includes/post.jade'), 'utf8', function (err, data) {
+                    if (err) throw err;
+
+                    var elementsToUpdate = {},
+                        fn = jade.compile(data),
+                        postHtml = fn({ 
+                            post: newPost,
+                            user: socket.handshake.user,
+                            showOptionsAlways: true,
+                            cols: 3,
+                            target: 'blank'
+                        });
+
+                    elementsToUpdate['#' + elementId] = postHtml;
+                    socket.emit("image-upload-complete", {
+                        action: 'replaceWith',
+                        elements: elementsToUpdate
+                    });
                 });
             });
         };
@@ -164,7 +179,7 @@ exports.socketio = function(app) {
 
         // Takes in filename, user and returns callback with error, results
         var getFilePath = function(filename, user, next) {
-            var userDir = path.join(app.rootDir, '/public/uploads/' + user.id);
+            var userDir = path.join(app.get('rootDir'), '/public/uploads/' + user.id);
             var originalDir = userDir + '/original';
             async.series([
                 function(next) {
@@ -182,7 +197,7 @@ exports.socketio = function(app) {
                     fs.exists(filepath, function(exists) {
                         if (exists) {
                             var ext = getExtension(filepath);
-                            filepath = increment_last(filepath.replace('.'+ext, '')) + '.' + ext;
+                            filepath = originalDir + '/' + increment_last(filename.replace('.'+ext, '')) + '.' + ext;
                         }
                         next(null, filepath);
                     });

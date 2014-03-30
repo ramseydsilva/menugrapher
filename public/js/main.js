@@ -46,6 +46,11 @@ define([
                         $(key).append(value);
                     });
                     break;
+                case "replaceWith":
+                    _.each(data.elements, function(value, key) {
+                        $(key).replaceWith(value);
+                    });
+                    break;
             }
         }
 
@@ -63,10 +68,14 @@ define([
 
         function getProgressBar() {
             var elementId = Math.floor((Math.random()*10000000000000000)+1); // Generate random id
-            var uploadBox = $('<div class="upload_box" id="' + elementId + '"></div>');
+            var uploadBox = $('<div class="col-sm-3 upload_box" id="' + elementId + '"></div>');
             var progressBar = $('<div class="progress progress-info progress-striped active"><div class="progress-bar"></div></div>');
             uploadBox.html(progressBar);
+
             $('#uploads').append(uploadBox);
+            if($('#uploads .upload_box, #uploads .post-box').length % 4 == 0)
+                $('#uploads').append('<div class="clearfix"></div>');
+
             return progressBar;
         }
 

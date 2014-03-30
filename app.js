@@ -107,7 +107,7 @@ app.use(express.errorHandler());
 
 app.server = require('http').Server(app),
 app.socketio = require('./socket').socketio(app);
-app.rootDir = __dirname;
+app.set('rootDir', __dirname);
 
 var routes = require('./routes')(app);
 
