@@ -1,7 +1,8 @@
 'use strict';
 
 var fs = require('fs'),
-    passportSocketIo = require("passport.socketio");
+    passportSocketIo = require("passport.socketio"),
+    postRespond = require('./controllers/post').respond;
 
 // To be instantiated once from app.js
 module.exports.socketio = function(app) {
@@ -28,6 +29,8 @@ module.exports.socketio = function(app) {
     });
 
     io.on('connection', function(socket){ 
+        postRespond(app, socket);
+
         socket.on('connect', function() {
             console.log("Socket connected");
         });

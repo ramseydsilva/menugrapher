@@ -24,14 +24,17 @@ define([
       console.error('Unable to connect Socket.IO', reason);
     });
 
-    socket.on('connect', function (data){
-        console.info('successfully established a working connection \o/');
-
-        $('[room]').each(function(index, roomItem) {
-            socket.emit("subscribe", { room: $(roomItem).attr('room') });
+    var subscribeElements = function(elements) {
+        elements.each(function(index, roomItem) {
+            if (!!$(roomItem).attr('room')) {
+                socket.emit("subscribe", { room: $(roomItem).attr('room') });
+            }
         });
+    };
 
-        var handleSocketEvent = function(data) {
+    var handleSocketEvent = function(actions) {
+        // An array of events are sent to the client, instructing on what task to perform
+        _.each(actions, function(data) {
             switch(data.action) {
                 case "redirect":
                     window.location = data.url;
@@ -39,22 +42,40 @@ define([
                 case "html":
                     _.each(data.elements, function(value, key) {
                         $(key).html(value);
+                        subscribeElements($(value));
                     });
                     break;
                 case "append":
                     _.each(data.elements, function(value, key) {
                         $(key).append(value);
+                        subscribeElements($(value));
                     });
                     break;
                 case "replaceWith":
                     _.each(data.elements, function(value, key) {
                         $(key).replaceWith(value);
+                        subscribeElements($(value));
+                    });
+                    break;
+                case "remove":
+                    _.each(data.elements, function(value, key) {
+                        $(key).remove();
+                        // TODO unsubscribe
+                    });
+                case "after":
+                    _.each(data.elements, function(value, key) {
+                        $(key).after(value);
                     });
                     break;
             }
-        }
+        });
+    };
 
+    socket.on('connect', function (data){
+        console.info('successfully established a working connection \o/');
+        subscribeElements($('[room]'));
         socket.on('post-update', handleSocketEvent);
+        socket.on('post-remove', handleSocketEvent);
         socket.on("image-upload-complete", handleSocketEvent);
 
     });

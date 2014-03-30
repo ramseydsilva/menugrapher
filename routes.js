@@ -15,11 +15,6 @@ var routes = function(app) {
         postMiddleware = require('./middleware/post');
 
     /**
-     * Application sockets
-     */
-    postController.socketio(app);
-
-    /**
      * Application routes.
      */
 
