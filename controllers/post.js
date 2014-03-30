@@ -1,12 +1,28 @@
 'use strict';
 
 var fs = require('fs'),
+    async = require('async'),
     ss = require('socket.io-stream'),
     post = require('../models/post'),
     formidable = require('formidable'),
     path = require('path'),
     moment = require('moment'),
     util = require('util');
+
+exports.posts = function(req, res) {
+    var breadcrumbs = [
+        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Posts', url: '/posts/', class: 'active'},
+    ];
+
+    post.find().sort('-_id').exec(function(err, posts){
+        res.render('post/posts', {
+            title: "Posts",
+            breadcrumbs: breadcrumbs,
+            posts: posts
+        });
+    });
+};
 
 exports.new = function(req, res) {
     var breadcrumbs = [
@@ -19,7 +35,7 @@ exports.new = function(req, res) {
         title: 'New Post',
         breadcrumbs: breadcrumbs
     });
-}
+};
 
 exports.post = function(req, res) {
     var breadcrumbs = [
@@ -109,8 +125,7 @@ exports.socketio = function(app) {
             });
         });
 
-        var filepath, url, elementId;
-        var savePost = function() {
+        var savePost = function(filepath, url, elementId) {
             var postData = {
                 user: {
                     uid: socket.handshake.user.id,
@@ -134,42 +149,103 @@ exports.socketio = function(app) {
                     elements: elementsToUpdate
                 });
             });
+        };
+
+        var getExtension = function(filename) {
+            var ext = path.extname(filename||'').split('.');
+            return ext[ext.length - 1];
+        }
+
+        function increment_last(v) {
+            return v.replace(/[0-9]+(?!.*[0-9])/, function(match) {
+                return parseInt(match, 10)+1;
+            });
+        }
+
+        // Takes in filename, user and returns callback with error, results
+        var getFilePath = function(filename, user, next) {
+            var userDir = path.join(app.rootDir, '/public/uploads/' + user.id);
+            var originalDir = userDir + '/original';
+            async.series([
+                function(next) {
+                    fs.mkdir(userDir, function(err) {
+                        next(null, err);
+                    });
+                },
+                function(next) {
+                    fs.mkdir(originalDir, function(err) {
+                        next(null, err);
+                    });
+                },
+                function(next) {
+                    var filepath = originalDir + '/' + filename;
+                    fs.exists(filepath, function(exists) {
+                        if (exists) {
+                            var ext = getExtension(filepath);
+                            filepath = increment_last(filepath.replace('.'+ext, '')) + '.' + ext;
+                        }
+                        next(null, filepath);
+                    });
+                }
+            ], function(err, results) {
+                return next(err, results[2]);
+            });
+        };
+
+        // Takes image filepath and returns callback with image url
+        var getImageUrl = function(filepath, next) {
+            return next(filepath.split('public')[1].replace('//', '/'));
         }
 
         ss(socket).on('image-upload', function(stream, data) {
-            if (!!data.link) {
-                var filename = path.basename(data.link).split('?')[0];
-                filepath = path.join(app.rootDir, '/public/uploads/original/' + filename),
-                url = '/uploads/original/' + filename;
-                elementId = data.elementId;
+            var filename, elementId = data.elementId;
 
-                var http = require('http'),
-                    https = require('https'),
-                    download = fs.createWriteStream(filepath);
-                var httpProtocol = !data.link.indexOf('https') ? https : http;
-                var httpStream = httpProtocol.get(data.link, function(res) {
-                    res.pipe(download);
-                    var totalSize = res.headers['content-length'];
-                    var downloadedSize = 0;
-                    res.on('data', function(buffer) {
-                        downloadedSize += buffer.length;
-                        console.log(buffer.size, totalSize);
-                        socket.emit('downloadProgress', {'progress': downloadedSize/totalSize * 100 + '%' });
-                    });
-                });
-                download.on('finish', savePost);
+            if (!!data.link) {
+                filename = path.basename(data.link).split('?')[0];
             } else {
-                var filename = path.basename(data.name.name);
-                filepath = path.join(app.rootDir, '/public/uploads/original/' + filename),
-                url = '/uploads/original/' + filename;
-                elementId = data.elementId;
-                var upload = fs.createWriteStream(filepath);
-                stream.pipe(upload);
-                stream.on('data', function() {
-                    console.log('writing to file upload');
-                });
-                stream.on('end', savePost);
+                filename = path.basename(data.name.name);
             }
+
+            async.waterfall([
+                function(next) { // get file path
+                    getFilePath(filename, socket.handshake.user, function(err, filepath) {
+                        next(null, filepath);
+                    });
+                },
+                function(filepath, next) { // get url
+                    getImageUrl(filepath, function(url){
+                        next(null, filepath, url);
+                    });
+                },
+                function(filepath, url, next) { // start stream
+                    if (!!data.link) {
+                        var http = require('http'),
+                            https = require('https'),
+                            download = fs.createWriteStream(filepath);
+                        var httpProtocol = !data.link.indexOf('https') ? https : http;
+                        var httpStream = httpProtocol.get(data.link, function(res) {
+                            res.pipe(download);
+                            var totalSize = res.headers['content-length'];
+                            var downloadedSize = 0;
+                            res.on('data', function(buffer) {
+                                downloadedSize += buffer.length;
+                                socket.emit('downloadProgress', {'progress': downloadedSize/totalSize * 100 + '%' });
+                            });
+                        });
+                        download.on('finish', function(err, data) { 
+                            next(err, filepath, url, elementId);
+                        });
+                    } else {
+                        var upload = fs.createWriteStream(filepath);
+                        stream.pipe(upload);
+                        stream.on('end', function(err, data) {
+                            next(err, filepath, url, elementId);
+                        });
+                    }
+                }
+            ], function(err, filepath, url, elementId) {
+                savePost(filepath, url, elementId);
+            });
         });
 
     });

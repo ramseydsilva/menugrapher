@@ -1,4 +1,5 @@
 var post = require('../models/post'),
+    user = require('../models/User'),
     async = require('async');
 
 exports.index = function(req, res) {
@@ -29,6 +30,21 @@ exports.user = function(req, res) {
         });
     });
 
+};
+
+exports.users = function(req, res) {
+    var breadcrumbs = [
+        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Users', url: '/users', class: 'active'},
+    ];
+
+    user.find().sort('-_id').exec(function(err, users){
+        res.render('home/users', {
+            title: "Users",
+            breadcrumbs: breadcrumbs,
+            users: users
+        });
+    });
 };
 
 exports.dashboard = function(req, res) {

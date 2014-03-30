@@ -25,16 +25,18 @@ var routes = function(app) {
 
     app.get('/', homeController.index);
     app.get('/dashboard', homeMiddleware.redirectToLoginIfNotLoggedIn, homeController.dashboard);
-    app.get('/user/:user', homeMiddleware.userExists, homeController.user);
+    app.get('/users', homeController.users);
+    app.get('/users/:user', homeMiddleware.userExists, homeController.user);
     app.get('/contact', contactController.getContact);
     app.post('/contact', contactController.postContact);
 
     // Post routes
-    app.get('/post/new', homeMiddleware.redirectToLoginIfNotLoggedIn, postController.new);
-    app.get('/post/:post', postMiddleware.postExists, postController.post);
-    app.get('/post/:post/edit', postMiddleware.postExists, postMiddleware.userHasRights, postController.edit);
-    app.get('/post/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.delete);
-    app.post('/post/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.deletePost);
+    app.get('/posts', postController.posts);
+    app.get('/posts/new', homeMiddleware.redirectToLoginIfNotLoggedIn, postController.new);
+    app.get('/posts/:post', postMiddleware.postExists, postController.post);
+    app.get('/posts/:post/edit', postMiddleware.postExists, postMiddleware.userHasRights, postController.edit);
+    app.get('/posts/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.delete);
+    app.post('/posts/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.deletePost);
 
     // Account routes
     app.get('/login', homeMiddleware.redirectToDashboardIfLoggedIn, userController.getLogin);
