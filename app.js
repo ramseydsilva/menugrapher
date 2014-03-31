@@ -16,7 +16,7 @@ var express = require('express'),
  * API keys + Passport configuration.
  */
 
-var app = express();
+var app = module.exports = express(); // This will allow app to be called form anywhere in program
 app.secrets = require('./config/secrets');
 
 /**
@@ -106,7 +106,7 @@ app.use(express.errorHandler());
 
 
 app.server = require('http').Server(app),
-app.socketio = require('./socket').socketio(app);
+app.socketio = require('./socket.io').socketio(app);
 app.set('rootDir', __dirname);
 
 var routes = require('./routes')(app);
@@ -118,6 +118,3 @@ var routes = require('./routes')(app);
 app.server.listen(app.get('port'), function() {
   console.log("✔ Express server listening on port %d in %s mode", app.get('port'), app.settings.env);
 });
-
-
-module.exports = app;

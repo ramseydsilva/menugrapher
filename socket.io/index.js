@@ -2,7 +2,7 @@
 
 var fs = require('fs'),
     passportSocketIo = require("passport.socketio"),
-    postRespond = require('./controllers/post').respond;
+    postSocket = require('./post').socket;
 
 // To be instantiated once from app.js
 module.exports.socketio = function(app) {
@@ -29,7 +29,7 @@ module.exports.socketio = function(app) {
     });
 
     io.on('connection', function(socket){ 
-        postRespond(app, socket);
+        postSocket(socket, app);
 
         socket.on('connect', function() {
             console.log("Socket connected");

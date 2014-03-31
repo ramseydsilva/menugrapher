@@ -62,11 +62,9 @@ postSchema.method({
 });
 
 postSchema.pre('save', function(next) {
-    this.updatedAt = new Date;
+    this.updatedAt = new Date();
     next();
 });
-
-var post = mongoose.model('post', postSchema);
 
 city.schema.plugin(supergoose, {instance: mongoose});
 city.schema.parentOf('post', 'posts').enforceWith('_city');
@@ -75,4 +73,5 @@ restaurant.schema.parentOf('post', 'posts').enforceWith('_restaurant');
 category.schema.plugin(supergoose, {instance: mongoose});
 category.schema.parentOf('post', 'posts').enforceWith('_category');
 
-module.exports = post;
+postSchema.plugin(supergoose, {instance: mongoose});
+module.exports = mongoose.model('post', postSchema);

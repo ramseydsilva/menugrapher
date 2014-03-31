@@ -101,10 +101,9 @@ define([
             url: api + "?name=~" + query,
             dataType: "json",
             success: function (data) {
-                var result = !!data.length ? [] : [query];
-                result = _.union(result, _.map(data, function(d) {
+                var result = _.map(data, function(d) {
                     return d.name;
-                }));
+                });
                 callback(result);
             }
         });
