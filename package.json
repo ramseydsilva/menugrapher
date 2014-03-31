@@ -61,8 +61,7 @@
     "connect-slashes": "^1.2.0",
     "moment": "^2.5.1",
     "express-restify-mongoose": "^0.6.7",
-    "supergoose": "^0.2.3",
-    "node-rest-client": "^0.8.3"
+    "supergoose": "^0.2.3"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

@@ -16,9 +16,8 @@ restaurantSchema.virtual('url').get(function() {
     return "/restaurants/" + this._id;
 });
 
-restaurantSchema.plugin(supergoose, {instance: mongoose});
-
 city.schema.plugin(supergoose, {instance: mongoose});
 city.schema.parentOf('restaurant', 'restaurants').enforceWith('_city');
 
+restaurantSchema.plugin(supergoose, {instance: mongoose});
 module.exports = mongoose.model("restaurant", restaurantSchema);

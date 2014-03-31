@@ -1,6 +1,9 @@
 extends ../layout
 
 block content
+
+    include ../includes/categorize
+
     div(class='panel panel-primary post', room='post-#{post.id}' id=post.id, url=post.url)
         div(class="form-group panel-heading")
             input(class="input-sm form-control post-title", type="text", value=post.title, placeholder="Enter a title")

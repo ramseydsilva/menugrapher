@@ -47,7 +47,7 @@ exports.post = function(req, res) {
         { text: 'Posts', url: '/posts/', class: ''},
         { text: res.locals.post.title, url: res.locals.post.url, class: 'active'}
     ];
-
+    console.log("in controller", res.locals.post._restaurant);
     res.render('post/post', {
         title: "Post",
         breadcrumbs: breadcrumbs,
@@ -65,10 +65,17 @@ exports.edit = function(req, res) {
         { text: 'Edit', url: res.locals.post.editUrl, class: 'active'}
     ];
 
+    var city = !!res.locals.post._city ? res.locals.post._city.name : '';
+    var category = !!res.locals.post._category ? res.locals.post._category.name : '';
+    var restaurant = !!res.locals.post._restaurant ? res.locals.post._restaurant.name : '';
+
     res.render('post/edit', {
         title: "Edit Post",
         breadcrumbs: breadcrumbs,
         post: res.locals.post,
+        city: city,
+        category: category,
+        restaurant: restaurant,
         back: {
             text: 'Back to Post',
             href: res.locals.post.url
@@ -103,6 +110,42 @@ exports.deletePost = function(req, res) {
     });
 };
 
+var getOrCreateCityRestaurantCategory = function(cityName, restaurantName, categoryName, next) {
+    async.parallel([
+        function(next) {
+            async.waterfall([
+                function(next) {
+                    city.findOrCreate({name: cityName}, function(err, doc) {
+                        next(err, doc);
+                    });
+                },
+                function(city, next) {
+                    restaurant.findOrCreate({name: restaurantName}, function(err, doc) {
+                        next(err, {city: city, restaurant: doc});
+                    });
+                }
+            ], function(err, results) {
+                // If restaurant is not assigned city, assign it now
+                if (!!results.city && !!results.restaurant && !!!results.restaurant._city) {
+                    results.restaurant._city = results.city.id;
+                    results.restaurant.save(function(err, doc){
+                        next(err, [results.city, doc]); // If we don't do this then the rest doesn't get saved to post
+                    });
+                } else {
+                    next(err, [results.city, results.restaurant]);
+                }
+            });
+        },
+        function(next) {
+            category.findOrCreate({name: categoryName}, function(err, doc) {
+                next(err, doc);
+            });
+        }
+    ], function(err, results) {
+        next(err, {city: results[0][0], restaurant: results[0][1], category: results[1]});
+    });
+};
+
 // Enables socket connection for post methods
 module.exports.respond = function(app, socket) {
 
@@ -118,22 +161,36 @@ module.exports.respond = function(app, socket) {
 
     socket.in('post').on('post-update', function(data) {
         post.findOne({ _id: data.id }, function(err, post) {
-            post.title = data.title;
-            post.description = data.description;
-            post.save(function(err, post, numberAffected) {
-                socket.in('post-'+ post.id).emit('post-update', [{
-                    action: 'redirect',
-                    url: post.url
-                }]);  // Emit to emitting socket, get them to redirect to post page on successful edit
+            async.parallel([
+                function(next) {
+                    getOrCreateCityRestaurantCategory(data.city, data.restaurant, data.category, next);
+                }
+            ], function(err, results) {
+                console.log(results);
+                console.log(results[0].restaurant.id);
+                post.title = data.title;
+                post.description = data.description;
+                post._city = results[0].city.id;
+                post._category = results[0].category.id;
+                post._restaurant = results[0].restaurant.id;
+                console.log(post._restaurant);
 
-                var elementsToUpdate = {};
-                elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
-                elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
+                post.save(function(err, post, numberAffected) {
+                    console.log('After saving rest value disappears?', post._restaurant);
+                    socket.in('post-'+ post.id).emit('post-update', [{
+                        action: 'redirect',
+                        url: post.url
+                    }]);  // Emit to emitting socket, get them to redirect to post page on successful edit
 
-                socket.broadcast.to('post-' + post.id).emit('post-update', [{
-                    action: 'html',
-                    elements: elementsToUpdate
-                }]);  // Emit to other sockets to update their info
+                    var elementsToUpdate = {};
+                    elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
+                    elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
+
+                    socket.broadcast.to('post-' + post.id).emit('post-update', [{
+                        action: 'html',
+                        elements: elementsToUpdate
+                    }]);  // Emit to other sockets to update their info
+                });
             });
         });
     });
@@ -262,33 +319,12 @@ module.exports.respond = function(app, socket) {
         ], function(err, filepath, url, elementId) {
 
             // Create city, restaurant, category first before saving post
-            async.parallel({
-                getOrCreateCity: function(next) {
-                    city.findOrCreate({name: data.city}, function(err, doc) {
-                        next(err, doc);
-                    });
-                },
-                getOrCreateRestaurant: function(next) {
-                    restaurant.findOrCreate({name: data.restaurant}, function(err, doc) {
-                        next(err, doc);
-                    });
-                },
-                getOrCreateCategory: function(next) {
-                    category.findOrCreate({name: data.category}, function(err, doc) {
-                        next(err, doc);
-                    });
+            async.parallel([
+                function(next) {
+                    getOrCreateCityRestaurantCategory(data.city, data.restaurant, data.category, next);
                 }
-            },
-            function(err, results) {
-                var city = results.getOrCreateCity;
-                var restaurant = results.getOrCreateRestaurant;
-                var category = results.getOrCreateCategory;
-
-                if (!!city && !!restaurant && !!!restaurant._city) {
-                    restaurant._city = city.id;
-                    restaurant.save();
-                }
-
+            ], function(err, results) {
+                console.log(results);
                 savePost({
                     user: {
                         uid: socket.handshake.user.id,
@@ -300,9 +336,9 @@ module.exports.respond = function(app, socket) {
                         thumbPath: "",
                         thumbUrl: "",
                     },
-                    _city: results.getOrCreateCity.id,
-                    _restaurant: results.getOrCreateRestaurant.id,
-                    _category: results.getOrCreateCategory.id
+                    _city: results[0].city.id,
+                    _restaurant: results[0].restaurant.id,
+                    _category: results[0].category.id
                 }, elementId);
             });
 

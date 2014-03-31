@@ -167,7 +167,10 @@ define([
             socket.emit('post-update', {
                 id: $('.post').get(0).id,
                 title: $('.post-title').val(),
-                description: $('.post-description').val()
+                description: $('.post-description').val(),
+                city: $('#city').val(),
+                restaurant: $('#restaurant').val(),
+                category: $('#category').val()
             });
         });
 
