@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-    div(class='panel panel-primary post' room='post-#{post.id}', id=post.id, url=post.url)
+    div(class='panel panel-primary post', room='post-#{post.id}', id=post.id, url=post.url)
         div(class='panel-heading')
             block panel-heading
                 span(class='post-title') #{post.title} &nbsp;
@@ -13,19 +13,22 @@ block content
                             a(class='text-danger' href=post.deleteUrl) Delete
         div(class='panel-body')
             p(class='text-primary') Uploaded 
-                if post.user.name
+                if !!post.user && !!post.user.name
                     | by <a href='#{post.userUrl}'>#{post.user.name}</a> 
                 | #{time} 
 
-                if post._category
+                if !!post._category && !!post._category.name
                     | of 
-                    a(class='text-warning', href='#{post._category.url}') #{post._category.name} 
-                if post._city
+                    a(class='_category text-warning', href='#{post._category.url}') #{post._category.name}
+                    | 
+                if !!post._city && !!post._city.name
                     | in 
-                    a(class='text-info', href='#{post._city.url}') #{post._city.name} 
-                if post._restaurant
+                    a(class='_city text-info', href='#{post._city.url}') #{post._city.name}
+                    | 
+                if !!post._restaurant && !!post._restaurant.name
                     | at 
-                    a(class='text-danger', href='#{post._restaurant.url}') #{post._restaurant.name} 
+                    a(class='_restaurant text-danger', href='#{post._restaurant.url}') #{post._restaurant.name}
+                    | 
 
             img(src=post.pic.originalUrl, width='100%')
             br

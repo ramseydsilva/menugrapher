@@ -1,0 +1,25 @@
+div(class="col-sm-#{cols} post-box post",id=post.id, room='post-#{post.id}')
+    div(class='container-relative', room='post-new-#{post.id}')
+        a(class='main-link', href=post.url, target=target)
+            span(class='text-info post-box-title post-title')= post.title
+            img(src=post.pic.originalUrl, class='container-full')
+            div(class='post-box-options showOptionsAlwaysfalse')
+                a(class='post-remove fa fa-times', title='Remove Post', target=target, post='#{post.id}')
+                a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)
+                a(class='fa fa-eye', href=post.url, title='View Post', target=target)
+            div(class='post-box-tags')
+                div(class='text-info')
+                    | City: 
+                    span(class='_city') #{post._city.name}
+                    a(class='remove-city fa fa-times', title='Remove City', post='#{post.id}')
+                    a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)
+                div(class='text-danger')
+                    | Restaurant: 
+                    span(class='_restaurant') #{post._restaurant.name}
+                    a(class='remove-restaurant fa fa-times', title='Remove Restaurant', post='#{post.id}')
+                    a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)
+                div(class='text-warning')
+                    | Category: 
+                    span(class='_category') #{post._category.name}
+                    a(class='remove-category fa fa-times', title='Remove Category', post='#{post.id}')
+                    a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)

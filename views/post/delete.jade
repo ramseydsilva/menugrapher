@@ -1,15 +1,12 @@
 extends post
 
 block panel-heading
-    ul(class='list-inline pull-right with-buttons')
+    ul(class='list-inline pull-right with-buttons', room='post-delete-#{post.id}')
         li(class='text-danger')
             span(class='hidden-xs') Are you sure you want to 
             span Delete this post?
         li
-            form(action='.', method='post')
-                input(type='hidden', name='redirect', value='/dashboard/')
-                input(type='hidden', name='_csrf', value=token)
-                button(class='btn btn-sm btn-danger') Yes
+            button(class='post-remove btn btn-sm btn-danger' post='#{post.id}') Yes
         li
             a(class='btn btn-success btn-sm' href='#{post.url}') No
     div(class='clearfix')

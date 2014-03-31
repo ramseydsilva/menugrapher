@@ -1,4 +1,5 @@
 var mongoose = require('mongoose'),
+    fs = require('fs'),
     supergoose = require('supergoose'),
     city = require('./city'),
     category = require('./category'),
@@ -64,6 +65,11 @@ postSchema.method({
 postSchema.pre('save', function(next) {
     this.updatedAt = new Date();
     next();
+});
+
+postSchema.post('remove', function(doc) {
+    console.log('removing doc', doc.pic.originalPath)
+    fs.unlink(doc.pic.originalPath);
 });
 
 city.schema.plugin(supergoose, {instance: mongoose});

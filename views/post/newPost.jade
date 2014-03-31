@@ -1,29 +1,31 @@
 extends ../layout
 
 block content
-    div(class='panel panel-default')
+    div(class='panel panel-default', room='post-new')
         div(class='panel-body')
             div(class='container-fluid')
-                div(class='row-fluid')
-                    div(class='col-sm-6')
-                        form(class='form-horizontal')
-                            fieldset
-                                legend From computer
-                                input(id='image', type='file', name='image' multiple)
-                    div(class='col-sm-6')
-                        form(class='form-horizontal')
-                            fieldset
-                                legend From internet
-                                input(type='text', class='image-url form-control', placeholder='Paste a url')
-                div(class='clearfix')
 
-                div(class='padded row-fluid')
+                p.lead Upload Pictures
+
+                include ../includes/categorize
+
+                div(class='row-fluid')
+                    div(class='col-sm-5')
+                        form(class='form-horizontal')
+                            fieldset
+                                p.lead From computer
+                                input(id='image', type='file', name='image' multiple)
+                    div(class='col-sm-1') &nbsp;
+                    div(class='col-sm-6')
+                        form(class='form-horizontal')
+                            fieldset
+                                p.lead From internet
+                                input(type='text', class='image-url form-control', placeholder='Paste a url')
+
+                div(class='clearfix padded row-fluid')
                     div(class='col-sm-12')
                         input(id='upload', type='submit', value='Upload', class='btn btn-warning')
 
-                div(class='clearfix')
-                include ../includes/categorize
-                div(class='clearfix')
 
-                div(class='padded row-fluid')
+                div(class='clearfix padded row-fluid')
                     div(id='uploads', class='row-fluid')

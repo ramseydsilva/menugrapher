@@ -1,6 +1,7 @@
 'use strict';
 
 var Post = require('../models/post'),
+    _ = require('underscore'),
     path = require('path'),
     fs = require('fs'),
     async = require('async'),
@@ -10,7 +11,7 @@ var Post = require('../models/post'),
 
 
 postSocket.update = function(socket, callback) {
-    socket.in('post').on('post-update', function(data) {
+    socket.on('post-update', function(data) {
         Post.findOne({ _id: data.id }, function(err, post) {
             async.parallel([
                 function(next) {
@@ -24,22 +25,29 @@ postSocket.update = function(socket, callback) {
                 post._restaurant = results[0].restaurant.id;
 
                 post.save(function(err, post, numberAffected) {
-                    socket.in('post-'+ post.id).emit('post-update', [{
+                    // Emit to socket instructing refresh
+                    socket.emit('post-update', [{
                         action: 'redirect',
                         url: post.url
-                    }]);  // Emit to emitting socket, get them to redirect to post page on successful edit
+                    }]);
 
-                    var elementsToUpdate = {};
-                    elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
-                    elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
+                    // All other clients with this post should update their info
+                    Post.findOne({ _id: post._id }).populate('_city').populate('_restaurant').populate('_category').exec(function(err, post) {
+                        var elementsToUpdate = {};
+                        elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
+                        elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
+                        elementsToUpdate['#' + post.id + ' ._city'] = post._city.name;
+                        elementsToUpdate['#' + post.id + ' ._restaurant'] = post._restaurant.name;
+                        elementsToUpdate['#' + post.id + ' ._category'] = post._category.name;
 
-                    socket.broadcast.to('post-' + post.id).emit('post-update', [{
-                        action: 'html',
-                        elements: elementsToUpdate
-                    }]);  // Emit to other sockets to update their info
+                        socket.broadcast.to('post-' + post.id).emit('post-update', [{
+                            action: 'html',
+                            elements: elementsToUpdate
+                        }]);
 
-                    if (!!callback)
-                        callback(err, post);
+                        if (!!callback)
+                            callback(err, post);
+                    });
 
                 });
             });
@@ -130,23 +138,60 @@ postSocket.imageUpload = function(socket, callback) {
 
 };
 
-postSocket.remove = function(socket, callback) {
-    socket.in('post').on('post-delete', function(data) {
-        var elements = {};
-        elements['#' + data.id] = 'Post deleted';
+postSocket.remove = function(io, socket, callback) {
+    socket.on('post:remove', function(data) {
+        Post.findOneAndRemove({_id: data.id, 'user.uid': socket.handshake.user.id}, function(err, post) {
+            if (!!post) {
+                post.remove();
+                var elements = {};
+                elements['#' + data.id] = 'Post deleted';
 
-        socket.to('post-' + data.id).emit('post-remove', [{
-            action: 'html',
-            elements: elements
-        }]);
+                // if in new post page, remove element
+                io.sockets.in('post-new-' + post.id).emit('post-update', [{
+                    action: 'remove',
+                    elements: elements
+                }]);
+
+                // Redirect if on post delete page
+                io.sockets.in('post-delete-' + post.id).emit('post-update', [{
+                    action: 'redirect',
+                    url: '/dashboard'
+                }]);
+            }
+
+            if (!!callback)
+                callback(err, post);
+        });
+    });
+};
+
+postSocket.removeAttr = function(socket, attr, callback) {
+    socket.on('post.' + attr + ':remove', function(data) {
+        Post.findOne({_id: data.id, 'user.uid': socket.handshake.user.id}, function(err, post) {
+            post[attr] = null;
+            post.save(function(err, doc) {
+                var elements = {};
+                elements['#' + data.id + ' .' + attr ] = "";
+                socket.to('post-' + data.id).emit('post-update', [{
+                    action: 'html',
+                    elements: elements
+                }]);
+
+                if (!!callback)
+                    callback(err, post);
+            });
+        });
     });
 };
 
 // Enables socket connection for post methods
-postSocket.socket = function(socket, app) {
+postSocket.socket = function(io, socket, app) {
     postSocket.update(socket);
     postSocket.imageUpload(socket);
-    postSocket.remove(socket);
+    postSocket.remove(io, socket);
+    postSocket.removeAttr(socket, '_city');
+    postSocket.removeAttr(socket, '_restaurant');
+    postSocket.removeAttr(socket, '_category');
 };
 
 module.exports = postSocket;

@@ -29,7 +29,7 @@ module.exports.socketio = function(app) {
     });
 
     io.on('connection', function(socket){ 
-        postSocket(socket, app);
+        postSocket(io, socket, app);
 
         socket.on('connect', function() {
             console.log("Socket connected");

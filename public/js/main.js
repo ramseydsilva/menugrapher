@@ -45,19 +45,19 @@ define([
                 case "html":
                     _.each(data.elements, function(value, key) {
                         $(key).html(value);
-                        subscribeElements($(value));
+                        subscribeElements($('<div>'+value+'</div>').find('[room]'));
                     });
                     break;
                 case "append":
                     _.each(data.elements, function(value, key) {
                         $(key).append(value);
-                        subscribeElements($(value));
+                        subscribeElements($('<div>'+value+'</div>').find('[room]'));
                     });
                     break;
                 case "replaceWith":
                     _.each(data.elements, function(value, key) {
                         $(key).replaceWith(value);
-                        subscribeElements($(value));
+                        subscribeElements($('<div>'+value+'</div>').find('[room]'));
                     });
                     break;
                 case "remove":
@@ -78,9 +78,6 @@ define([
         console.info('successfully established a working connection \o/');
         subscribeElements($('[room]'));
         socket.on('post-update', handleSocketEvent);
-        socket.on('post-remove', handleSocketEvent);
-        socket.on("image-upload-complete", handleSocketEvent);
-
     });
 
     function getProgressBar() {
@@ -95,6 +92,35 @@ define([
 
         return progressBar;
     }
+
+    var cities = {};
+    function fetchCity(api, query, callback) {
+        $.ajax({
+            url: api + "?name=~" + query,
+            dataType: "json",
+            success: function (data) {
+                var result = _.map(data, function(d) {
+                    cities[d.name] = d._id;
+                    return d.name;
+                });
+                callback(result);
+            }
+        });
+    };
+
+    function fetchRestaurant(api, query, callback) {
+        var cityQuery = !!cities[$('#city').val()] ? "&_city=" + cities[$('#city').val()] : "";
+        $.ajax({
+            url: api + "?name=~" + query + cityQuery,
+            dataType: "json",
+            success: function (data) {
+                var result = _.map(data, function(d) {
+                    return d.name;
+                });
+                callback(result);
+            }
+        });
+    };
 
     function fetchJson(api, query, callback) {
         $.ajax({
@@ -173,29 +199,50 @@ define([
             });
         });
 
+        $('body').on('click', '.post-remove', function(e) {
+            socket.emit('post:remove', {
+                id: $(e.target).attr('post')
+            });
+        });
+
+        $('#uploads').on('click', 'a.remove-category', function(e) {
+            socket.emit('post._category:remove', {
+                id: $(e.target).attr('post')
+            });
+        });
+
+        $('#uploads').on('click', 'a.remove-city', function(e) {
+            socket.emit('post._city:remove', {
+                id: $(e.target).attr('post')
+            });
+        });
+
+        $('#uploads').on('click', 'a.remove-restaurant', function(e) {
+            socket.emit('post._restaurant:remove', {
+                id: $(e.target).attr('post')
+            });
+        });
+
         $('#city').typeahead({
             displayKey: "name",
-            minLength: 3,
             items: "all",
             autoSelect: false,
             source: function(query, callback) {
-                fetchJson($('#city').attr('api'), query, callback);
+                fetchCity($('#city').attr('api'), query, callback);
             }
         });
 
         $('#restaurant').typeahead({
             displayKey: "name",
-            minLength: 3,
             items: "all",
             autoSelect: false,
             source: function(query, callback) {
-                fetchJson($('#restaurant').attr('api'), query, callback);
+                fetchRestaurant($('#restaurant').attr('api'), query, callback);
             }
         });
 
         $('#category').typeahead({
             displayKey: "name",
-            minLength: 3,
             items: "all",
             autoSelect: false,
             source: function(query, callback) {

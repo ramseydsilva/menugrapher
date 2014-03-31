@@ -98,28 +98,28 @@ PostHelpers.newPost = function(postData, socket, elementId, callback) {
     var newPost = new Post(postData);
     newPost.save(function(err, newPost, numberAffected) {
 
-        // Generate post html to send to client
-        fs.readFile(path.join(app.get('views'), 'includes/post.jade'), 'utf8', function (err, data) {
-            if (err) throw err;
+        Post.findOne({_id: newPost._id}).populate('_category').populate('_city').populate('_restaurant').exec(function(err, post) {
+            // Generate post html to send to client
+            fs.readFile(path.join(app.get('views'), 'includes/postEdit.jade'), 'utf8', function (err, data) {
+                if (err) throw err;
 
-            var elementsToUpdate = {},
-                fn = jade.compile(data),
-                postHtml = fn({ 
-                    post: newPost,
-                    user: socket.handshake.user,
-                    showOptionsAlways: true,
-                    cols: 3,
-                    target: '_blank'
-                });
+                var elementsToUpdate = {},
+                    fn = jade.compile(data),
+                    postHtml = fn({ 
+                        post: post,
+                        cols: 3,
+                        target: '_blank'
+                    });
 
-            elementsToUpdate['#' + elementId] = postHtml;
-            socket.emit("image-upload-complete", [{
-                action: 'replaceWith',
-                elements: elementsToUpdate
-            }]);
+                elementsToUpdate['#' + elementId] = postHtml;
+                socket.emit("post-update", [{
+                    action: 'replaceWith',
+                    elements: elementsToUpdate
+                }]);
 
-            callback(err, newPost);
+                callback(err, post);
 
+            });
         });
     });
 };
