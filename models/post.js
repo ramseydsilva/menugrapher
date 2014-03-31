@@ -1,6 +1,5 @@
 var mongoose = require('mongoose'),
     fs = require('fs'),
-    supergoose = require('supergoose'),
     city = require('./city'),
     category = require('./category'),
     restaurant = require('./restaurant');
@@ -72,12 +71,4 @@ postSchema.post('remove', function(doc) {
     fs.unlink(doc.pic.originalPath);
 });
 
-city.schema.plugin(supergoose, {instance: mongoose});
-city.schema.parentOf('post', 'posts').enforceWith('_city');
-restaurant.schema.plugin(supergoose, {instance: mongoose});
-restaurant.schema.parentOf('post', 'posts').enforceWith('_restaurant');
-category.schema.plugin(supergoose, {instance: mongoose});
-category.schema.parentOf('post', 'posts').enforceWith('_category');
-
-postSchema.plugin(supergoose, {instance: mongoose});
 module.exports = mongoose.model('post', postSchema);

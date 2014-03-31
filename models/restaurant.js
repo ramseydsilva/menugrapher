@@ -1,5 +1,4 @@
 var mongoose = require('mongoose'),
-    supergoose = require('supergoose'),
     city = require('./city');
 
 var schemaOptions = {
@@ -9,15 +8,14 @@ var schemaOptions = {
 
 var restaurantSchema = new mongoose.Schema({
     name: String,
-    _city: { type: mongoose.Schema.ObjectId, ref: 'city' }
+    _city: { type: mongoose.Schema.ObjectId, ref: 'city' },
 }, schemaOptions);
 
 restaurantSchema.virtual('url').get(function() {
     return "/restaurants/" + this._id;
 });
 
-city.schema.plugin(supergoose, {instance: mongoose});
-city.schema.parentOf('restaurant', 'restaurants').enforceWith('_city');
+restaurantSchema.post('save', function(err, restaurant) {
+});
 
-restaurantSchema.plugin(supergoose, {instance: mongoose});
 module.exports = mongoose.model("restaurant", restaurantSchema);

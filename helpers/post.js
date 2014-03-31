@@ -63,18 +63,32 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
         function(next) {
             async.waterfall([
                 function(next) {
-                    city.findOrCreate({name: cityName}, function(err, doc) {
-                        next(err, doc);
+                    city.findOne({ name: cityName }, function(err, doc) {
+                        if (!!!doc) {
+                            var newCity = new city({name: cityName});
+                            newCity.save(function(err, doc){
+                                next(err, doc);
+                            });
+                        } else {
+                            next(err, doc);
+                        }
                     });
                 },
                 function(city, next) {
-                    restaurant.findOrCreate({name: restaurantName}, function(err, doc) {
-                        next(err, {city: city, restaurant: doc});
+                    restaurant.findOne({ name: restaurantName, _city: city._id }, function(err, doc) {
+                        if (!!!doc) {
+                            var newRestaurant = new restaurant({ name: restaurantName, _city: city._id });
+                            newRestaurant.save(function(err, doc) {
+                                next(err, { city: city, restaurant: doc });
+                            });
+                        } else {
+                            next(err, { city: city, restaurant: doc });
+                        }
                     });
                 }
             ], function(err, results) {
                 // If restaurant is not assigned city, assign it now
-                if (!!results.city && !!results.restaurant && !!!results.restaurant._city) {
+                if (!!!results.city.name && !!!results.restaurant._city) {
                     results.restaurant._city = results.city.id;
                     results.restaurant.save(function(err, doc){
                         next(err, [results.city, doc]); // If we don't do this then the rest doesn't get saved to post
@@ -85,12 +99,19 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
             });
         },
         function(next) {
-            category.findOrCreate({name: categoryName}, function(err, doc) {
-                next(err, doc);
+            category.findOne({ name: categoryName }, function(err, doc) {
+                if (!!!doc) {
+                    var newCategory = new category({ name: categoryName });
+                    newCategory.save(function(err, doc) {
+                        next(err, doc);
+                    });
+                } else {
+                    next(err, doc);
+                }
             });
         }
     ], function(err, results) {
-        next(err, {city: results[0][0], restaurant: results[0][1], category: results[1]});
+        next(err, { city: results[0][0], restaurant: results[0][1], category: results[1] });
     });
 };
 
