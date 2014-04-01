@@ -46,6 +46,11 @@ module.exports.restaurant = function(restaurant, _class) {
     return null;
 };
 
+
+module.exports.item = function(item, _class) {
+    return { text: item.name, url: item.url, class: !!_class ? _class : ''};
+};
+
 module.exports.category = function(category, _class) {
     return { text: category.name, url: category.url, class: !!_class ? _class : ''};
 };

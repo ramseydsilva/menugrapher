@@ -12,4 +12,8 @@ var itemSchema = new mongoose.Schema({
     _restaurant: { type: mongoose.Schema.ObjectId, ref : 'restaurant' },
 }, schemaOptions);
 
+itemSchema.virtual('url').get(function() {
+    return "/items/" + this._id;
+});
+
 module.exports = mongoose.model("item", itemSchema);

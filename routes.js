@@ -12,6 +12,7 @@ var passport = require('passport'),
 var routes = function(app) {
 
     var homeController = require('./controllers/home'),
+        itemController = require('./controllers/item'),
         cityController = require('./controllers/city'),
         categoryController = require('./controllers/category'),
         restaurantController = require('./controllers/restaurant'),
@@ -22,6 +23,7 @@ var routes = function(app) {
         contactController = require('./controllers/contact');
 
     var homeMiddleware = require('./middleware/home'),
+        itemMiddleware = require('./middleware/item'),
         cityMiddleware = require('./middleware/city'),
         categoryMiddleware = require('./middleware/category'),
         restaurantMiddleware = require('./middleware/restaurant'),
@@ -53,6 +55,7 @@ var routes = function(app) {
     app.get('/restaurants/:restaurant', restaurantMiddleware.restaurantExists, postMiddleware.getUploadUrl, restaurantController.restaurant);
     app.get('/categories', categoryController.categories);
     app.get('/categories/:category', categoryMiddleware.categoryExists, postMiddleware.getUploadUrl, categoryController.category);
+    app.get('/items/:item', itemMiddleware.itemExists, postMiddleware.getUploadUrl, itemController.item);
 
     // API routes
     restify.serve(app, city);

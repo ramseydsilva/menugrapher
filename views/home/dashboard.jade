@@ -6,23 +6,23 @@ block content
             div(class='container-fluid')
 
                 div(class='clearfix row-fluid')
-                    div(class='col-md-2')
-                        a.lead(href='/cities') Cities
-                        for city in cities
-                            if city.name
-                                a(href=city.url)= city.name
-                                br
-                        a.lead(href='/categories') Categories
-                        for category in categories
-                            if category.name
-                                a(href=category.url)= category.name
-                                br
+                    div(class='col-sm-3')
+                        - var title = { name: 'Cities', url: '/cities' }
+                        - var items = cities
+                        include ../includes/leftmenu
 
-                    div(class='col-md-5')
-                        p.lead My uploads
-                        - var cols = 4, posts = myPosts
-                        include ../includes/posts
-                    div(class='col-md-5')
-                        p.lead Recent uploads
-                        - var cols = 4, posts = recentPosts
-                        include ../includes/posts
+                        - title = { name: 'Categories', url: '/categories' }
+                        - items = categories
+                        include ../includes/leftmenu
+
+                    div(class='col-sm-9')
+                        div(class='container-fluid')
+                            div(class='row-fluid')
+                                    div(class='col-sm-6')
+                                        p.lead My uploads
+                                        - var cols = 4, posts = myPosts
+                                        include ../includes/posts
+                                    div(class='col-sm-5')
+                                        p.lead Recent uploads
+                                        - var cols = 4, posts = recentPosts
+                                        include ../includes/posts
