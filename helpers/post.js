@@ -63,13 +63,16 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
         function(next) {
             async.waterfall([
                 function(next) {
+                    console.log('finding city');
                     city.findOne({ name: cityName }, function(err, doc) {
                         if (!!!doc) {
                             var newCity = new city({name: cityName});
                             newCity.save(function(err, doc){
+                                console.log('creating city', doc);
                                 next(err, doc);
                             });
                         } else {
+                            console.log('returning existing cit', doc);
                             next(err, doc);
                         }
                     });
@@ -77,11 +80,14 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
                 function(city, next) {
                     restaurant.findOne({ name: restaurantName, _city: city._id }, function(err, doc) {
                         if (!!!doc) {
+                            console.log('creating rest', restaurantName, city);
                             var newRestaurant = new restaurant({ name: restaurantName, _city: city._id });
                             newRestaurant.save(function(err, doc) {
+                                console.log('new rest', doc);
                                 next(err, { city: city, restaurant: doc });
                             });
                         } else {
+                            console.log('returning existing rest', doc);
                             next(err, { city: city, restaurant: doc });
                         }
                     });

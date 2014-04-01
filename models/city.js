@@ -1,4 +1,5 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    restaurant = require('./restaurant');
 
 var schemaOptions = {
     toObject: { virtuals: true },
@@ -6,7 +7,8 @@ var schemaOptions = {
 };
 
 var citySchema = new mongoose.Schema({
-    name: String
+    name: String,
+    restaurants: [restaurant.schema]
 }, schemaOptions);
 
 citySchema.virtual('url').get(function() {

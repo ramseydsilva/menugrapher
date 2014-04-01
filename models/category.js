@@ -1,5 +1,4 @@
-var mongoose = require('mongoose'),
-    supergoose = require('supergoose');
+var mongoose = require('mongoose');
 
 var schemaOptions = {
     toObject: { virtuals: true },
@@ -15,5 +14,4 @@ categorySchema.virtual('url').get(function() {
     return "/categories/" + this._id;
 });
 
-categorySchema.plugin(supergoose, {instance: mongoose});
 module.exports = mongoose.model("category", categorySchema);

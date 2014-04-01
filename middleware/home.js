@@ -4,9 +4,9 @@ var user = require('../models/User'),
     middleware = {};
 
 
-middleware.redirectToDashboardIfLoggedIn = function(req, res, next) {
+middleware.redirectToHomeIfLoggedIn = function(req, res, next) {
     if (req.user) {
-        res.redirect('/dashboard');
+        res.redirect('/');
     } else {
         next();
     }

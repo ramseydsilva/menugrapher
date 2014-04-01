@@ -30,9 +30,9 @@ var routes = function(app) {
      * Application routes.
      */
 
-    app.get('/', homeController.index);
-    app.get('/dashboard', homeMiddleware.redirectToLoginIfNotLoggedIn, homeController.dashboard);
+    app.get('/', homeController.home);
     app.get('/users', homeController.users);
+    app.get('/profile', passportConf.isAuthenticated, homeController.profile);
     app.get('/users/:user', homeMiddleware.userExists, homeController.user);
     app.get('/contact', contactController.getContact);
     app.post('/contact', contactController.postContact);
@@ -60,7 +60,7 @@ var routes = function(app) {
     restify.serve(app, post);
 
     // Account routes
-    app.get('/login', homeMiddleware.redirectToDashboardIfLoggedIn, userController.getLogin);
+    app.get('/login', homeMiddleware.redirectToHomeIfLoggedIn, userController.getLogin);
     app.post('/login', userController.postLogin);
     app.get('/logout', userController.logout);
     app.get('/forgot', userController.getForgot);

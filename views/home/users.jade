@@ -4,4 +4,4 @@ block content
     div(class='panel panel-default')
         div(class='panel-body')
             for user in users
-                p.lead= user.profile.name
+                a(href='#{user.url}')= user.profile.name

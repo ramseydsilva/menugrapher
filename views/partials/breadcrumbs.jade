@@ -11,9 +11,13 @@ div(class='panel panel-default dashboard-header')
         a(class="pull-right btn btn-success", href="/posts/new")
             i(class="fa fa-camera")
             span(class='hidden-xs') Upload Picture
-        a(class="pull-right btn btn-info", href="/dashboard")
-            i(class="fa fa-list")
-            span(class='hidden-xs') Dashboard
+        if user
+            a(class="pull-right btn btn-warning", href="/profile")
+                i(class="fa fa-user")
+                span(class='hidden-xs') Profile
+        a(class="pull-right btn btn-info", href="/")
+            i(class="fa fa-home")
+            span(class='hidden-xs') Home
 
 if breadcrumbs
     ul(class="breadcrumb")

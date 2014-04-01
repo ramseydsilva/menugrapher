@@ -3,6 +3,12 @@ extends ../layout
 block content
     div(class='panel panel-default')
         div(class='panel-body')
+            p.lead Restaurants in #{city.name}
+            for restaurant in restaurants
+                a(href='#{restaurant.url}')= restaurant.name
+                br
+            br
+            hr
             p.lead Posts in #{city.name}
             - var cols = 3
             include ../includes/posts

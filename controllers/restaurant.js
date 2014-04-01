@@ -6,7 +6,7 @@ var async = require('async'),
 
 exports.restaurant = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Restaurants', url: '/restaurants', class: ''},
         { text: res.locals.restaurant.name, url: '/Restaurants/' + res.locals.restaurant.id, class: 'active'}
     ];
@@ -30,7 +30,7 @@ exports.restaurant = function(req, res) {
 
 exports.restaurants = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Restaurants', url: '/restaurants', class: 'active'}
     ];
 

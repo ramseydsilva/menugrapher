@@ -1,18 +1,19 @@
 'use strict';
 
-var post = require('../models/post'),
+var async = require('async'),
+    post = require('../models/post'),
     user = require('../models/User'),
-    async = require('async');
+    city = require('../models/city'),
+    restaurant = require('../models/restaurant'),
+    category = require('../models/category');
 
-exports.index = function(req, res) {
-    res.render('home', {
-        title: 'Home'
-    });
+exports.profile = function(req, res) {
+    res.redirect(req.user.url);
 };
 
 exports.user = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Users', url: '/users/', class: ''},
         { text: res.locals.user.profile.name, url: '/user/' + res.locals.user.id, class: 'active'}
     ];
@@ -35,7 +36,7 @@ exports.user = function(req, res) {
 
 exports.users = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Users', url: '/users', class: 'active'},
     ];
 
@@ -48,29 +49,51 @@ exports.users = function(req, res) {
     });
 };
 
-exports.dashboard = function(req, res) {
+exports.home = function(req, res) {
     var myPosts, recentPosts;
-    var breadcrumbs = [{ text: 'Dashboard', url: '/dashboard', class: 'active'}];
+    var breadcrumbs = [{ text: 'Home', url: '/', class: 'active'}];
 
-    async.parallel([
-        function(cb) {
-            post.find({ 'user.uid': req.user.id }).sort('-_id').exec(function(err, posts){
-                myPosts = posts;
-                cb();
-            });
-        },
-        function(cb) {
-            recentPosts = post.find({ 'user.uid': {'$ne': req.user.id }}).sort('-_id').exec(function(err, posts){
-                recentPosts = posts;
-                cb();
-            });
-        }
-    ], function(results) {
-        res.render('home/dashboard', {
-            title: 'Dashboard',
-            breadcrumbs: breadcrumbs,
-            myPosts: myPosts,
-            recentPosts: recentPosts
+    if (!!!req.user) {
+        res.render('home', {
+            title: 'Home'
         });
-    });
-}
+    } else {
+        async.parallel({
+            categories: function(next) {
+                category.find({}, function(err, categories) {
+                    next(err, categories);
+                });
+            },
+            cities: function(next) {
+                city.find({}, function(err, cities) {
+                    next(err, cities);
+                });
+            },
+            restaurants: function(next) {
+                restaurant.find({}, function(err, restaurants) {
+                    next(err, restaurants);
+                });
+            },
+           myPosts: function(next) { 
+                post.find({ 'user.uid': req.user.id }).sort('-_id').exec(function(err, posts){
+                    next(err, posts);
+                });
+            },
+            recentPosts: function(next) {
+                recentPosts = post.find({ 'user.uid': {'$ne': req.user.id }}).sort('-_id').exec(function(err, posts){
+                    next(err, posts);
+                });
+            }
+        }, function(err, results) {
+            res.render('home/dashboard', {
+                title: 'Home',
+                breadcrumbs: breadcrumbs,
+                myPosts: results.myPosts,
+                recentPosts: results.recentPosts,
+                restaurants: results.restaurants,
+                categories: results.categories,
+                cities: results.cities
+            });
+        });
+    }
+};

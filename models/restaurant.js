@@ -1,4 +1,7 @@
+'use strict';
+
 var mongoose = require('mongoose'),
+    item = require('./item'),
     city = require('./city');
 
 var schemaOptions = {
@@ -8,7 +11,8 @@ var schemaOptions = {
 
 var restaurantSchema = new mongoose.Schema({
     name: String,
-    _city: { type: mongoose.Schema.ObjectId, ref: 'city' },
+    _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
+    items: [item.schema]
 }, schemaOptions);
 
 restaurantSchema.virtual('url').get(function() {

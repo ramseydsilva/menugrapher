@@ -116,6 +116,7 @@ postSocket.imageUpload = function(socket, callback) {
                         uid: socket.handshake.user.id,
                         name: socket.handshake.user.profile.name
                     },
+                    _user: socket.handshake.user.id,
                     pic: {
                         originalPath: filepath,
                         originalUrl: url,
@@ -155,7 +156,7 @@ postSocket.remove = function(io, socket, callback) {
                 // Redirect if on post delete page
                 io.sockets.in('post-delete-' + post.id).emit('post-update', [{
                     action: 'redirect',
-                    url: '/dashboard'
+                    url: socket.handshake.user.url
                 }]);
             }
 

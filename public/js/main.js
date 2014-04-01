@@ -1,15 +1,19 @@
 require.config({
     paths: {
         "jquery": "lib/jquery-2.1.0.min",
+        "jqueryui": "lib/jquery-ui-1.10.3.custom",
         "bootstrap": "lib/bootstrap.min",
         "underscore": "lib/underscore-min",
         "typeahead": "lib/bootstrap3-typeahead.min",
         "socket.io": "/socket.io/socket.io",
-        "socket.io-stream": "lib/socket.io-stream"
+        "socket.io-stream": "lib/socket.io-stream",
+        "packery": "lib/packery.pkgd.min",
     },
     shim: {
         "bootstrap": ["jquery"],
-        "typeahead": ["jquery"]
+        "typeahead": ["jquery"],
+        "jqueryui": ["jquery"],
+        "packery": ["jquery", "jqueryui"]
     }
 });
 
@@ -19,7 +23,8 @@ define([
     "socket.io",
     "socket.io-stream",
     "bootstrap",
-    "typeahead"
+    "typeahead",
+    "jqueryui"
 ], function($, _, io, ss) {
     var socket = io.connect('//' + window.location.host);
 
@@ -136,6 +141,7 @@ define([
     };
 
     $(document).ready(function() {
+
         $(document).keyup(function(e) {
             if ($('#back').length && e.keyCode == 27) {
                 window.location = $('#back').attr('href');

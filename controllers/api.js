@@ -2,7 +2,7 @@
 
 exports.cities = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Posts', url: '/posts/', class: 'active'},
     ];
 

@@ -15,7 +15,7 @@ var async = require('async'),
 
 exports.posts = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Posts', url: '/posts/', class: 'active'},
     ];
 
@@ -30,7 +30,7 @@ exports.posts = function(req, res) {
 
 exports.new = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Posts', url: '/posts/', class: ''},
         { text: 'New', url: '/post/new', class: 'active'}
     ];
@@ -43,7 +43,7 @@ exports.new = function(req, res) {
 
 exports.post = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Posts', url: '/posts/', class: ''},
         { text: res.locals.post.title, url: res.locals.post.url, class: 'active'}
     ];
@@ -59,7 +59,7 @@ exports.post = function(req, res) {
 
 exports.edit = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Posts', url: '/posts/', class: ''},
         { text: res.locals.post.title, url: res.locals.post.url, class: ''},
         { text: 'Edit', url: res.locals.post.editUrl, class: 'active'}
@@ -85,7 +85,7 @@ exports.edit = function(req, res) {
 
 exports.delete = function(req, res) {
     var breadcrumbs = [
-        { text: 'Dashboard', url: '/dashboard', class: ''},
+        { text: 'Home', url: '/', class: ''},
         { text: 'Posts', url: '/posts/', class: ''},
         { text: res.locals.post.title, url: res.locals.post.url, class: ''},
         { text: 'Delete', url: res.locals.post.deleteUrl, class: 'active'}
