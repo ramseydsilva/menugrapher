@@ -104,7 +104,7 @@ define([
             dataType: "json",
             success: function (data) {
                 var result = _.map(data, function(d) {
-                    cities[d.name] = d._id;
+                    if (!!d.name) cities[d.name] = d._id;
                     return d.name;
                 });
                 result = _.uniq(result);
@@ -121,7 +121,7 @@ define([
             dataType: "json",
             success: function (data) {
                 var result = _.map(data, function(d) {
-                    restaurants[d.name] = d._id;
+                    if (!!d.name) restaurants[d.name] = d._id;
                     return d.name;
                 });
                 result = _.uniq(result);
