@@ -45,47 +45,65 @@ exports.users = function(req, res) {
 };
 
 exports.home = function(req, res) {
-    var myPosts, recentPosts;
-    if (!!!req.user) {
-        res.render('home', {
-            title: 'Home'
-        });
-    } else {
-        async.parallel({
-            breadcrumbs: function(next) {
-                next(null, [breadcrumb.home()]);
-            },
-            categories: function(next) {
-                category.find({}, function(err, categories) {
-                    next(err, categories);
-                });
-            },
-            cities: function(next) {
-                city.find({}, function(err, cities) {
-                    next(err, cities);
-                });
-            },
-            myPosts: function(next) { 
-                post.find({ 'user.uid': req.user.id }).sort('-_id').populate('_city')
-                    .populate('_restaurant').populate('_category').exec(function(err, posts){
-                    next(err, posts);
-                });
-            },
-            recentPosts: function(next) {
-                recentPosts = post.find({ 'user.uid': {'$ne': req.user.id }}).sort('-_id')
-                    .populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts){
-                    next(err, posts);
-                });
-            }
-        }, function(err, results) {
-            res.render('home/dashboard', {
-                title: 'Home',
-                breadcrumbs: results.breadcrumbs,
-                myPosts: results.myPosts,
-                recentPosts: results.recentPosts,
-                categories: results.categories,
-                cities: results.cities
+    var breadcrumbs, categories, cities, myPosts, recentPosts;
+
+    async.parallel({
+        breadcrumbs: function(next) {
+            next(null, [breadcrumb.home()]);
+        },
+        categories: function(next) {
+            category.find({}, function(err, categories) {
+                next(err, categories);
             });
-        });
-    }
+        },
+        cities: function(next) {
+            city.find({}, function(err, cities) {
+                next(err, cities);
+            });
+        },
+        posts: function(next) { 
+            post.find().sort('-_id').populate('_city')
+                .populate('_restaurant').populate('_category').exec(function(err, posts){
+                next(err, posts);
+            });
+        }
+    }, function(err, results) {
+        breadcrumbs = results.breadcrumbs;
+        categories = results.categories;
+        cities = results.cities;
+
+        if (!!!req.user) {
+            res.render('home', {
+                title: 'Home',
+                breadcrumbs: breadcrumbs,
+                posts: results.posts,
+                categories: categories,
+                cities: cities
+            });
+        } else {
+            async.parallel({
+                myPosts: function(next) { 
+                    post.find({ 'user.uid': req.user.id }).sort('-_id').populate('_city')
+                        .populate('_restaurant').populate('_category').exec(function(err, posts){
+                        next(err, posts);
+                    });
+                },
+                recentPosts: function(next) {
+                    recentPosts = post.find({ 'user.uid': {'$ne': req.user.id }}).sort('-_id')
+                        .populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts){
+                        next(err, posts);
+                    });
+                }
+            }, function(err, results) {
+                res.render('home/dashboard', {
+                    title: 'Home',
+                    breadcrumbs: breadcrumbs,
+                    myPosts: results.myPosts,
+                    recentPosts: results.recentPosts,
+                    categories: categories,
+                    cities: cities
+                });
+            });
+        }
+    });
 };
