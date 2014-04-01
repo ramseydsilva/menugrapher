@@ -2,24 +2,22 @@
 
 var async = require('async'),
     category = require('../models/category'),
+    breadcrumb = require('../helpers/breadcrumb'),
     post = require('../models/post');
 
 exports.category = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Categories', url: '/categories', class: ''},
-        { text: res.locals.category.name, url: '/Categories/' + res.locals.category.id, class: 'active'}
-    ];
-
+    var category = res.locals.category;
+    var breadcrumbs = [ breadcrumb.home(), breadcrumb.categories(), breadcrumb.category(category, 'active') ];
     async.parallel({
         posts: function(next) {
-            post.find({'_category': res.locals.category.id }).sort('-_id').exec(function(err, posts) {
+            post.find({'_category': category.id }).sort('-_id')
+            .populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts) {
                 next(err, posts);
             });
         },
     }, function(err, results) {
         res.render('home/category', {
-            title: 'Category | ' + res.locals.category.name,
+            title: 'Category | ' + category.name,
             breadcrumbs: breadcrumbs,
             posts: results.posts,
             user: res.locals.user
@@ -29,11 +27,7 @@ exports.category = function(req, res) {
 };
 
 exports.categories = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Categories', url: '/categories', class: 'active'}
-    ];
-
+    var breadcrumbs = [ breadcrumb.home(), breadcrumb.categories('active') ];
     category.find({}, function(err, categories) {
         res.render('home/categories', {
             title: 'Categories',

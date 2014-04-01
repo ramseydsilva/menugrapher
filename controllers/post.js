@@ -1,6 +1,7 @@
 'use strict';
 
 var async = require('async'),
+    breadcrumb = require('../helpers/breadcrumb'),
     ss = require('socket.io-stream'),
     post = require('../models/post'),
     city = require('../models/city'),
@@ -14,12 +15,8 @@ var async = require('async'),
 
 
 exports.posts = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Posts', url: '/posts/', class: 'active'},
-    ];
-
-    post.find().sort('-_id').exec(function(err, posts){
+    var breadcrumbs = [ breadcrumb.home(), breadcrumb.posts('active') ];
+    post.find().sort('-_id').populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts){
         res.render('post/posts', {
             title: "Posts",
             breadcrumbs: breadcrumbs,
@@ -29,12 +26,7 @@ exports.posts = function(req, res) {
 };
 
 exports.new = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Posts', url: '/posts/', class: ''},
-        { text: 'New', url: '/post/new', class: 'active'}
-    ];
-
+    var breadcrumbs = [ breadcrumb.home(), breadcrumb.posts(), breadcrumb.newPost() ];
     res.render('post/newPost', {
         title: 'New Post',
         breadcrumbs: breadcrumbs
@@ -42,70 +34,44 @@ exports.new = function(req, res) {
 };
 
 exports.post = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Posts', url: '/posts/', class: ''},
-        { text: res.locals.post.title, url: res.locals.post.url, class: 'active'}
-    ];
-
+    var post = res.locals.post;
+    var breadcrumbs = [ breadcrumb.home(), breadcrumb.city(post._city), breadcrumb.restaurant(post._restaurant), breadcrumb.post(post, 'active') ];
     res.render('post/post', {
         title: "Post",
         breadcrumbs: breadcrumbs,
-        post: res.locals.post,
-        userHasRights: res.locals.post.userHasRights(req.user),
-        time: moment(res.locals.post.createdAt).fromNow()
+        post: post,
+        userHasRights: post.userHasRights(req.user),
+        time: moment(post.createdAt).fromNow()
     });
 };
 
 exports.edit = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Posts', url: '/posts/', class: ''},
-        { text: res.locals.post.title, url: res.locals.post.url, class: ''},
-        { text: 'Edit', url: res.locals.post.editUrl, class: 'active'}
-    ];
-
-    var city = !!res.locals.post._city ? res.locals.post._city.name : '';
-    var category = !!res.locals.post._category ? res.locals.post._category.name : '';
-    var restaurant = !!res.locals.post._restaurant ? res.locals.post._restaurant.name : '';
+    var post = res.locals.post;
+    var breadcrumbs = [ breadcrumb.home(), breadcrumb.city(post._city), breadcrumb.restaurant(post._restaurant), breadcrumb.post(post, 'active'),
+        { text: 'Edit', url: post.editUrl, class: 'active'} ];
 
     res.render('post/edit', {
         title: "Edit Post",
         breadcrumbs: breadcrumbs,
-        post: res.locals.post,
-        city: city,
-        category: category,
-        restaurant: restaurant,
+        post: post,
         back: {
             text: 'Back to Post',
-            href: res.locals.post.url
+            href: post.url
         }
     });
 };
 
 exports.delete = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Posts', url: '/posts/', class: ''},
-        { text: res.locals.post.title, url: res.locals.post.url, class: ''},
-        { text: 'Delete', url: res.locals.post.deleteUrl, class: 'active'}
-    ];
-
+    var post = res.locals.post;
+    var breadcrumbs = [ breadcrumb.home(), breadcrumb.city(post._city), breadcrumb.restaurant(post._restaurant), breadcrumb.post(post, 'active'),
+        { text: 'Delete', url: post.deleteUrl, class: 'active'} ];
     res.render('post/delete', {
         title: "Delete Post",
         breadcrumbs: breadcrumbs,
-        post: res.locals.post,
+        post: post,
         back: {
             text: 'Back to Post',
-            href: res.locals.post.url
+            href: post.url
         }
     });
 };
-
-exports.deletePost = function(req, res) {
-    res.locals.post.remove(function(err, post) {
-        if (err) res.redirect(post.deleteUrl);  // TODO: Handle error
-        res.redirect(req.body.redirect);
-    });
-};
-

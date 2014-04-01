@@ -162,7 +162,7 @@ hr {
     z-index: 100;
 }
 
-.post-box-options.showOptionsAlwaystrue {
+.post-box-tags.showOptionsAlwaystrue, .post-box-options.showOptionsAlwaystrue {
     visibility: hidden;
 }
 
@@ -171,8 +171,15 @@ hr {
     bottom: 0;
     z-index: 50;
     width: 100%;
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(0,0,0,0.5);
     padding: 5px;
+}
+
+.col-sm-4.post {
+    font-size: 70%;
+}
+.col-sm-4.post .post-box-tags {
+    padding: 2px;
 }
 
 .post-box-tags div a {
@@ -242,4 +249,14 @@ input {
 
 #packery .post {
     width: 200px;
+}
+
+a.lead {
+    display: block;
+    width: 100%;
+    margin: 10px 0 20px;
+}
+
+a.fa-times {
+    cursor: pointer;
 }

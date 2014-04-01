@@ -63,7 +63,6 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
         function(next) {
             async.waterfall([
                 function(next) {
-                    console.log('finding city');
                     city.findOne({ name: cityName }, function(err, doc) {
                         if (!!!doc) {
                             var newCity = new city({name: cityName});
@@ -72,7 +71,6 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
                                 next(err, doc);
                             });
                         } else {
-                            console.log('returning existing cit', doc);
                             next(err, doc);
                         }
                     });
@@ -80,28 +78,18 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
                 function(city, next) {
                     restaurant.findOne({ name: restaurantName, _city: city._id }, function(err, doc) {
                         if (!!!doc) {
-                            console.log('creating rest', restaurantName, city);
                             var newRestaurant = new restaurant({ name: restaurantName, _city: city._id });
                             newRestaurant.save(function(err, doc) {
                                 console.log('new rest', doc);
                                 next(err, { city: city, restaurant: doc });
                             });
                         } else {
-                            console.log('returning existing rest', doc);
                             next(err, { city: city, restaurant: doc });
                         }
                     });
                 }
             ], function(err, results) {
-                // If restaurant is not assigned city, assign it now
-                if (!!!results.city.name && !!!results.restaurant._city) {
-                    results.restaurant._city = results.city.id;
-                    results.restaurant.save(function(err, doc){
-                        next(err, [results.city, doc]); // If we don't do this then the rest doesn't get saved to post
-                    });
-                } else {
-                    next(err, [results.city, results.restaurant]);
-                }
+                next(err, [results.city, results.restaurant]);
             });
         },
         function(next) {

@@ -22,8 +22,9 @@ div(class='panel panel-default dashboard-header')
 if breadcrumbs
     ul(class="breadcrumb")
         for b in breadcrumbs
-            if b.class == 'active'
-                li(class=b.class)= b.text
-            else
-                li(class=b.class)
-                    a(href=b.url)= b.text
+            if !!b
+                if b.class == 'active'
+                    li(class=b.class)= b.text
+                else
+                    li(class=b.class)
+                        a(href=b.url)= b.text

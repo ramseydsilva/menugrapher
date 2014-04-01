@@ -6,5 +6,6 @@ block content
             p.lead Cities
             hr
             for city in cities
-                p.lead
+                if city.name
                     a(href='#{city.url}')= city.name
+                    br

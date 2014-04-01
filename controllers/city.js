@@ -1,33 +1,56 @@
 'use strict';
 
 var async = require('async'),
+    breadcrumb = require('../helpers/breadcrumb'),
     city = require('../models/city'),
     restaurant = require('../models/restaurant'),
     post = require('../models/post');
 
-exports.city = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Cities', url: '/cities', class: ''},
-        { text: res.locals.city.name, url: '/cities/' + res.locals.city.id, class: 'active'}
-    ];
-
+exports.restaurants = function(req, res) {
+    var city = res.locals.city;
     async.parallel({
+        breadcrumbs: function(next) {
+            next(null, [ breadcrumb.home(), breadcrumb.city(city), breadcrumb.cityRestaurants(city, 'active') ]);
+        },
         restaurants: function(next) {
-            restaurant.find({_city: res.locals.city._id}, function(err, restaurants) {
+            restaurant.find({_city: city._id}, function(err, restaurants) {
+                console.log(err, restaurants);
+                next(err, restaurants);
+            });
+        }
+    }, function(err, results) {
+        res.render('city/restaurants', {
+            title: 'City | ' + city.getName,
+            breadcrumbs: results.breadcrumbs,
+            restaurants: results.restaurants,
+            user: res.locals.user
+        });
+    });
+
+};
+
+
+exports.city = function(req, res) {
+    var city = res.locals.city;
+    async.parallel({
+        breadcrumbs: function(next) {
+            next(null, [ breadcrumb.home(), breadcrumb.city(city, 'active') ]);
+        },
+        restaurants: function(next) {
+            restaurant.find({_city: city._id}, function(err, restaurants) {
                 console.log(err, restaurants);
                 next(err, restaurants);
             });
         },
         posts: function(next) {
-            post.find({'_city': res.locals.city.id }).sort('-_id').exec(function(err, posts) {
+            post.find({'_city': city.id }).sort('-_id').populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts) {
                 next(err, posts);
             });
         },
     }, function(err, results) {
         res.render('home/city', {
-            title: 'City | ' + res.locals.city.name,
-            breadcrumbs: breadcrumbs,
+            title: 'City | ' + city.getName,
+            breadcrumbs: results.breadcrumbs,
             posts: results.posts,
             restaurants: results.restaurants,
             user: res.locals.user
@@ -37,11 +60,7 @@ exports.city = function(req, res) {
 };
 
 exports.cities = function(req, res) {
-    var breadcrumbs = [
-        { text: 'Home', url: '/', class: ''},
-        { text: 'Cities', url: '/cities', class: 'active'}
-    ];
-
+    var breadcrumbs = [ breadcrumb.home(), breadcrumb.cities('active') ];
     city.find({}, function(err, cities) {
         res.render('home/cities', {
             title: 'Cities',

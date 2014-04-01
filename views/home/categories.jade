@@ -6,5 +6,6 @@ block content
             p.lead Categories
             hr
             for category in categories
-                p.lead
+                if category.name
                     a(href='#{category.url}')= category.name
+                    br

@@ -8,13 +8,14 @@ div(class="col-sm-#{cols} post-box post",id=post.id, room='post-#{post.id}')
                     a(class='fa fa-trash-o', href=post.deleteUrl, title='Delete Post', target=target)
                     a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)
                     a(class='fa fa-eye', href=post.url, title='View Post', target=target)
+
             div(class='post-box-tags showOptionsAlways#{!!!showOptionsAlways}')
                 div(class='text-info')
                     | City: 
-                    span(class='_city') #{post.city.name}
+                    span(class='_city')= (!!post._city ? post._city.name : '')
                 div(class='text-danger')
                     | Restaurant: 
-                    span(class='_restaurant') #{post.restaurant.name}
+                    span(class='_restaurant')= (!!post._restaurant ? post._restaurant.name : '')
                 div(class='text-warning')
                     | Category: 
-                    span(class='_category') #{post.category.name}
+                    span(class='_category')= (!!post._category ? post._category.name : '')

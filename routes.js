@@ -43,11 +43,11 @@ var routes = function(app) {
     app.get('/posts/:post', postMiddleware.postExists, postController.post);
     app.get('/posts/:post/edit', postMiddleware.postExists, postMiddleware.userHasRights, postController.edit);
     app.get('/posts/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.delete);
-    app.post('/posts/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.deletePost);
 
     // City, Restaurant, Category
     app.get('/cities', cityController.cities);
     app.get('/cities/:city', cityMiddleware.cityExists, cityController.city);
+    app.get('/cities/:city/restaurants', cityMiddleware.cityExists, cityController.restaurants);
     app.get('/restaurants', restaurantController.restaurants);
     app.get('/restaurants/:restaurant', restaurantMiddleware.restaurantExists, restaurantController.restaurant);
     app.get('/categories', categoryController.categories);

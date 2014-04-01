@@ -7,12 +7,15 @@ var schemaOptions = {
 };
 
 var citySchema = new mongoose.Schema({
-    name: String,
-    restaurants: [restaurant.schema]
+    name: String
 }, schemaOptions);
 
 citySchema.virtual('url').get(function() {
     return "/cities/" + this._id;
+});
+
+citySchema.virtual('restaurantsUrl').get(function() {
+    return this.url + '/restaurants';
 });
 
 module.exports = mongoose.model("city", citySchema);

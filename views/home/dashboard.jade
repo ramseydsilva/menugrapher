@@ -5,32 +5,24 @@ block content
         div(class='panel-body post-container')
             div(class='container-fluid')
 
-                div(class='row-fluid')
-                    div(class='col-md-4')
-                        p.lead Cities
+                div(class='clearfix row-fluid')
+                    div(class='col-md-2')
+                        a.lead(href='/cities') Cities
                         for city in cities
-                            a(href=city.url)= city.name
-                            br
-
-                    div(class='col-md-4')
-                        p.lead Restaurants
-                        for restaurant in restaurants
-                            a(href=restaurant.url)= restaurant.name
-                            br
-
-                    div(class='col-md-4')
-                        p.lead Categories
+                            if city.name
+                                a(href=city.url)= city.name
+                                br
+                        a.lead(href='/categories') Categories
                         for category in categories
-                            a(href=category.url)= category.name
-                            br
+                            if category.name
+                                a(href=category.url)= category.name
+                                br
 
-                div(class='row-fluid')
-                    div(class='col-md-6')
+                    div(class='col-md-5')
                         p.lead My uploads
-                        - var cols = 6, posts = myPosts
+                        - var cols = 4, posts = myPosts
                         include ../includes/posts
-
-                    div(class='col-md-6')
+                    div(class='col-md-5')
                         p.lead Recent uploads
-                        - var cols = 6, posts = recentPosts
+                        - var cols = 4, posts = recentPosts
                         include ../includes/posts
