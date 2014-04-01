@@ -8,7 +8,7 @@ div(class='panel panel-default dashboard-header')
                     a(href='javascript:history.back()') &larr; 
                         span(class='hidden-xs') Go Back
 
-        a(class="pull-right btn btn-success", href="/posts/new")
+        a(class="pull-right btn btn-success", href="#{!!uploadUrl ? uploadUrl : '/posts/new'}")
             i(class="fa fa-camera")
             span(class='hidden-xs') Upload Picture
         if user

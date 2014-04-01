@@ -20,7 +20,7 @@ exports.restaurant = function(req, res) {
         },
     }, function(err, results) {
         res.render('home/restaurant', {
-            title: 'Restaurant | ' + res.locals.restaurant.getName,
+            title: 'Restaurant | ' + restaurant.name,
             breadcrumbs: results.breadcrumbs,
             posts: results.posts,
             user: res.locals.user

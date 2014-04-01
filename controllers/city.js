@@ -20,7 +20,7 @@ exports.restaurants = function(req, res) {
         }
     }, function(err, results) {
         res.render('city/restaurants', {
-            title: 'City | ' + city.getName,
+            title: city.name,
             breadcrumbs: results.breadcrumbs,
             restaurants: results.restaurants,
             user: res.locals.user
@@ -49,7 +49,7 @@ exports.city = function(req, res) {
         },
     }, function(err, results) {
         res.render('home/city', {
-            title: 'City | ' + city.getName,
+            title: city.name,
             breadcrumbs: results.breadcrumbs,
             posts: results.posts,
             restaurants: results.restaurants,

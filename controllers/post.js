@@ -26,10 +26,14 @@ exports.posts = function(req, res) {
 };
 
 exports.new = function(req, res) {
+    console.log(req.query.city, req.query.category, req.query.restaurant);
     var breadcrumbs = [ breadcrumb.home(), breadcrumb.posts(), breadcrumb.newPost() ];
     res.render('post/newPost', {
         title: 'New Post',
-        breadcrumbs: breadcrumbs
+        breadcrumbs: breadcrumbs,
+        city: req.query.city,
+        category: req.query.category,
+        restaurant: req.query.restaurant
     });
 };
 

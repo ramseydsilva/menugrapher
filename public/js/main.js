@@ -23,8 +23,7 @@ define([
     "socket.io",
     "socket.io-stream",
     "bootstrap",
-    "typeahead",
-    "jqueryui"
+    "typeahead"
 ], function($, _, io, ss) {
     var socket = io.connect('//' + window.location.host);
 

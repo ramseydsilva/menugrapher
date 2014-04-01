@@ -39,19 +39,19 @@ var routes = function(app) {
 
     // Post routes
     app.get('/posts', postController.posts);
-    app.get('/posts/new', homeMiddleware.redirectToLoginIfNotLoggedIn, postController.new);
-    app.get('/posts/:post', postMiddleware.postExists, postController.post);
-    app.get('/posts/:post/edit', postMiddleware.postExists, postMiddleware.userHasRights, postController.edit);
-    app.get('/posts/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postController.delete);
+    app.get('/posts/new', homeMiddleware.redirectToLoginIfNotLoggedIn, postMiddleware.getUploadUrl, postController.new);
+    app.get('/posts/:post', postMiddleware.postExists, postMiddleware.getUploadUrl, postController.post);
+    app.get('/posts/:post/edit', postMiddleware.postExists, postMiddleware.userHasRights, postMiddleware.getUploadUrl, postController.edit);
+    app.get('/posts/:post/delete', postMiddleware.postExists, postMiddleware.userHasRights, postMiddleware.getUploadUrl, postController.delete);
 
     // City, Restaurant, Category
     app.get('/cities', cityController.cities);
-    app.get('/cities/:city', cityMiddleware.cityExists, cityController.city);
-    app.get('/cities/:city/restaurants', cityMiddleware.cityExists, cityController.restaurants);
+    app.get('/cities/:city', cityMiddleware.cityExists, postMiddleware.getUploadUrl, cityController.city);
+    app.get('/cities/:city/restaurants', cityMiddleware.cityExists, postMiddleware.getUploadUrl, cityController.restaurants);
     app.get('/restaurants', restaurantController.restaurants);
-    app.get('/restaurants/:restaurant', restaurantMiddleware.restaurantExists, restaurantController.restaurant);
+    app.get('/restaurants/:restaurant', restaurantMiddleware.restaurantExists, postMiddleware.getUploadUrl, restaurantController.restaurant);
     app.get('/categories', categoryController.categories);
-    app.get('/categories/:category', categoryMiddleware.categoryExists, categoryController.category);
+    app.get('/categories/:category', categoryMiddleware.categoryExists, postMiddleware.getUploadUrl, categoryController.category);
 
     // API routes
     restify.serve(app, city);
