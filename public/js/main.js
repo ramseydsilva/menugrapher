@@ -107,11 +107,13 @@ define([
                     cities[d.name] = d._id;
                     return d.name;
                 });
+                result = _.uniq(result);
                 callback(result);
             }
         });
     };
 
+    var restaurants = {};
     function fetchRestaurant(api, query, callback) {
         var cityQuery = !!cities[$('#city').val()] ? "&_city=" + cities[$('#city').val()] : "";
         $.ajax({
@@ -119,8 +121,29 @@ define([
             dataType: "json",
             success: function (data) {
                 var result = _.map(data, function(d) {
+                    restaurants[d.name] = d._id;
                     return d.name;
                 });
+                result = _.uniq(result);
+
+                if (!!callback)
+                    callback(result);
+            }
+        });
+    };
+
+
+    if (!!$('#restaurant').length) fetchRestaurant($('#restaurant').attr('api'), $('#restaurant').val());
+    function fetchItem(api, query, callback) {
+        var restaurantQuery = !!restaurants[$('#restaurant').val()] ? "&_restaurant=" + restaurants[$('#restaurant').val()] : "";
+        $.ajax({
+            url: api + "?name=~" + query + restaurantQuery,
+            dataType: "json",
+            success: function (data) {
+                var result = _.map(data, function(d) {
+                    return d.name;
+                });
+                result = _.uniq(result);
                 callback(result);
             }
         });
@@ -134,6 +157,7 @@ define([
                 var result = _.map(data, function(d) {
                     return d.name;
                 });
+                result = _.uniq(result);
                 callback(result);
             }
         });
@@ -160,7 +184,8 @@ define([
                     size: file.size,
                     city: $('#city').val(),
                     restaurant: $('#restaurant').val(),
-                    category: $('#category').val()
+                    category: $('#category').val(),
+                    item: $('#item').val()
                 });
                 blobStream.on('data', function(chunk) {
                     size += chunk.length;
@@ -183,7 +208,8 @@ define([
                         link: $(image_input).val(),
                         city: $('#city').val(),
                         restaurant: $('#restaurant').val(),
-                        category: $('#category').val()
+                        category: $('#category').val(),
+                        item: $('#item').val()
                     });
                     socket.on('downloadProgress', function(data) {
                         progressBar.find('.progress-bar').css('width', data.progress);
@@ -200,7 +226,8 @@ define([
                 description: $('.post-description').val(),
                 city: $('#city').val(),
                 restaurant: $('#restaurant').val(),
-                category: $('#category').val()
+                category: $('#category').val(),
+                item: $('#item').val()
             });
         });
 
@@ -252,6 +279,15 @@ define([
             autoSelect: false,
             source: function(query, callback) {
                 fetchJson($('#category').attr('api'), query, callback);
+            }
+        });
+
+        $('#item').typeahead({
+            displayKey: "name",
+            items: "all",
+            autoSelect: false,
+            source: function(query, callback) {
+                fetchItem($('#item').attr('api'), query, callback);
             }
         });
 

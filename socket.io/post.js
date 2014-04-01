@@ -15,7 +15,7 @@ postSocket.update = function(socket, callback) {
         Post.findOne({ _id: data.id }, function(err, post) {
             async.parallel([
                 function(next) {
-                    postHelpers.getOrCreateCityRestaurantCategory(data.city, data.restaurant, data.category, next);
+                    postHelpers.getOrCreateCityRestaurantCategoryItem(data.city, data.restaurant, data.category, data.item, next);
                 }
             ], function(err, results) {
                 post.title = data.title;
@@ -23,6 +23,7 @@ postSocket.update = function(socket, callback) {
                 post._city = results[0].city.id;
                 post._category = results[0].category.id;
                 post._restaurant = results[0].restaurant.id;
+                post._item = results[0].item.id;
 
                 post.save(function(err, post, numberAffected) {
                     // Emit to socket instructing refresh
@@ -108,7 +109,7 @@ postSocket.imageUpload = function(socket, callback) {
             // Create city, restaurant, category first before saving post
             async.parallel([
                 function(next) {
-                    postHelpers.getOrCreateCityRestaurantCategory(data.city, data.restaurant, data.category, next);
+                    postHelpers.getOrCreateCityRestaurantCategoryItem(data.city, data.restaurant, data.category, data.item, next);
                 }
             ], function(err, results) {
                 postHelpers.newPost({
@@ -125,7 +126,8 @@ postSocket.imageUpload = function(socket, callback) {
                     },
                     _city: results[0].city.id,
                     _restaurant: results[0].restaurant.id,
-                    _category: results[0].category.id
+                    _category: results[0].category.id,
+                    _item: results[0].item.id
                 }, socket, elementId, function(err, post) {
 
                     if (!!callback)

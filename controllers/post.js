@@ -51,6 +51,7 @@ exports.post = function(req, res) {
 
 exports.edit = function(req, res) {
     var post = res.locals.post;
+    console.log(post);
     var breadcrumbs = [ breadcrumb.home(), breadcrumb.city(post._city), breadcrumb.restaurant(post._restaurant), breadcrumb.post(post, 'active'),
         { text: 'Edit', url: post.editUrl, class: 'active'} ];
 

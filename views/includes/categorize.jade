@@ -2,11 +2,14 @@ if !!post
     - city = !!post._city ? post._city.name : ''
     - restaurant = !!post._restaurant ? post._restaurant.name : ''
     - category = !!post._category ? post._category.name : ''
+    - item = !!post._item ? post._item.name : ''
 div(class='container-fluid padded')
     div(class='row-padded row-fluid')
-        div(class='col-sm-4')
+        div(class='col-sm-3')
             input(id='city', api='/api/v1/cities', type='text', class='form-control', placeholder='City', autocomplete='off', value=city)
-        div(class='col-sm-4')
+        div(class='col-sm-3')
             input(id='restaurant', api='/api/v1/restaurants', type='text', class='form-control', placeholder='Restaurant', autocomplete='off', value=restaurant)
-        div(class='col-sm-4')
+        div(class='col-sm-3')
             input(id='category', api='/api/v1/categories', type='text', class='form-control', placeholder='Category', autocomplete='off', value=category)
+        div(class='col-sm-3')
+            input(id='item', api='/api/v1/items', type='text', class='form-control', placeholder='Menu Item', autocomplete='off', value=item)

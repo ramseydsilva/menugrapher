@@ -8,7 +8,8 @@ var schemaOptions = {
 };
 
 var itemSchema = new mongoose.Schema({
-    name: String
+    name: String,
+    _restaurant: { type: mongoose.Schema.ObjectId, ref : 'restaurant' },
 }, schemaOptions);
 
 module.exports = mongoose.model("item", itemSchema);

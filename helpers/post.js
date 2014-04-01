@@ -6,6 +6,7 @@ var fs = require('fs'),
     city = require('../models/city'),
     restaurant = require('../models/restaurant'),
     category = require('../models/category'),
+    item = require('../models/item'),
     async = require('async'),
     path = require('path'),
     Post = require('../models/post'),
@@ -58,7 +59,7 @@ PostHelpers.getImageUrl = function(filepath, next) {
     return next(filepath.split('public')[1].replace('//', '/'));
 };
 
-PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantName, categoryName, next) {
+PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restaurantName, categoryName, itemName, next) {
     async.parallel([
         function(next) {
             async.waterfall([
@@ -81,15 +82,30 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
                             var newRestaurant = new restaurant({ name: restaurantName, _city: city._id });
                             newRestaurant.save(function(err, doc) {
                                 console.log('new rest', doc);
-                                next(err, { city: city, restaurant: doc });
+                                next(err, city, doc);
                             });
                         } else {
-                            next(err, { city: city, restaurant: doc });
+                            next(err, city, doc);
+                        }
+                    });
+                },
+                function(city, restaurant, next) {
+                    console.log(city, restaurant);
+                    item.findOne({ name: itemName, _restaurant: restaurant._id }, function(err, doc) {
+                        if (!!!doc) {
+                            var newItem = new item({ name: itemName, _restaurant: restaurant._id });
+                            newItem.save(function(err, doc) {
+                                restaurant.items.push(doc);
+                                restaurant.save();
+                                next(err, { city: city, restaurant: restaurant, item: newItem });
+                            });
+                        } else {
+                            next(err, { city: city, restaurant: restaurant, item: doc });
                         }
                     });
                 }
             ], function(err, results) {
-                next(err, [results.city, results.restaurant]);
+                next(err, [results.city, results.restaurant, results.item ]);
             });
         },
         function(next) {
@@ -105,7 +121,7 @@ PostHelpers.getOrCreateCityRestaurantCategory = function(cityName, restaurantNam
             });
         }
     ], function(err, results) {
-        next(err, { city: results[0][0], restaurant: results[0][1], category: results[1] });
+        next(err, { city: results[0][0], restaurant: results[0][1], category: results[1], item: results[0][2] });
     });
 };
 

@@ -4,6 +4,7 @@ var passport = require('passport'),
     passportConf = require('./config/passport'),
     post = require('./models/post'),
     city = require('./models/city'),
+    item = require('./models/item'),
     restaurant = require('./models/restaurant'),
     category = require('./models/category'),
     restify = require('express-restify-mongoose');
@@ -58,6 +59,7 @@ var routes = function(app) {
     restify.serve(app, restaurant);
     restify.serve(app, category);
     restify.serve(app, post);
+    restify.serve(app, item);
 
     // Account routes
     app.get('/login', homeMiddleware.redirectToHomeIfLoggedIn, userController.getLogin);
