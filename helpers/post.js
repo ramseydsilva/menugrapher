@@ -1,11 +1,12 @@
 'use strict';
 
 var fs = require('fs'),
+    _ = require('underscore'),
     app = require('../app'),
     mkdirp = require('mkdirp'),
     jade = require('jade'),
     city = require('../models/city'),
-    restaurant = require('../models/restaurant'),
+    Restaurant = require('../models/restaurant'),
     category = require('../models/category'),
     item = require('../models/item'),
     async = require('async'),
@@ -66,41 +67,21 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
         function(next) {
             async.waterfall([
                 function(next) {
-                    city.findOne({ name: cityName }, function(err, doc) {
-                        if (!!!doc) {
-                            var newCity = new city({name: cityName});
-                            newCity.save(function(err, doc){
-                                next(err, doc);
-                            });
-                        } else {
-                            next(err, doc);
-                        }
+                    city.findOneAndUpdate({ name: cityName }, {}, {upsert: true}, function(err, doc) {
+                        next(err, doc);
                     });
                 },
                 function(city, next) {
-                    restaurant.findOne({ name: restaurantName, _city: city._id }, function(err, doc) {
-                        if (!!!doc) {
-                            var newRestaurant = new restaurant({ name: restaurantName, _city: city._id });
-                            newRestaurant.save(function(err, doc) {
-                                next(err, city, doc);
-                            });
-                        } else {
-                            next(err, city, doc);
-                        }
+                    Restaurant.findOneAndUpdate({ name: restaurantName, _city: city._id }, {}, {upsert: true}, function(err, doc) {
+                        next(err, city, doc);
                     });
                 },
                 function(city, restaurant, next) {
-                    item.findOne({ name: itemName, _restaurant: restaurant._id }, function(err, doc) {
-                        if (!!!doc) {
-                            var newItem = new item({ name: itemName, _restaurant: restaurant._id });
-                            newItem.save(function(err, doc) {
-                                restaurant.items.push(doc);
-                                restaurant.save();
-                                next(err, { city: city, restaurant: restaurant, item: newItem });
-                            });
-                        } else {
-                            next(err, { city: city, restaurant: restaurant, item: doc });
-                        }
+                    item.findOneAndUpdate({ name: itemName, _restaurant: restaurant._id }, {}, {upsert: true}, function(err, doc) {
+                        Restaurant.update({_id: restaurant._id}, { $addToSet: {menu: doc}}, function(err, _) {
+                            if (err) throw err;
+                        });
+                        next(err, { city: city, restaurant: restaurant, item: doc });
                     });
                 }
             ], function(err, results) {
@@ -108,15 +89,8 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
             });
         },
         function(next) {
-            category.findOne({ name: categoryName }, function(err, doc) {
-                if (!!!doc) {
-                    var newCategory = new category({ name: categoryName });
-                    newCategory.save(function(err, doc) {
-                        next(err, doc);
-                    });
-                } else {
-                    next(err, doc);
-                }
+            category.findOneAndUpdate({ name: categoryName }, {}, {upsert: true}, function(err, doc) {
+                next(err, doc);
             });
         }
     ], function(err, results) {

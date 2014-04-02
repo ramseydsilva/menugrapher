@@ -62,3 +62,11 @@ module.exports.post = function(post, _class) {
 module.exports.newPost = function(_class) {
     return { text: 'New', url: '/post/new', class: !!_class ? _class : ''};
 };
+
+module.exports.albums = function(_class) {
+    return { text: 'Albums', url: '', class: !!_class ? _class: ''};
+};
+
+module.exports.album = function(album, _class) {
+    return { text: album.name, url: album.url, class: !!_class ? _class: ''};
+};

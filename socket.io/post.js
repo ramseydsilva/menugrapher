@@ -8,8 +8,9 @@ var Post = require('../models/post'),
     async = require('async'),
     ss = require('socket.io-stream'),
     postHelpers = require('../helpers/post'),
+    albumHelpers = require('../helpers/album'),
+    album = require('../models/album'),
     postSocket = {};
-
 
 postSocket.update = function(socket, callback) {
     socket.on('post-update', function(data) {
@@ -54,6 +55,47 @@ postSocket.update = function(socket, callback) {
                 });
             });
         });
+    });
+};
+
+postSocket.createAlbumCheckBox = function(socket, callback) {
+    socket.on('create-album', function(data) {
+        if (!!data.create) {
+            // Create album checked
+            // TODO assign pictures if pictures were uploaded before Create Album checkbox was clicked
+            album.create({ name: 'New Album', _user: socket.handshake.user.id, '_meta.socketId': socket.id}, function(err, doc) {
+                socket.emit("post-update", [{
+                    action: 'val',
+                    elements: {
+                        '#album': doc._id
+                    }
+                }]);
+
+                var elements = {};
+                elements['#userAlbums-' + doc._user] = "<a href='' class='list-group-item' id='album-" + doc._id + "'>" + doc.name + "</a>";
+                socket.broadcast.emit('create-album', [{
+                    action: 'append',
+                    elements: elements
+                }]);
+
+                if (!!callback)
+                    callback(err, doc);
+            });
+        } else {
+            // Create album unchecked
+            if (!!data.album) {
+                // force = true, since user unchecked create album box
+                console.log("Gonna delete album!!!!!");
+                albumHelpers.deleteAlbum({_id: data.album, _user: socket.handshake.user.id}, true, socket);
+            }
+        }
+    });
+};
+
+// Delete album created by the upload picture socket if it contains no pictures
+postSocket.deleteAlbum = function(socket, callback) {
+    socket.on('disconnect', function(stream, data) {
+        albumHelpers.deleteAlbum({ _user: socket.handshake.user.id, '_meta.socketId': socket.id}, false, socket);
     });
 };
 
@@ -141,12 +183,16 @@ postSocket.imageUpload = function(socket, callback) {
                     _item: results.post.item.id
                 }, socket, elementId, function(err, post) {
 
-                    if (!!callback)
-                        callback(err, post);
-
+                    // Assign to album
+                    if (!!data.album) {
+                        albumHelpers.assignPostToAlbum(post, data.album, function(err, doc) {
+                            console.log('calling album assing helper');
+                            if (!!callback)
+                                callback(err, post, doc)
+                        });
+                    }
                 });
             });
-
         });
     });
 };
@@ -201,6 +247,8 @@ postSocket.removeAttr = function(socket, attr, callback) {
 postSocket.socket = function(io, socket, app) {
     postSocket.update(socket);
     postSocket.imageUpload(socket);
+    postSocket.createAlbumCheckBox(socket);
+    postSocket.deleteAlbum(socket);
     postSocket.remove(io, socket);
     postSocket.removeAttr(socket, '_city');
     postSocket.removeAttr(socket, '_restaurant');

@@ -6,16 +6,16 @@ block content
 
             div(class='clearfix row-fluid')
                 div(class='col-sm-3')
-                    - title = { name: 'Albums', url: '' }
-                    - items = albums
-                    - id = 'userAlbums-' + user.id
+                    - title = { name: 'Other albums by user', url: '' }
+                    - items = userAlbums
+                    - id = 'userAlbums-' + album._user
                     include ../includes/leftmenu
 
                 div(class='col-sm-9')
                     div(class='container-fluid')
                         div(class='row-fluid')
                             div(class='col-sm-12')
-                                if user.profile.name
-                                    p.lead #{user.profile.name}
+                                p.lead #{album.name}
                                 - var cols = 3
+                                - var posts = album.pics
                                 include ../includes/posts

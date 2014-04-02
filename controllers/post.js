@@ -33,7 +33,9 @@ exports.new = function(req, res) {
         breadcrumbs: breadcrumbs,
         city: req.query.city,
         category: req.query.category,
-        restaurant: req.query.restaurant
+        restaurant: req.query.restaurant,
+        item: req.query.item,
+        album: req.query.album
     });
 };
 

@@ -12,18 +12,21 @@ var schemaOptions = {
 };
 
 var albumSchema = new mongoose.Schema({
-    title: String,
+    name: String,
     description: String,
     _user: { type: mongoose.Schema.ObjectId, ref : 'User' },
     _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
     _restaurant: { type: mongoose.Schema.ObjectId, ref : 'restaurant' },
     _category: { type: mongoose.Schema.ObjectId, ref : 'category' },
     pics: [post.schema],
-    updatedAt: { type: Date }
+    updatedAt: { type: Date },
+    _meta: {
+        socketId: String
+    }
 }, schemaOptions);
 
 albumSchema.virtual('url').get(function() {
-    return this.userUrl + "/albumt/" + this._id;
+    return "/albums/" + this._id;
 });
 
 albumSchema.virtual('createdAt').get(function() {
@@ -31,7 +34,7 @@ albumSchema.virtual('createdAt').get(function() {
 });
 
 albumSchema.virtual('userUrl').get(function() {
-    return '/users/' + this.user.uid;
+    return '/users/' + this._user;
 });
 
 albumSchema.method({

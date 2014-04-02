@@ -20,6 +20,7 @@ var routes = function(app) {
         userController = require('./controllers/user'),
         socialApiController = require('./controllers/social'),
         apiController = require('./controllers/api'),
+        albumController = require('./controllers/album'),
         contactController = require('./controllers/contact');
 
     var homeMiddleware = require('./middleware/home'),
@@ -27,6 +28,7 @@ var routes = function(app) {
         cityMiddleware = require('./middleware/city'),
         categoryMiddleware = require('./middleware/category'),
         restaurantMiddleware = require('./middleware/restaurant'),
+        albumMiddleware = require('./middleware/album'),
         postMiddleware = require('./middleware/post');
 
     /**
@@ -37,6 +39,7 @@ var routes = function(app) {
     app.get('/users', homeController.users);
     app.get('/profile', passportConf.isAuthenticated, homeController.profile);
     app.get('/users/:user', homeMiddleware.userExists, homeController.user);
+    app.get('/albums/:album', albumMiddleware.albumExists, albumController.album);
     app.get('/contact', contactController.getContact);
     app.post('/contact', contactController.postContact);
 

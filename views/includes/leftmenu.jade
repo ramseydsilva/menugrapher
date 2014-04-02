@@ -1,7 +1,7 @@
 div(class='container-fluid')
     div(class='row-fluid')
         div(class='col-sm-11')
-            div(class='list-group')
+            div(id=id, class='list-group')
                 a(class='list-group-item active', href=title.url)= title.name
                     if !!items.length
                         for item in items

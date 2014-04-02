@@ -26,6 +26,9 @@ exports.user = function(req, res) {
         },
         albums: function(next) {
             album.find({_user: res.locals.user.id}).exec(function(err, albums) {
+                console.log(albums);
+                albums.splice(0, 0, {name: 'Create new', url: '/posts/new?album=true' })
+                console.log(albums);
                 next(err, albums);
             });
         }

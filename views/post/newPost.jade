@@ -5,7 +5,13 @@ block content
         div(class='panel-body')
             div(class='container-fluid')
 
-                p.lead Upload Pictures
+                div.row-fluid
+                    div(class='lead col-sm-10') 
+                        | Upload Pictures
+                    div(class='checkbox col-sm-2')
+                        input(type='checkbox', checked=album, id='createAlbum')
+                        input(type='hidden', id='album')
+                        h4.no-padding.no-margin Create Album
 
                 include ../includes/categorize
 
@@ -15,6 +21,8 @@ block content
                             fieldset
                                 p.lead From computer
                                 input(id='image', type='file', name='image' multiple)
+
+
                     div(class='col-sm-1') &nbsp;
                     div(class='col-sm-6')
                         form(class='form-horizontal')

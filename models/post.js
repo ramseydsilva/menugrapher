@@ -64,8 +64,8 @@ postSchema.pre('save', function(next) {
 });
 
 postSchema.post('remove', function(doc) {
-    console.log('removing doc', doc.pic.originalPath)
     fs.unlink(doc.pic.originalPath);
+    fs.unlink(doc.pic.thumbPath);
 });
 
 module.exports = mongoose.model('post', postSchema);
