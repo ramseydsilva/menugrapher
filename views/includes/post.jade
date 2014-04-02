@@ -2,7 +2,7 @@ div(class="col-sm-#{cols} post-box post",id=post.id, room='post-#{post.id}')
     div(class='container-relative')
         a(class='main-link', href=post.url, target=target)
             span(class='text-info post-box-title post-title')= post.title
-            img(src=post.pic.originalUrl, class='container-full')
+            img(src=post.pic.thumbUrl, class='container-full')
             if post.userHasRights(user)
                 div(class='post-box-options showOptionsAlways#{!!!showOptionsAlways}')
                     a(class='fa fa-trash-o', href=post.deleteUrl, title='Delete Post', target=target)

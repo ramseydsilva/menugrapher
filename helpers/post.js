@@ -2,6 +2,7 @@
 
 var fs = require('fs'),
     app = require('../app'),
+    mkdirp = require('mkdirp'),
     jade = require('jade'),
     city = require('../models/city'),
     restaurant = require('../models/restaurant'),
@@ -18,39 +19,39 @@ PostHelpers.getExtension = function(filename) {
     return ext[ext.length - 1];
 };
 
-PostHelpers.incrementLast = function(v) {
-    return v.replace(/[0-9]+(?!.*[0-9])/, function(match) {
-        return parseInt(match, 10)+1;
+PostHelpers.getUniquePath = function(filepath, next) {
+    var filename = path.basename(filepath);
+    fs.exists(filepath, function(exists) {
+        if (exists) {
+            var ext = PostHelpers.getExtension(filepath);
+            var newfilename = filename.replace('.' + ext, '').replace(/[0-9]+(?!.*[0-9])/, function(match) {
+                return parseInt(match, 10)+1;
+            }) + '.' + ext;
+            PostHelpers.getUniquePath(filepath.replace(filename, newfilename), next);
+        } else {
+            next(filepath);
+        }
     });
 };
 
 // Takes in filename, user and returns callback with error, results
-PostHelpers.getFilePath = function(filename, user, callback) {
+PostHelpers.getFilePath = function(filename, directory, user, callback) {
     var userDir = path.join(app.get('rootDir'), '/public/uploads/' + user.id);
-    var originalDir = userDir + '/original';
+    var dir = userDir + '/' + directory;
     async.series([
         function(next) {
-            fs.mkdir(userDir, function(err) {
+            mkdirp(dir, function(err) {
                 next(null, err);
             });
         },
         function(next) {
-            fs.mkdir(originalDir, function(err) {
-                next(null, err);
-            });
-        },
-        function(next) {
-            var filepath = originalDir + '/' + filename;
-            fs.exists(filepath, function(exists) {
-                if (exists) {
-                    var ext = PostHelpers.getExtension(filepath);
-                    filepath = originalDir + '/' + PostHelpers.incrementLast(filename.replace('.'+ext, '')) + '.' + ext;
-                }
+            var filepath = dir + '/' + filename;
+            PostHelpers.getUniquePath(filepath, function(filepath) {
                 next(null, filepath);
             });
         }
     ], function(err, results) {
-        return callback(err, results[2]);
+        return callback(err, results[1]);
     });
 };
 
@@ -68,7 +69,6 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
                         if (!!!doc) {
                             var newCity = new city({name: cityName});
                             newCity.save(function(err, doc){
-                                console.log('creating city', doc);
                                 next(err, doc);
                             });
                         } else {
@@ -81,7 +81,6 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
                         if (!!!doc) {
                             var newRestaurant = new restaurant({ name: restaurantName, _city: city._id });
                             newRestaurant.save(function(err, doc) {
-                                console.log('new rest', doc);
                                 next(err, city, doc);
                             });
                         } else {
@@ -90,7 +89,6 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
                     });
                 },
                 function(city, restaurant, next) {
-                    console.log(city, restaurant);
                     item.findOne({ name: itemName, _restaurant: restaurant._id }, function(err, doc) {
                         if (!!!doc) {
                             var newItem = new item({ name: itemName, _restaurant: restaurant._id });

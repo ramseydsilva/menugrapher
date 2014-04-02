@@ -60,7 +60,9 @@
     "longjohn": "~0.2.3",
     "connect-slashes": "^1.2.0",
     "moment": "^2.5.1",
-    "express-restify-mongoose": "^0.6.7"
+    "express-restify-mongoose": "^0.6.7",
+    "gm": "^1.14.2",
+    "mkdirp": "^0.3.5"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

@@ -2,6 +2,7 @@
 
 var Post = require('../models/post'),
     _ = require('underscore'),
+    gm = require('gm'),
     path = require('path'),
     fs = require('fs'),
     async = require('async'),
@@ -68,7 +69,7 @@ postSocket.imageUpload = function(socket, callback) {
 
         async.waterfall([
             function(next) { // get file path
-                postHelpers.getFilePath(filename, socket.handshake.user, function(err, filepath) {
+                postHelpers.getFilePath(filename, 'original', socket.handshake.user, function(err, filepath) {
                     next(null, filepath);
                 });
             },
@@ -107,11 +108,21 @@ postSocket.imageUpload = function(socket, callback) {
         ], function(err, filepath, url, elementId) {
 
             // Create city, restaurant, category first before saving post
-            async.parallel([
-                function(next) {
+            async.parallel({
+                post: function(next) {
                     postHelpers.getOrCreateCityRestaurantCategoryItem(data.city, data.restaurant, data.category, data.item, next);
+                },
+                thumb: function(next) {
+                    postHelpers.getFilePath(path.basename(filepath), 'thumb/240x160', socket.handshake.user, function(err, thumbPath) {
+                        gm(filepath).gravity('Center').crop(240, 160, 0, 0).resize(240, 160).write(thumbPath, function(err) {
+                            if (err) throw err;
+                            postHelpers.getImageUrl(thumbPath, function(url){
+                                next(null, { path: thumbPath, url: url });
+                            });
+                        });
+                    });
                 }
-            ], function(err, results) {
+            }, function(err, results) {
                 postHelpers.newPost({
                     user: {
                         uid: socket.handshake.user.id,
@@ -121,13 +132,13 @@ postSocket.imageUpload = function(socket, callback) {
                     pic: {
                         originalPath: filepath,
                         originalUrl: url,
-                        thumbPath: "",
-                        thumbUrl: "",
+                        thumbPath: results.thumb.path,
+                        thumbUrl: results.thumb.url,
                     },
-                    _city: results[0].city.id,
-                    _restaurant: results[0].restaurant.id,
-                    _category: results[0].category.id,
-                    _item: results[0].item.id
+                    _city: results.post.city.id,
+                    _restaurant: results.post.restaurant.id,
+                    _category: results.post.category.id,
+                    _item: results.post.item.id
                 }, socket, elementId, function(err, post) {
 
                     if (!!callback)
@@ -138,7 +149,6 @@ postSocket.imageUpload = function(socket, callback) {
 
         });
     });
-
 };
 
 postSocket.remove = function(io, socket, callback) {

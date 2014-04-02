@@ -3,6 +3,18 @@ extends ../layout
 block content
     div(class='panel panel-default')
         div(class='panel-body')
-            p.lead Posts by #{user.profile.name}
-            - var cols = 3
-            include ../includes/posts
+
+            div(class='clearfix row-fluid')
+                div(class='col-sm-3')
+                    - title = { name: 'Albums', url: '' }
+                    - items = albums
+                    include ../includes/leftmenu
+
+                div(class='col-sm-9')
+                    div(class='container-fluid')
+                        div(class='row-fluid')
+                            div(class='col-sm-12')
+                                if user.profile.name
+                                    p.lead #{user.profile.name}
+                                - var cols = 3
+                                include ../includes/posts

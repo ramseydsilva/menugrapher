@@ -2,7 +2,7 @@ div(class="col-sm-#{cols} post-box post",id=post.id, room='post-#{post.id}')
     div(class='container-relative', room='post-new-#{post.id}')
         a(class='main-link', href=post.url, target=target)
             span(class='text-info post-box-title post-title')= post.title
-            img(src=post.pic.originalUrl, class='container-full')
+            img(src=post.pic.thumbUrl, class='container-full')
             div(class='post-box-options showOptionsAlwaysfalse')
                 a(class='post-remove fa fa-times', title='Remove Post', target=target, post='#{post.id}')
                 a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)

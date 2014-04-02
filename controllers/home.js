@@ -2,6 +2,7 @@
 
 var async = require('async'),
     post = require('../models/post'),
+    album = require('../models/album'),
     user = require('../models/User'),
     city = require('../models/city'),
     breadcrumb = require('../helpers/breadcrumb'),
@@ -23,11 +24,17 @@ exports.user = function(req, res) {
                 next(err, posts);
             });
         },
+        albums: function(next) {
+            album.find({_user: res.locals.user.id}).exec(function(err, albums) {
+                next(err, albums);
+            });
+        }
     }, function(err, results) {
         res.render('home/user', {
             breadcrumbs: results.breadcrumbs,
             posts: results.posts,
-            user: res.locals.user
+            user: res.locals.user,
+            albums: results.albums
         });
     });
 
