@@ -53,13 +53,13 @@ albumSchema.method({
 albumSchema.pre('save', function(next) {
     var self = this;
     self.updatedAt = new Date();
-    User.find({_id: self._user}).limit(1).exec(function(err, user) {
+    console.log(self);
+    User.findOne({_id: self._user}).exec(function(err, user) {
         self.user._id = user._id;
         self.user.name = user.profile.name;
         self.user.picture = user.profile.picture;
+        next();
     });
-
-    next();
 });
 
 albumSchema.index( { 'pics._id': 1 }, { unique: true, sparse: true } );
