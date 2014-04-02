@@ -25,7 +25,8 @@ PostHelpers.getUniquePath = function(filepath, next) {
         if (exists) {
             var ext = PostHelpers.getExtension(filepath);
             var newfilename = filename.replace('.' + ext, '').replace(/[0-9]+(?!.*[0-9])/, function(match) {
-                return parseInt(match, 10)+1;
+                // assign random values, to reduce chances of file being overwritten by competing socket
+                return parseInt(match, 10) + 1 + Math.floor((Math.random()*100000000)+1);
             }) + '.' + ext;
             PostHelpers.getUniquePath(filepath.replace(filename, newfilename), next);
         } else {
