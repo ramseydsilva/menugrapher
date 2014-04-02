@@ -68,20 +68,23 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
             async.waterfall([
                 function(next) {
                     city.findOneAndUpdate({ name: cityName }, {}, {upsert: true}, function(err, doc) {
+                        if (err) throw err;
                         next(err, doc);
                     });
                 },
                 function(city, next) {
                     Restaurant.findOneAndUpdate({ name: restaurantName, _city: city._id }, {}, {upsert: true}, function(err, doc) {
+                        if (err) throw err;
                         next(err, city, doc);
                     });
                 },
                 function(city, restaurant, next) {
+                    console.log(city, restaurant);
                     item.findOneAndUpdate({ name: itemName, _restaurant: restaurant._id }, {}, {upsert: true}, function(err, doc) {
-                        Restaurant.update({_id: restaurant._id}, { $addToSet: {menu: doc}}, function(err, _) {
+                        Restaurant.update({_id: restaurant._id}, { $addToSet: {menu: doc._id }}, function(err, _) {
                             if (err) throw err;
+                            next(err, { city: city, restaurant: restaurant, item: doc });
                         });
-                        next(err, { city: city, restaurant: restaurant, item: doc });
                     });
                 }
             ], function(err, results) {
@@ -94,6 +97,7 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
             });
         }
     ], function(err, results) {
+        console.log(results);
         next(err, { city: results[0][0], restaurant: results[0][1], category: results[1], item: results[0][2] });
     });
 };

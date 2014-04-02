@@ -14,7 +14,9 @@ var schemaOptions = {
 var restaurantSchema = new mongoose.Schema({
     name: String,
     _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
-    menu: [item.schema]
+    menu: [
+        {type: mongoose.Schema.ObjectId, ref: 'item'}
+    ]
 }, schemaOptions);
 
 restaurantSchema.virtual('url').get(function() {

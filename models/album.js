@@ -17,15 +17,12 @@ var albumSchema = new mongoose.Schema({
     name: String,
     description: String,
     _user: { type: mongoose.Schema.ObjectId, ref : 'User' },
-    user: {
-        _id: { type: String, default: ''},
-        name: { type: String, default: '' },
-        picture: { type: String, default: '' }
-    },
     _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
     _restaurant: { type: mongoose.Schema.ObjectId, ref : 'restaurant' },
     _category: { type: mongoose.Schema.ObjectId, ref : 'category' },
-    pics: [post.schema],
+    pics: [
+        {type: mongoose.Schema.ObjectId, ref: 'post'}
+    ],
     updatedAt: { type: Date },
     _meta: {
         socketId: String
@@ -53,13 +50,7 @@ albumSchema.method({
 albumSchema.pre('save', function(next) {
     var self = this;
     self.updatedAt = new Date();
-    console.log(self);
-    User.findOne({_id: self._user}).exec(function(err, user) {
-        self.user._id = user._id;
-        self.user.name = user.profile.name;
-        self.user.picture = user.profile.picture;
-        next();
-    });
+    next();
 });
 
 albumSchema.index( { 'pics._id': 1 }, { unique: true, sparse: true } );

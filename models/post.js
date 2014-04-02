@@ -1,8 +1,10 @@
 var mongoose = require('mongoose'),
     fs = require('fs'),
+    _ = require('underscore'),
     async = require('async'),
     city = require('./city'),
     category = require('./category'),
+    Album = require('./album'),
     restaurant = require('./restaurant');
 
 var schemaOptions = {
@@ -60,6 +62,7 @@ postSchema.method({
 postSchema.pre('save', function(next) {
     var self = this;
     self.updatedAt = new Date();
+
     next();
 });
 

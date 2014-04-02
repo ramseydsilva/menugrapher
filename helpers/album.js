@@ -6,9 +6,9 @@ var Album = require('../models/album'),
     path = require('path'),
     jade = require('jade');
 
-var deleteAlbumIfEmpty = function(options, socket, callback) {
+var deleteAlbumIfEmpty = function(options, io, callback) {
     // Don't force delete if the album has pictures
-    deleteAlbum(options, false, socket, callback);
+    deleteAlbum(options, false, io, callback);
 };
 
 module.exports.deleteAlbumIfEmpty = deleteAlbumIfEmpty;
@@ -39,8 +39,8 @@ var deleteAlbum = function(options, force, io, callback) {
 };
 module.exports.deleteAlbum = deleteAlbum;
 
-var assignPostToAlbum = function(post, albumId, io, callback) {
-    Album.update({_id: albumId}, { $addToSet: {pics: post}}, function(err, album) {
+var assignPostToAlbum = function(post, albumId, currentUser, io, callback) {
+    Album.update({_id: albumId}, { $addToSet: {pics: post._id}}, function(err, album) {
         if (err) throw err;
 
         // Generate post html to send to client
@@ -51,6 +51,7 @@ var assignPostToAlbum = function(post, albumId, io, callback) {
                 fn = jade.compile(data),
                 postHtml = fn({
                     post: post,
+                    user: currentUser,
                     cols: 3,
                     target: '_blank'
                 });

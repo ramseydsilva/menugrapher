@@ -78,7 +78,6 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
                         album.findOne({name: /^Album\ /i, _user:socket.handshake.user.id}, {}, { sort: {'_id' : -1}}, function(err, previousAlbum) {
                             var name = 'Album 1';
                             if (!!previousAlbum && previousAlbum.name) {
-                                console.log('getting new name');
                                 name = previousAlbum.name.replace(/[0-9]+(?!.*[0-9])/, parseInt(previousAlbum.name.match(/[0-9]+(?!.*[0-9])/), 10)+1);
                                 console.log('new name', name);
                             }
@@ -94,7 +93,6 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
 
                                 var elements = {};
                                 elements['#userAlbums-' + doc._user] = "<a href='" + doc.url + "' class='list-group-item' id='album-" + doc._id + "'>" + doc.name + "</a>";
-                                console.log('supposed to emit to ', 'albums-user-' + doc._user);
                                 io.sockets.in('albums-user-' + doc._user).emit('create-album', [{
                                     action: 'append',
                                     elements: elements
@@ -114,7 +112,7 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
         } else {
             // Create album unchecked, delete only if album is empty
             if (!!data.album) {
-                albumHelpers.deleteAlbumIfEmpty({_id: data.album, _user: socket.handshake.user.id}, socket);
+                albumHelpers.deleteAlbumIfEmpty({_id: data.album, _user: socket.handshake.user.id}, io);
             }
         }
     });
@@ -213,7 +211,7 @@ postSocket.imageUpload = function(socket, io, callback) {
 
                     // Assign to album
                     if (!!data.album) {
-                        albumHelpers.assignPostToAlbum(post, data.album, io, function(err, doc) {
+                        albumHelpers.assignPostToAlbum(post, data.album, socket.handshake.user, io, function(err, doc) {
                             if (!!callback)
                                 callback(err, post, doc)
                         });

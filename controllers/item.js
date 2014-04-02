@@ -11,7 +11,7 @@ exports.item = function(req, res) {
     var item = res.locals.item;
     async.parallel({
         restaurant: function(next) {
-            restaurant.findOne({'_id': item._restaurant}).exec(function(err, restaurant) {
+            restaurant.findOne({'_id': item._restaurant}).populate('menu').exec(function(err, restaurant) {
                 next(err, restaurant);
             });
         },
@@ -22,7 +22,7 @@ exports.item = function(req, res) {
             });
         },
     }, function(err, results) {
-        var breadcrumbs = [breadcrumb.home(), breadcrumb.city(item._city), breadcrumb.restaurant(results.restaurant), breadcrumb.item(item, 'active')];
+        var breadcrumbs = [breadcrumb.home(), breadcrumb.city(item._restaurant._city), breadcrumb.restaurant(results.restaurant), breadcrumb.item(item, 'active')];
         res.render('home/item', {
             title: 'item | ' + item.name,
             breadcrumbs: breadcrumbs,

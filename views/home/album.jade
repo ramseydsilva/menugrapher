@@ -2,13 +2,13 @@ extends ../layout
 
 block content
     div(class='panel panel-default', room='album-#{album._id}')
-        div(class='panel-body', room='albums-user-#{album._user}')
+        div(class='panel-body', room='albums-user-#{album._user._id}')
 
             div(class='clearfix row-fluid')
                 div(class='col-sm-3')
-                    - title = { name: album.user.name + "'s albums", url: '' }
+                    - title = { name: album._user.profile.name + "'s albums", url: '' }
                     - items = userAlbums
-                    - id = 'userAlbums-' + album._user
+                    - id = 'userAlbums-' + album._user._id
                     include ../includes/leftmenu
 
                 div(class='col-sm-9')
