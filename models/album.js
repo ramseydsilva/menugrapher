@@ -39,7 +39,7 @@ albumSchema.virtual('userUrl').get(function() {
 
 albumSchema.method({
     userHasRights: function(user) {
-        return !!user && this.user.uid == user.id;
+        return !!user && this._user == user.id;
     }
 });
 

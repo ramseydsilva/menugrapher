@@ -20,7 +20,7 @@ exports.user = function(req, res) {
             next(null, [ breadcrumb.home(), breadcrumb.users(), breadcrumb.user(user, 'active') ]);
         },
         posts: function(next) {
-            post.find({'user.uid': req.params.user }).sort('-_id').populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts) {
+            post.find({'_user': req.params.user }).sort('-_id').populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts) {
                 next(err, posts);
             });
         },
@@ -93,13 +93,13 @@ exports.home = function(req, res) {
         } else {
             async.parallel({
                 myPosts: function(next) { 
-                    post.find({ 'user.uid': req.user.id }).sort('-_id').populate('_city')
+                    post.find({ '_user': req.user.id }).sort('-_id').populate('_city')
                         .populate('_restaurant').populate('_category').exec(function(err, posts){
                         next(err, posts);
                     });
                 },
                 recentPosts: function(next) {
-                    recentPosts = post.find({ 'user.uid': {'$ne': req.user.id }}).sort('-_id')
+                    recentPosts = post.find({ '_user': {'$ne': req.user.id }}).sort('-_id')
                         .populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts){
                         next(err, posts);
                     });

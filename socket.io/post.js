@@ -167,7 +167,7 @@ postSocket.imageUpload = function(socket, callback) {
             }, function(err, results) {
                 postHelpers.newPost({
                     user: {
-                        uid: socket.handshake.user.id,
+                        _id: socket.handshake.user.id,
                         name: socket.handshake.user.profile.name
                     },
                     _user: socket.handshake.user.id,
@@ -199,7 +199,7 @@ postSocket.imageUpload = function(socket, callback) {
 
 postSocket.remove = function(io, socket, callback) {
     socket.on('post:remove', function(data) {
-        Post.findOneAndRemove({_id: data.id, 'user.uid': socket.handshake.user.id}, function(err, post) {
+        Post.findOneAndRemove({_id: data.id, '_user': socket.handshake.user.id}, function(err, post) {
             if (!!post) {
                 post.remove();
                 var elements = {};
@@ -226,7 +226,7 @@ postSocket.remove = function(io, socket, callback) {
 
 postSocket.removeAttr = function(socket, attr, callback) {
     socket.on('post.' + attr + ':remove', function(data) {
-        Post.findOne({_id: data.id, 'user.uid': socket.handshake.user.id}, function(err, post) {
+        Post.findOne({_id: data.id, '_user': socket.handshake.user.id}, function(err, post) {
             post[attr] = null;
             post.save(function(err, doc) {
                 var elements = {};

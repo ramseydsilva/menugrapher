@@ -18,7 +18,7 @@ var postSchema = new mongoose.Schema({
         thumbUrl: String
     },
     user: {
-        uid: String,
+        _id: String,
         name: String
     },
     title: String,
@@ -48,12 +48,12 @@ postSchema.virtual('createdAt').get(function() {
 });
 
 postSchema.virtual('userUrl').get(function() {
-    return '/users/' + this.user.uid;
+    return '/users/' + this._user;
 });
 
 postSchema.method({
     userHasRights: function(user) {
-        return !!user && this.user.uid == user.id;
+        return !!user && this._user == user.id;
     }
 });
 
