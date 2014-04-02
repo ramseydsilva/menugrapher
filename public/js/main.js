@@ -18,11 +18,10 @@ require.config({
 define([
     "jquery",
     "underscore",
+    "sockets",
     "bootstrap",
-    "typeahead",
-    "upload",
-    "sockets"
-], function($, _, io, ss) {
+    "typeahead"
+], function($, _, socket) {
 
     var cities = {};
     function fetchCity(api, query, callback) {
@@ -90,6 +89,23 @@ define([
     };
 
     $(document).ready(function() {
+
+        // load upload script only if user is on upload page
+        if(!!$('#upload').length) {
+            require(['upload']);
+        }
+
+        $('.post-update').on('click', function(e) {
+            socket.emit('post-update', {
+                id: $('.post').get(0).id,
+                title: $('.post-title').val(),
+                description: $('.post-description').val(),
+                city: $('#city').val(),
+                restaurant: $('#restaurant').val(),
+                category: $('#category').val(),
+                item: $('#item').val()
+            });
+        });
 
         $(document).keyup(function(e) {
             if ($('#back').length && e.keyCode == 27) {

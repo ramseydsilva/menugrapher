@@ -1,51 +1,72 @@
 'use strict';
 
-var album = require('../models/album');
+var Album = require('../models/album'),
+    app = require('../app'),
+    fs = require('fs'),
+    path = require('path'),
+    jade = require('jade');
 
-module.exports.deleteAlbum = function(options, force, socket, callback) {
-    album.findOne(options, function(err, doc) {
-        if (!!doc) {
+var deleteAlbumIfEmpty = function(options, socket, callback) {
+    // Don't force delete if the album has pictures
+    deleteAlbum(options, false, socket, callback);
+};
+
+module.exports.deleteAlbumIfEmpty = deleteAlbumIfEmpty;
+
+var deleteAlbum = function(options, force, io, callback) {
+    Album.findOne(options, function(err, album) {
+        if (!!album) {
             var element = {};
-            element['#album-' + doc._id ] = '';
+            element['#album-' + album._id ] = '';
 
             // IF album is empty or if forceful delete
-            if (!!force || doc.pics.length == 0) {
-                console.log('deleting album', doc);
+            console.log('deleting album if empty', !!force, album.pics.length);
+            if (!!force || album.pics.length == 0) {
                 album.remove(function(err, doc) {
                     console.log('album deleted', doc);
                     if (err) throw err;
 
-                    socket.broadcast.emit('create-album', [{
+                    io.sockets.in('albums-user-' + doc._user).emit('create-album', [{
                         action: 'remove',
                         elements: element
                     }]);
-
-                    if (!!callback)
-                        callback(err, doc);
                 });
             }
         }
+        if (!!callback)
+            callback();
     });
 };
+module.exports.deleteAlbum = deleteAlbum;
 
-var assignPostToAlbum = function(post, albumId, callback) {
-    album.findOne({_id: albumId}, function(err, album) {
-        console.log('found album', albumId, album);
-        if (!!album) {
-            album.pics.push(post);
-            album.save(function(err, doc) {
-                console.log('about to throw error', doc);
-                if (err && err.name == 'VersionError') {
-                    // VersionError is thrown when post item was saved concurrently, in which scenario, try resaving it
-                    assignPostToAlbum(post, albumId, callback);
-                } else if(err) {
-                    throw err; // Throw any other error
-                }
+var assignPostToAlbum = function(post, albumId, io, callback) {
+    Album.update({_id: albumId}, { $addToSet: {pics: post}}, function(err, album) {
+        if (err) throw err;
 
-                if (!!callback)
-                    callback(err, doc);
-            });
-        }
+        // Generate post html to send to client
+        fs.readFile(path.join(app.get('views'), 'includes/post.jade'), 'utf8', function (err, data) {
+            if (err) throw err;
+
+            var elementsToUpdate = {},
+                fn = jade.compile(data),
+                postHtml = fn({
+                    post: post,
+                    cols: 3,
+                    target: '_blank'
+                });
+
+            elementsToUpdate['#album-posts'] = postHtml;
+            io.sockets.in('album-' + albumId).emit('album-update', [{
+                action: 'append',
+                elements: elementsToUpdate
+            }]);
+
+            console.log('supposed to broadcast to album page', elementsToUpdate);
+
+        });
+
+        if (!!callback)
+            callback(err, album);
     });
 };
 module.exports.assignPostToAlbum = assignPostToAlbum;

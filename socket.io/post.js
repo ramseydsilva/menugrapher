@@ -58,48 +58,76 @@ postSocket.update = function(socket, callback) {
     });
 };
 
-postSocket.createAlbumCheckBox = function(socket, callback) {
+postSocket.createAlbumCheckBox = function(socket, io, callback) {
     socket.on('create-album', function(data) {
         if (!!data.create) {
             // Create album checked
-            // TODO assign pictures if pictures were uploaded before Create Album checkbox was clicked
-            album.create({ name: 'New Album', _user: socket.handshake.user.id, '_meta.socketId': socket.id}, function(err, doc) {
-                socket.emit("post-update", [{
-                    action: 'val',
-                    elements: {
-                        '#album': doc._id
+            // First find if album already exists given the albumId
+            async.waterfall([
+                function(next) {
+                    console.log('finding album', data.album);
+                    album.findOne({ _id: data.album}, function(err, doc) {
+                        next(null, doc);
+                    });
+                },
+                function(existingAlbum, next) {
+                    console.log('creating album', existingAlbum);
+                    if (!!!existingAlbum) {
+                        console.log('creating album', existingAlbum);
+                        // Can't find album, create new one but first query for previously created albums starting with 'Album '
+                        album.findOne({name: /^Album\ /i, _user:socket.handshake.user.id}, {}, { sort: {'_id' : -1}}, function(err, previousAlbum) {
+                            var name = 'Album 1';
+                            if (!!previousAlbum && previousAlbum.name) {
+                                console.log('getting new name');
+                                name = previousAlbum.name.replace(/[0-9]+(?!.*[0-9])/, parseInt(previousAlbum.name.match(/[0-9]+(?!.*[0-9])/), 10)+1);
+                                console.log('new name', name);
+                            }
+                            album.create({ name: name, _user: socket.handshake.user.id, '_meta.socketId': socket.id}, function(err, doc) {
+                                if (err) throw err;
+
+                                socket.emit("post-update", [{
+                                    action: 'val',
+                                    elements: {
+                                        '#album': doc._id
+                                    }
+                                }]);
+
+                                var elements = {};
+                                elements['#userAlbums-' + doc._user] = "<a href='" + doc.url + "' class='list-group-item' id='album-" + doc._id + "'>" + doc.name + "</a>";
+                                console.log('supposed to emit to ', 'albums-user-' + doc._user);
+                                io.sockets.in('albums-user-' + doc._user).emit('create-album', [{
+                                    action: 'append',
+                                    elements: elements
+                                }]);
+
+                                next(err, doc);
+                            });
+                        });
+                    } else {
+                        next(null, existingAlbum);
                     }
-                }]);
-
-                var elements = {};
-                elements['#userAlbums-' + doc._user] = "<a href='' class='list-group-item' id='album-" + doc._id + "'>" + doc.name + "</a>";
-                socket.broadcast.emit('create-album', [{
-                    action: 'append',
-                    elements: elements
-                }]);
-
+                },
+            ], function(err, result) {
                 if (!!callback)
-                    callback(err, doc);
+                    callback(err, result);
             });
         } else {
-            // Create album unchecked
+            // Create album unchecked, delete only if album is empty
             if (!!data.album) {
-                // force = true, since user unchecked create album box
-                console.log("Gonna delete album!!!!!");
-                albumHelpers.deleteAlbum({_id: data.album, _user: socket.handshake.user.id}, true, socket);
+                albumHelpers.deleteAlbumIfEmpty({_id: data.album, _user: socket.handshake.user.id}, socket);
             }
         }
     });
 };
 
 // Delete album created by the upload picture socket if it contains no pictures
-postSocket.deleteAlbum = function(socket, callback) {
+postSocket.deleteAlbum = function(socket, io, callback) {
     socket.on('disconnect', function(stream, data) {
-        albumHelpers.deleteAlbum({ _user: socket.handshake.user.id, '_meta.socketId': socket.id}, false, socket);
+        albumHelpers.deleteAlbumIfEmpty({ _user: socket.handshake.user.id, '_meta.socketId': socket.id}, io);
     });
 };
 
-postSocket.imageUpload = function(socket, callback) {
+postSocket.imageUpload = function(socket, io, callback) {
     ss(socket).on('image-upload', function(stream, data) {
         var filename, elementId = data.elementId;
 
@@ -185,8 +213,7 @@ postSocket.imageUpload = function(socket, callback) {
 
                     // Assign to album
                     if (!!data.album) {
-                        albumHelpers.assignPostToAlbum(post, data.album, function(err, doc) {
-                            console.log('calling album assing helper');
+                        albumHelpers.assignPostToAlbum(post, data.album, io, function(err, doc) {
                             if (!!callback)
                                 callback(err, post, doc)
                         });
@@ -246,9 +273,9 @@ postSocket.removeAttr = function(socket, attr, callback) {
 // Enables socket connection for post methods
 postSocket.socket = function(io, socket, app) {
     postSocket.update(socket);
-    postSocket.imageUpload(socket);
-    postSocket.createAlbumCheckBox(socket);
-    postSocket.deleteAlbum(socket);
+    postSocket.imageUpload(socket, io);
+    postSocket.createAlbumCheckBox(socket, io);
+    postSocket.deleteAlbum(socket, io);
     postSocket.remove(io, socket);
     postSocket.removeAttr(socket, '_city');
     postSocket.removeAttr(socket, '_restaurant');

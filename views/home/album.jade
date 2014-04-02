@@ -1,12 +1,12 @@
 extends ../layout
 
 block content
-    div(class='panel panel-default')
-        div(class='panel-body')
+    div(class='panel panel-default', room='album-#{album._id}')
+        div(class='panel-body', room='albums-user-#{album._user}')
 
             div(class='clearfix row-fluid')
                 div(class='col-sm-3')
-                    - title = { name: 'Other albums by user', url: '' }
+                    - title = { name: album.user.name + "'s albums", url: '' }
                     - items = userAlbums
                     - id = 'userAlbums-' + album._user
                     include ../includes/leftmenu
@@ -17,5 +17,7 @@ block content
                             div(class='col-sm-12')
                                 p.lead #{album.name}
                                 - var cols = 3
-                                - var posts = album.pics
-                                include ../includes/posts
+                                - var posts = album.pics.reverse()
+                                div#album-posts
+                                - each post in posts
+                                    include ../includes/post

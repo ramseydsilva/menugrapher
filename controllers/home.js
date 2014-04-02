@@ -14,21 +14,21 @@ exports.profile = function(req, res) {
 };
 
 exports.user = function(req, res) {
-    var user = res.locals.user;
+    var currentUser = res.locals.currentUser;
     async.parallel({
         breadcrumbs: function(next) {
-            next(null, [ breadcrumb.home(), breadcrumb.users(), breadcrumb.user(user, 'active') ]);
+            next(null, [ breadcrumb.home(), breadcrumb.users(), breadcrumb.user(currentUser, 'active') ]);
         },
         posts: function(next) {
-            post.find({'_user': req.params.user }).sort('-_id').populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts) {
+            post.find({'_user': currentUser._id }).sort('-_id').populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts) {
                 next(err, posts);
             });
         },
         albums: function(next) {
-            album.find({_user: res.locals.user.id}).exec(function(err, albums) {
-                console.log(albums);
-                albums.splice(0, 0, {name: 'Create new', url: '/posts/new?album=true' })
-                console.log(albums);
+            album.find({_user: currentUser._id}).sort('-_id').exec(function(err, albums) {
+                if (!!req.user && currentUser.id == res.locals.user._id) {
+                    albums.splice(0, 0, {name: 'Create new', url: '/posts/new?album=true' });
+                }
                 next(err, albums);
             });
         }
@@ -36,11 +36,10 @@ exports.user = function(req, res) {
         res.render('home/user', {
             breadcrumbs: results.breadcrumbs,
             posts: results.posts,
-            user: res.locals.user,
+            currentUser: res.locals.user,
             albums: results.albums
         });
     });
-
 };
 
 exports.users = function(req, res) {

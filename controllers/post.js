@@ -35,7 +35,8 @@ exports.new = function(req, res) {
         category: req.query.category,
         restaurant: req.query.restaurant,
         item: req.query.item,
-        album: req.query.album
+        album: req.query.album,
+        albumId: req.query.albumId
     });
 };
 

@@ -4,18 +4,19 @@ block content
     div(class='panel panel-default')
         div(class='panel-body')
 
-            div(class='clearfix row-fluid')
+            div(class='clearfix row-fluid', room='albums-user-#{currentUser.id}')
                 div(class='col-sm-3')
                     - title = { name: 'Albums', url: '' }
                     - items = albums
-                    - id = 'userAlbums-' + user.id
+                    - id = 'userAlbums-' + currentUser.id
                     include ../includes/leftmenu
 
                 div(class='col-sm-9')
                     div(class='container-fluid')
                         div(class='row-fluid')
                             div(class='col-sm-12')
-                                if user.profile.name
-                                    p.lead #{user.profile.name}
+                                if currentUser.profile.name
+                                    p.lead #{currentUser.profile.name}
                                 - var cols = 3
-                                include ../includes/posts
+                                - each post in posts
+                                    include ../includes/post

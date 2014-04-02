@@ -36,6 +36,7 @@ module.exports.socketio = function(app) {
         });
 
         socket.on('subscribe', function(data) {
+            console.log('joining ', data.room);
             socket.join(data.room);
         });
 

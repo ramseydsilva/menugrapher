@@ -4,17 +4,24 @@ var mongoose = require('mongoose'),
     city = require('./city'),
     category = require('./category'),
     post = require('./post'),
+    User = require('./User'),
     restaurant = require('./restaurant');
 
 var schemaOptions = {
     toObject: { virtuals: true },
-    toJSON: { virtuals: true }
+    toJSON: { virtuals: true },
+    autoIndex: true
 };
 
 var albumSchema = new mongoose.Schema({
     name: String,
     description: String,
     _user: { type: mongoose.Schema.ObjectId, ref : 'User' },
+    user: {
+        _id: { type: String, default: ''},
+        name: { type: String, default: '' },
+        picture: { type: String, default: '' }
+    },
     _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
     _restaurant: { type: mongoose.Schema.ObjectId, ref : 'restaurant' },
     _category: { type: mongoose.Schema.ObjectId, ref : 'category' },
@@ -46,7 +53,14 @@ albumSchema.method({
 albumSchema.pre('save', function(next) {
     var self = this;
     self.updatedAt = new Date();
+    User.find({_id: self._user}).limit(1).exec(function(err, user) {
+        self.user._id = user._id;
+        self.user.name = user.profile.name;
+        self.user.picture = user.profile.picture;
+    });
+
     next();
 });
 
+albumSchema.index( { 'pics._id': 1 }, { unique: true, sparse: true } );
 module.exports = mongoose.model('album', albumSchema);

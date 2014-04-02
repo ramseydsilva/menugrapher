@@ -100,18 +100,6 @@ define([
             });
         });
 
-        $('.post-update').on('click', function(e) {
-            socket.emit('post-update', {
-                id: $('.post').get(0).id,
-                title: $('.post-title').val(),
-                description: $('.post-description').val(),
-                city: $('#city').val(),
-                restaurant: $('#restaurant').val(),
-                category: $('#category').val(),
-                item: $('#item').val()
-            });
-        });
-
         $('#uploads').on('click', 'a.remove-category', function(e) {
             socket.emit('post._category:remove', {
                 id: $(e.target).attr('post')

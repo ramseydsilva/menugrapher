@@ -7,7 +7,7 @@ var async = require('async'),
 exports.album = function(req, res) {
     var album = res.locals.album;
     var breadcrumbs = [breadcrumb.home(), breadcrumb.albums(), breadcrumb.album(album, 'active')];
-    Album.find({_user: album._user}, function(err, albums) {
+    Album.find({_user: album._user}).sort('-_id').exec(function(err, albums) {
         res.render('home/album', {
             title: 'Album | ' + album.name,
             breadcrumbs: breadcrumbs,

@@ -78,6 +78,7 @@ define([
         subscribeElements($('[room]'));
         socket.on('post-update', handleSocketEvent);
         socket.on('create-album', handleSocketEvent);
+        socket.on('album-update', handleSocketEvent);
     });
 
     socket.ss = ss;

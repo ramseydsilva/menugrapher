@@ -4,14 +4,7 @@ block content
     div(class='panel panel-default', room='post-new')
         div(class='panel-body')
             div(class='container-fluid')
-
-                div.row-fluid
-                    div(class='lead col-sm-10') 
-                        | Upload Pictures
-                    div(class='checkbox col-sm-2')
-                        input(type='checkbox', checked=album, id='createAlbum')
-                        input(type='hidden', id='album')
-                        h4.no-padding.no-margin Create Album
+                p.lead Upload Pictures
 
                 include ../includes/categorize
 
@@ -31,8 +24,14 @@ block content
                                 input(type='text', class='image-url form-control', placeholder='Paste a url')
 
                 div(class='clearfix padded row-fluid')
-                    div(class='col-sm-12')
+                    div(class='col-sm-1')
                         input(id='upload', type='submit', value='Upload', class='btn btn-warning')
+                    div(class='col-sm-11')
+                        h4
+                            input(type='checkbox', checked=album, id='createAlbum') 
+                            input(type='hidden', id='album', value=albumId)
+                            |  Create Album
+
 
 
                 div(class='clearfix padded row-fluid')
