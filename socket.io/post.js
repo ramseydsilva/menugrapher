@@ -114,7 +114,7 @@ postSocket.imageUpload = function(socket, callback) {
                 },
                 thumb: function(next) {
                     postHelpers.getFilePath(path.basename(filepath), 'thumb/240x160', socket.handshake.user, function(err, thumbPath) {
-                        gm(filepath).gravity('Center').crop(240, 160, 0, 0).resize(240, 160, '!').write(thumbPath, function(err) {
+                        gm(filepath).resize(240, 160, '!').gravity('Center').crop(240, 160, 0, 0).write(thumbPath, function(err) {
                             if (err) throw err;
                             postHelpers.getImageUrl(thumbPath, function(url){
                                 next(null, { path: thumbPath, url: url });
