@@ -17,6 +17,7 @@ var request = require('supertest'),
     Item = require('../../models/item'),
     userFixture = require('../fixtures/user'),
     util = require('../util'),
+    postUtil = require('./util'),
     jquery = require('fs').readFileSync("node_modules/jquery/dist/jquery.min.js", "utf-8"),
     user;
 
@@ -35,59 +36,28 @@ describe('GET /users', function() {
     });
 
     it('Updating non existant post gives error but creates new city, restaurant, category, items and links them together', function(done) {
-        var socket = util.getSocketClient(app.server);
-        socket.on('connect', function() {
-            socket.emit('post-update', {
-                id: 'Mypostid',
-                title: 'Post title',
-                description: 'Post description',
-                city: 'Toronto',
-                restaurant: 'Big Slice',
-                category: 'Pizza',
-                item: 'Pepperoni pizza'
+        util.getSocketClient(app, function(socket) {
+            socket.once('connect', function() {
+                socket.emit('post-update', {
+                    id: 'Mypostid',
+                    title: 'Post title',
+                    description: 'Post description',
+                    city: 'Toronto',
+                    restaurant: 'Big Slice',
+                    category: 'Pizza',
+                    item: 'Pepperoni pizza'
+                });
+            });
+            socket.once('post', function(data) {
+                data.error.should.be.eql('Post not found');
+                postUtil.ensureCityRestaurantCategoryItemLinkage('Toronto', 'Big Slice', 'Pizza', 'Pepperoni pizza', function(err, results) {
+                    socket.disconnect();
+                    done(err);
+                });
             });
         });
-        socket.on('post', function(data) {
-            data.error.should.be.eql('Post not found');
+    });
 
-            async.waterfall({
-                city: function(next) {
-                    City.find({}, function(err, cities) {
-                        cities.length.should.be.exactly(1);
-                        cities[0].name.should.be.exactly('Toronto');
-                        next(err, cities[0]);
-                    });
-                },
-                restaurant: function(city, next) {
-                    Restaurant.find({}, function(err, restaurants) {
-                        restaurants.length.should.be.exactly(1);
-                        restaurants[0].name.should.be.exactly('Big Slice');
-                        restaurants[0]._city.should.be.exactly(city._id);
-                        next(err, city, restaurants[0]);
-                    });
-                },
-                category: function(city, restaurant, next) {
-                    Category.find({}, function(err, categories) {
-                        categories.length.should.be.exactly(1);
-                        categories[0].name.should.be.exactly('Pizza');
-                        next(err, city, restaurant, categories[0]);
-                    });
-                },
-                item: function(city, restaurant, category, next) {
-                    Item.find({}, function(err, items) {
-                        items.length.should.be.exactly(1);
-                        items[0].name.should.be.exactly('Pepperoni pizza');
-                        items[0]._restaurant.shoud.be.exactly(restaurant._id);
-                        next(err, city, restaurant, category, items[0]);
-                    });
-                }
-            }, function(err, results) {
-                done();
-            });
-        });
-
-});
-
-after(util.after);
+    after(util.after);
 
 });

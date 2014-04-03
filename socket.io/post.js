@@ -82,7 +82,7 @@ postSocket.update = function(socket, callback) {
  */
 postSocket.createAlbumCheckBox = function(socket, io, callback) {
     socket.on('create-album', function(data) {
-        if (!!!socket.handshake.user) {
+        if (!!!socket.handshake.user.id) {
             socket.emit('album', {error: 'Permission denied'});
         } else {
             if (!!data.create) {
@@ -164,8 +164,8 @@ postSocket.deleteAlbum = function(socket, io, callback) {
  */
 postSocket.imageUpload = function(socket, io, callback) {
     ss(socket).on('image-upload', function(stream, data) {
-        if (!!!socket.handshake.user) {
-            post.emit('post', {error: 'Permission denied'});
+        if (!!!socket.handshake.user.id) {
+            socket.emit('post1', {error: 'Permission denied'});
         } else {
             var filename, elementId = data.elementId;
 
@@ -267,7 +267,7 @@ postSocket.imageUpload = function(socket, io, callback) {
  */
 postSocket.remove = function(io, socket, callback) {
     socket.on('post:remove', function(data) {
-        if (!!!socket.handshake.user) {
+        if (!!!socket.handshake.user.id) {
             socket.emit('post', {error: 'Permission denied'});
         } else {
             Post.findOneAndRemove({_id: data.id, '_user': socket.handshake.user.id}, function(err, post) {
