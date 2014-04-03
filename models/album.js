@@ -33,6 +33,14 @@ albumSchema.virtual('url').get(function() {
     return "/albums/" + this._id;
 });
 
+albumSchema.virtual('editurl').get(function() {
+    return this.url + '/edit';
+});
+
+albumSchema.virtual('deleteurl').get(function() {
+    return this.url + '/delete';
+});
+
 albumSchema.virtual('createdAt').get(function() {
     return this._id.getTimestamp();
 });
@@ -43,6 +51,8 @@ albumSchema.virtual('userUrl').get(function() {
 
 albumSchema.method({
     userHasRights: function(user) {
+        if (typeof this._user == "object")
+            return this._user.id == user.id;
         return !!user && this._user == user.id;
     }
 });

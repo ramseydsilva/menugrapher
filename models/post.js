@@ -37,11 +37,11 @@ postSchema.virtual('url').get(function() {
     return "/posts/" + this._id;
 });
 
-postSchema.virtual('editUrl').get(function() {
+postSchema.virtual('editurl').get(function() {
     return this.url + '/edit';
 });
 
-postSchema.virtual('deleteUrl').get(function() {
+postSchema.virtual('deleteurl').get(function() {
     return this.url + '/delete';
 });
 
@@ -55,6 +55,8 @@ postSchema.virtual('userUrl').get(function() {
 
 postSchema.method({
     userHasRights: function(user) {
+        if (typeof user == "object")
+            return this._user.id == user.id;
         return !!user && this._user == user.id;
     }
 });

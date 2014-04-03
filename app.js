@@ -9,7 +9,6 @@ var express = require('express'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     expressValidator = require('express-validator'),
-    slashes = require('connect-slashes'),
     connectAssets = require('connect-assets');
 
 /**
@@ -72,8 +71,13 @@ app.use(express.session({
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: month }));
 app.use(express.favicon(path.join(__dirname, 'public/img/favicon.ico')));
 
-app.use(slashes());
-app.use(express.csrf());
+if (process.env.NODE_ENV == 'production') {
+    app.use(express.csrf());
+    app.use(function(req, res, next) {
+        res.locals.token = req.csrfToken();
+    });
+};
+
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -93,7 +97,6 @@ app.use(function(req, res, next) {
 app.use(function(req, res, next) {
     res.locals.user = req.user;
     res.locals.secrets = app.secrets;
-    res.locals.token = req.csrfToken();
     next();
 });
 

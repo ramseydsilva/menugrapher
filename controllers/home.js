@@ -56,6 +56,8 @@ exports.users = function(req, res) {
 exports.home = function(req, res) {
     var breadcrumbs, categories, cities, myPosts, recentPosts;
 
+    console.log(req.user);
+
     async.parallel({
         breadcrumbs: function(next) {
             next(null, [breadcrumb.home()]);

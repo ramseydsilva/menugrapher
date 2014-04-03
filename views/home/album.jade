@@ -16,6 +16,13 @@ block content
                         div(class='row-fluid')
                             div(class='col-sm-12')
                                 p.lead #{album.name}
+                                    if album.userHasRights(user)
+                                        ul(class='list-inline pull-right')
+                                            li
+                                                a(class='' href=album.editUrl) Edit
+                                            li
+                                                a(class='text-danger' href=album.deleteUrl) Delete
+
                                 - var cols = 3
                                 - var posts = album.pics.reverse()
                                 div#album-posts
