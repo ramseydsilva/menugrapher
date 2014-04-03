@@ -5,16 +5,16 @@ block content
         div(class='panel-heading')
             block panel-heading
                 span(class='post-title') #{post.title} &nbsp;
-                if userHasRights
+                if post.userHasRights(user)
                     ul(class='list-inline pull-right')
                         li
-                            a(class='' href=post.editUrl) Edit
+                            a(class='', href=post.editUrl) Edit
                         li
-                            a(class='text-danger' href=post.deleteUrl) Delete
+                            a(class='text-danger', href=post.deleteUrl) Delete
         div(class='panel-body')
             p(class='text-primary') Uploaded 
                 if !!post.user && !!post.user.name
-                    | by <a href='#{post.userUrl}'>#{post.user.name}</a> 
+                    | by <a href='#{post.userUrl}'>#{post._user.profile.name}</a> 
                 | #{time} 
 
                 if !!post._category && !!post._category.name

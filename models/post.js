@@ -19,10 +19,6 @@ var postSchema = new mongoose.Schema({
         thumbPath: String,
         thumbUrl: String
     },
-    user: {
-        _id: String,
-        name: String
-    },
     title: String,
     description: String,
     _user: { type: mongoose.Schema.ObjectId, ref : 'User' },
@@ -37,11 +33,12 @@ postSchema.virtual('url').get(function() {
     return "/posts/" + this._id;
 });
 
-postSchema.virtual('editurl').get(function() {
+postSchema.virtual('editUrl').get(function() {
+    console.log('getting edit url', this.url);
     return this.url + '/edit';
 });
 
-postSchema.virtual('deleteurl').get(function() {
+postSchema.virtual('deleteUrl').get(function() {
     return this.url + '/delete';
 });
 
@@ -50,6 +47,8 @@ postSchema.virtual('createdAt').get(function() {
 });
 
 postSchema.virtual('userUrl').get(function() {
+    if (typeof this._user == "object")
+        return '/users/' + this._user._id;
     return '/users/' + this._user;
 });
 

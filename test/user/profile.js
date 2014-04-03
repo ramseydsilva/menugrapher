@@ -5,52 +5,27 @@ process.env['MONGODB'] = 'mongodb://localhost:27017/mytestdb';
 var request = require('supertest'),
     superagent = require('superagent'),
     jsdom = require('jsdom'),
-    jquery = require('jquery'),
-    async = require('async'),
     should = require('should'),
     app = require('../../app.js'),
     User = require('../../models/User'),
     userFixture = require('../fixtures/user.js'),
-    fs = require("fs"),
-    mongoose = require('mongoose'),
-    jquery = fs.readFileSync("node_modules/jquery/dist/jquery.min.js", "utf-8"),
+    util = require('../util'),
+    jquery = require('fs').readFileSync("node_modules/jquery/dist/jquery.min.js", "utf-8"),
     user;
 
 var agent = superagent.agent();
 
+var loadFixture = function(next) {
+    user = User(userFixture.user);
+    user.save(function(err, data) {
+        next(err, data);
+    });
+};
+
 describe('GET /users', function() {
     before(function(done) {
-
-        function clearDB(next) {
-            for (var i in mongoose.connection.collections) {
-                mongoose.connection.collections[i].remove(function() {});
-            }
-            return next(null);
-        }
-
-        async.series([
-            function(next) {
-                if (mongoose.connection.readyState === 0) {
-                    mongoose.connect(process.env.MONGODB, function (err) {
-                        if (err) {
-                            throw err;
-                        }
-                        return clearDB(next);
-                    });
-                } else {
-                    return clearDB(next);
-                }
-            },
-            function(next) {
-                user = User(userFixture.user);
-                user.save(function(err, data) {
-                    next(err, data);
-                });
-            }
-        ], function(err, results) {
-            if (err) {
-                console.log("Error instantiating fixtures: " + err);
-            }
+        util.before(loadFixture, function(err, results) {
+            user = results[1];
             done(err);
         });
     });
@@ -110,9 +85,6 @@ describe('GET /users', function() {
         });
     });
 
-    after(function (done) {
-        mongoose.disconnect();
-        return done();
-    });
+    after(util.after);
 
 });

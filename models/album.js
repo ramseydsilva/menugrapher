@@ -33,11 +33,11 @@ albumSchema.virtual('url').get(function() {
     return "/albums/" + this._id;
 });
 
-albumSchema.virtual('editurl').get(function() {
+albumSchema.virtual('editUrl').get(function() {
     return this.url + '/edit';
 });
 
-albumSchema.virtual('deleteurl').get(function() {
+albumSchema.virtual('deleteUrl').get(function() {
     return this.url + '/delete';
 });
 

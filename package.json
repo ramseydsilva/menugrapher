@@ -72,7 +72,11 @@
     "should": "^3.2.0",
     "jquery": "^2.1.0",
     "jsdom": "^0.10.4",
-    "superagent": "^0.17.0"
+    "superagent": "^0.17.0",
+    "socket.io-client": "^0.9.16",
+    "socket.io": "^0.9.16",
+    "engine.io": "^1.0.5",
+    "socket.io-parser": "^2.1.2"
   },
   "maintainers": [
     {
