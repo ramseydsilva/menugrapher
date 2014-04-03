@@ -47,16 +47,14 @@ postSchema.virtual('createdAt').get(function() {
 });
 
 postSchema.virtual('userUrl').get(function() {
-    if (typeof this._user == "object")
-        return '/users/' + this._user._id;
-    return '/users/' + this._user;
+    return '/users/' + String(this._user);
 });
 
 postSchema.method({
     userHasRights: function(user) {
-        if (typeof user == "object" && this._user.id && user.id)
-            return this._user.id == user._id;
-        return !!user && this._user == user._id;
+        if (!!this._user._id)
+            return String(this._user._id) == String(user._id);
+        return String(this._user) == String(user._id);
     }
 });
 

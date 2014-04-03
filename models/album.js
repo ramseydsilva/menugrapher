@@ -51,9 +51,9 @@ albumSchema.virtual('userUrl').get(function() {
 
 albumSchema.method({
     userHasRights: function(user) {
-        if (typeof this._user == "object")
-            return this._user.id == user.id;
-        return !!user && this._user == user.id;
+        if (!!this._user._id)
+            return String(this._user._id) == String(user._id);
+        return String(this._user) == String(user._id);
     }
 });
 
