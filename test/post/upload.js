@@ -19,6 +19,7 @@ var request = require('supertest'),
     userFixture = require('../fixtures/user'),
     util = require('../util'),
     postUtil = require('./util'),
+    socketer = require('socketer'),
     jquery = require('fs').readFileSync("node_modules/jquery/dist/jquery.min.js", "utf-8"),
     user;
 
@@ -51,7 +52,7 @@ describe('GET /users', function() {
     };
 
     it('Anonymous user cannot post image, permission denied', function(done) {
-        util.getSocketClient(app, function(socket) {
+        socketer.anonSocket(app, function(socket) {
             socket.once('connect', function() {
                 uploadImage(socket);
             });
@@ -64,7 +65,7 @@ describe('GET /users', function() {
     });
 
     it('Upload link from website creates new post, ensuring proper linkage', function(done) {
-        util.getAuthenticatedSocketClient(app, {email: userFixture.user.email, password: userFixture.user.password}, function(socket) {
+        socketer.authSocket(app, {email: userFixture.user.email, password: userFixture.user.password}, '/login', function(socket) {
             socket.on('connect', function() {
                 uploadImage(socket);
             });

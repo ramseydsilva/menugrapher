@@ -77,7 +77,8 @@
     "socket.io": "^0.9.16",
     "engine.io": "^1.0.5",
     "socket.io-parser": "^2.1.2",
-    "xmlhttprequest": "^1.6.0"
+    "xmlhttprequest": "^1.6.0",
+    "socketer": "0.0.2"
   },
   "maintainers": [
     {

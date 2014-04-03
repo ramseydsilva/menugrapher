@@ -18,6 +18,7 @@ var request = require('supertest'),
     userFixture = require('../fixtures/user'),
     util = require('../util'),
     postUtil = require('./util'),
+    socketer = require('socketer'),
     jquery = require('fs').readFileSync("node_modules/jquery/dist/jquery.min.js", "utf-8"),
     user;
 
@@ -36,7 +37,7 @@ describe('GET /users', function() {
     });
 
     it('Updating non existant post gives error but creates new city, restaurant, category, items and links them together', function(done) {
-        util.getSocketClient(app, function(socket) {
+        socketer.anonSocket(app, function(socket) {
             socket.once('connect', function() {
                 socket.emit('post-update', {
                     id: 'Mypostid',
