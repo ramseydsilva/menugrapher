@@ -79,10 +79,9 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
                     });
                 },
                 function(city, restaurant, next) {
-                    console.log(city, restaurant);
                     item.findOneAndUpdate({ name: itemName, _restaurant: restaurant._id }, {}, {upsert: true}, function(err, doc) {
                         Restaurant.update({_id: restaurant._id}, { $addToSet: {menu: doc._id }}, function(err, _) {
-                            if (err) throw err;
+                            if (err && err.code == 11000) throw err; // E11000 is duplicate key error which can pass
                             next(err, { city: city, restaurant: restaurant, item: doc });
                         });
                     });

@@ -41,7 +41,7 @@ module.exports.deleteAlbum = deleteAlbum;
 
 var assignPostToAlbum = function(post, albumId, currentUser, io, callback) {
     Album.update({_id: albumId}, { $addToSet: {pics: post._id}}, function(err, album) {
-        if (err) throw err;
+        if (err && err.code == 11000) throw err; // E11000 is duplicate key error which can pass
 
         // Generate post html to send to client
         fs.readFile(path.join(app.get('views'), 'includes/post.jade'), 'utf8', function (err, data) {
