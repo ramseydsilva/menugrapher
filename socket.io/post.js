@@ -90,21 +90,17 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
                 // First find if album already exists given the albumId
                 async.waterfall([
                     function(next) {
-                        console.log('finding album', data.album);
                         album.findOne({ _id: data.album}, function(err, doc) {
                             next(null, doc);
                         });
                     },
                     function(existingAlbum, next) {
-                        console.log('creating album', existingAlbum);
                         if (!!!existingAlbum) {
-                            console.log('creating album', existingAlbum);
                             // Can't find album, create new one but first query for previously created albums starting with 'Album '
                             album.findOne({name: /^Album\ /i, _user:socket.handshake.user.id}, {}, { sort: {'_id' : -1}}, function(err, previousAlbum) {
                                 var name = 'Album 1';
                                 if (!!previousAlbum && previousAlbum.name) {
                                     name = previousAlbum.name.replace(/[0-9]+(?!.*[0-9])/, parseInt(previousAlbum.name.match(/[0-9]+(?!.*[0-9])/), 10)+1);
-                                    console.log('new name', name);
                                 }
                                 album.create({ name: name, _user: socket.handshake.user.id, '_meta.socketId': socket.id}, function(err, doc) {
                                     if (err) throw err;
@@ -178,7 +174,6 @@ postSocket.imageUpload = function(socket, io, callback) {
             } else {
                 filename = path.basename(data.name.name);
             }
-
             async.waterfall([
                 function(next) { // get file path
                     postHelpers.getFilePath(filename, 'original', socket.handshake.user, function(err, filepath) {

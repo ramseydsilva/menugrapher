@@ -15,7 +15,7 @@ var restaurantSchema = new mongoose.Schema({
     name: String,
     _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
     menu: [
-        {type: mongoose.Schema.ObjectId, ref: 'item'}
+        {type: mongoose.Schema.ObjectId, ref: 'item', unique: true}
     ]
 }, schemaOptions);
 
@@ -23,7 +23,7 @@ restaurantSchema.virtual('url').get(function() {
     return "/restaurants/" + this._id;
 });
 
-restaurantSchema.index( { 'menu._id': 1 }, { unique: true } );
+restaurantSchema.index( { 'menu._id': 1 } );
 var restaurantModel = mongoose.model("restaurant", restaurantSchema);
 
 mongoose.set('debug', true);

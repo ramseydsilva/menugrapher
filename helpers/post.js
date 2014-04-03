@@ -25,11 +25,8 @@ PostHelpers.getUniquePath = function(filepath, next) {
     fs.exists(filepath, function(exists) {
         if (exists) {
             var ext = PostHelpers.getExtension(filepath);
-            var newfilename = filename.replace('.' + ext, '').replace(/[0-9]+(?!.*[0-9])/, function(match) {
-                // assign random values, to reduce chances of file being overwritten by competing socket
-                return parseInt(match, 10) + 1 + Math.floor((Math.random()*100000000)+1);
-            }) + '.' + ext;
-            PostHelpers.getUniquePath(filepath.replace(filename, newfilename), next);
+            var fileNoExt = filename.replace('.' + ext, '');
+            PostHelpers.getUniquePath(filepath.replace(fileNoExt, Math.floor((Math.random()*100000000000))), next);
         } else {
             next(filepath);
         }
@@ -40,10 +37,11 @@ PostHelpers.getUniquePath = function(filepath, next) {
 PostHelpers.getFilePath = function(filename, directory, user, callback) {
     var userDir = path.join(app.get('rootDir'), '/public/uploads/' + user.id);
     var dir = userDir + '/' + directory;
+    console.log(dir);
     async.series([
         function(next) {
             mkdirp(dir, function(err) {
-                next(null, err);
+                next(err);
             });
         },
         function(next) {
@@ -67,6 +65,7 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
         function(next) {
             async.waterfall([
                 function(next) {
+                    console.log('entering waterfall');
                     city.findOneAndUpdate({ name: cityName }, {}, {upsert: true}, function(err, doc) {
                         if (err) throw err;
                         next(err, doc);
@@ -80,8 +79,9 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
                 },
                 function(city, restaurant, next) {
                     item.findOneAndUpdate({ name: itemName, _restaurant: restaurant._id }, {}, {upsert: true}, function(err, doc) {
+                        if (err) throw err;
                         Restaurant.update({_id: restaurant._id}, { $addToSet: {menu: doc._id }}, function(err, _) {
-                            if (err && err.code == 11000) throw err; // E11000 is duplicate key error which can pass
+                            if (err) throw err;
                             next(err, { city: city, restaurant: restaurant, item: doc });
                         });
                     });
