@@ -27,7 +27,7 @@ postSocket.update = function(socket, callback) {
                 }
             ], function(err, results) {
                 if (post) {
-                    if (post._user.id == socket.handshake.user.id) {
+                    if (post._user != socket.handshake.user.id) {
                         post.title = data.title;
                         post.description = data.description;
                         post._city = results[0].city.id;
