@@ -54,9 +54,9 @@ postSchema.virtual('userUrl').get(function() {
 
 postSchema.method({
     userHasRights: function(user) {
-        if (typeof user == "object")
-            return this._user.id == user.id;
-        return !!user && this._user == user.id;
+        if (typeof user == "object" && this._user.id && user.id)
+            return this._user.id == user._id;
+        return !!user && this._user == user._id;
     }
 });
 
