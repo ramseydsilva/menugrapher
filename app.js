@@ -16,12 +16,14 @@ var express = require('express'),
 /**
  * Load configuration
  */
-nconf.argv().env().file({ file: __dirname + '/config/' + nconf.get('env') + '/config.json' });
+
+nconf.argv().env();
+nconf.file({ file: __dirname + '/config/' + nconf.get('env') + '/config.json' });
 nconf.defaults({ 
     'env': 'dev',
     'rootDirPrefix': ''
 });
-
+nconf.argv().env().file({ file: __dirname + '/config/' + nconf.get('env') + '/config.json' });
 
 /**
  * API keys + Passport configuration.

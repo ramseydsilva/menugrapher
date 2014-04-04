@@ -14,5 +14,6 @@ results
 npm-debug.log
 node_modules
 /public/uploads/*
+test/public
 bower_components
 my_node_modules
