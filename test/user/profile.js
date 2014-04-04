@@ -6,7 +6,7 @@ var request = require('supertest'),
     should = require('should'),
     app = require('../../app.js'),
     User = require('../../models/User'),
-    userFixture = require('../fixtures/user.js'),
+    userFixture = require('../fixtures/db/user.js'),
     util = require('../util'),
     jquery = require('fs').readFileSync("node_modules/jquery/dist/jquery.min.js", "utf-8"),
     user;

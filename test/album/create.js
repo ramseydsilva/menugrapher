@@ -15,7 +15,7 @@ var request = require('supertest'),
     Restaurant = require('../../models/restaurant'),
     Category = require('../../models/category'),
     Item = require('../../models/item'),
-    userFixture = require('../fixtures/user'),
+    userFixture = require('../fixtures/db/user'),
     util = require('../util'),
     postUtil = require('../post/util'),
     socketer = require('socketer'),
@@ -191,6 +191,12 @@ describe('Create new album works', function() {
             it('and contain post', function() {
                 album.pics.length.should.be.exactly(1);
                 album.pics[0].should.be.eql(post._id);
+            });
+
+            it('and contain same attrs as post', function() {
+                album._restaurant.should.be.eql(post._restaurant);
+                album._city.should.be.eql(post._city);
+                album._category.should.be.eql(post._category);
             });
 
             it('and album user should be current user', function() {

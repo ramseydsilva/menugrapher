@@ -102,7 +102,11 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
                                 if (!!previousAlbum && previousAlbum.name) {
                                     name = previousAlbum.name.replace(/[0-9]+(?!.*[0-9])/, parseInt(previousAlbum.name.match(/[0-9]+(?!.*[0-9])/), 10)+1);
                                 }
-                                album.create({ name: name, _user: socket.handshake.user.id, '_meta.socketId': socket.id}, function(err, doc) {
+                                album.create({ 
+                                    name: name, 
+                                    _user: socket.handshake.user.id,
+                                    '_meta.socketId': socket.id
+                                }, function(err, doc) {
                                     if (err) throw err;
 
                                     socket.emit("create-album", [{
