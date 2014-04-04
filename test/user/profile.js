@@ -1,7 +1,5 @@
 'use strict';
 
-process.env['MONGODB'] = 'mongodb://localhost:27017/mytestdb';
-
 var request = require('supertest'),
     superagent = require('superagent'),
     jsdom = require('jsdom'),
@@ -24,7 +22,7 @@ var loadFixture = function(next) {
 
 describe('GET /users', function() {
     before(function(done) {
-        util.before(loadFixture, function(err, results) {
+        util.loadDb(loadFixture, function(err, results) {
             user = results[1];
             done(err);
         });

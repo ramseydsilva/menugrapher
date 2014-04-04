@@ -1,9 +1,7 @@
 'use strict';
 
-process.env['MONGODB'] = 'mongodb://localhost:27017/mytestdb';
-process.env.PORT = 4000;
-
 var async = require('async'),
+    nconf = require('nconf'),
     ioc = require('socket.io-client'),
     request = require('request'),
     mongoose = require('mongoose');
@@ -16,18 +14,18 @@ var loadFixture = function(Model, fixture, next) {
 };
 module.exports.loadFixture = loadFixture;
 
-var before = function(loadData, done) {
+var loadDb = function(loadData, done) {
     function clearDB(next) {
         for (var i in mongoose.connection.collections) {
             mongoose.connection.collections[i].remove(function() {});
         }
-        return next(null);
+        next(null);
     }
 
     async.series([
         function(next) {
             if (mongoose.connection.readyState === 0) {
-                mongoose.connect(process.env.MONGODB, function (err) {
+                mongoose.connect(nconf.get('db:host') + ':' + nconf.get('db:port') + '/' + nconf.get('db:name'), function (err) {
                     if (err) {
                         throw err;
                     }
@@ -45,11 +43,11 @@ var before = function(loadData, done) {
         done(err, results);
     });
 };
-module.exports.before = before;
+module.exports.loadDb = loadDb;
 
 var after = function (done) {
     mongoose.disconnect();
-    return done();
+    done();
 };
 module.exports.after = after;
 

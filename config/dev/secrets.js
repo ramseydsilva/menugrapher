@@ -1,6 +1,4 @@
 module.exports = {
-  db: process.env.MONGODB|| 'mongodb://localhost:27017/test',
-
   sessionSecret: process.env.SESSION_SECRET || 'secret',
 
   localAuth: true,

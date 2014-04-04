@@ -1,0 +1,11 @@
+{
+    "http": {
+        "port": "4000"
+    },
+    "db": {
+        "port": "27017",
+        "name": "testdb",
+        "host": "mongodb://localhost"
+    },
+    "rootDirPrefix": "/test"
+}

@@ -1,8 +1,5 @@
 'use strict';
 
-process.env['MONGODB'] = 'mongodb://localhost:27017/mytestdb';
-process.env.PORT = 4000;
-
 var request = require('supertest'),
     superagent = require('superagent'),
     jsdom = require('jsdom'),
@@ -26,7 +23,7 @@ var agent = superagent.agent();
 
 describe('GET /users', function() {
     before(function(done) {
-        util.before(
+        util.loadDb(
             function(next) {
                 util.loadFixture(User, userFixture.user, next);
             }

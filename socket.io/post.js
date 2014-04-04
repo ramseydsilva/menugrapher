@@ -165,7 +165,7 @@ postSocket.deleteAlbum = function(socket, io, callback) {
 postSocket.imageUpload = function(socket, io, callback) {
     ss(socket).on('image-upload', function(stream, data) {
         if (!!!socket.handshake.user.id) {
-            socket.emit('post1', {error: 'Permission denied'});
+            socket.emit('post', {error: 'Permission denied'});
         } else {
             var filename, elementId = data.elementId;
 

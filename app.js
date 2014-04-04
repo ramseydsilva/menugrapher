@@ -8,15 +8,27 @@ var express = require('express'),
     path = require('path'),
     mongoose = require('mongoose'),
     passport = require('passport'),
+    nconf = require('nconf'),
     expressValidator = require('express-validator'),
     connectAssets = require('connect-assets');
+
+
+/**
+ * Load configuration
+ */
+nconf.argv().env();
+nconf.defaults({ 
+    'env': 'dev',
+    'rootDirPrefix': ''
+});
+nconf.argv().env().file({ file: __dirname + '/config/' + nconf.get('env') + '/config.json' });
 
 /**
  * API keys + Passport configuration.
  */
 
 var app = module.exports = express(); // This will allow app to be called form anywhere in program
-app.secrets = require('./config/secrets');
+app.secrets = require('./config/' + nconf.get('env') + '/secrets');
 
 /**
  * Create Express server.
@@ -27,6 +39,7 @@ app.secrets = require('./config/secrets');
  * Mongoose configuration.
  */
 
+app.secrets.db = nconf.get('db:host') + ':' + nconf.get('db:port') + '/' + nconf.get('db:name');
 mongoose.connect(app.secrets.db);
 mongoose.connection.on('error', function() {
   console.error('✗ MongoDB Connection Error. Please make sure MongoDB is running.');
@@ -40,7 +53,6 @@ var hour = 3600000;
 var day = (hour * 24);
 var month = (day * 30);
 
-app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(connectAssets({
@@ -110,7 +122,7 @@ app.use(express.errorHandler());
 
 app.server = require('http').Server(app),
 app.socketio = require('./socket.io').socketio(app);
-app.set('rootDir', __dirname);
+app.set('rootDir', __dirname + nconf.get('rootDirPrefix'));
 
 var routes = require('./routes')(app);
 
@@ -118,6 +130,6 @@ var routes = require('./routes')(app);
  * Start Express server.
  */
 
-app.server.listen(app.get('port'), function() {
-  console.log("✔ Express server listening on port %d in %s mode", app.get('port'), app.settings.env);
+app.server.listen(nconf.get('http:port'), function() {
+  console.log("✔ Express server listening on port %d in %s mode", nconf.get('http:port'), app.settings.env);
 });

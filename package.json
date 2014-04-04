@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "mocha"
+    "test": "env=test mocha"
   },
   "dependencies": {
     "async": "~0.2.10",
@@ -78,7 +78,12 @@
     "engine.io": "^1.0.5",
     "socket.io-parser": "^2.1.2",
     "xmlhttprequest": "^1.6.0",
-    "socketer": "0.0.2"
+    "socketer": "0.0.5",
+    "nconf": "^0.6.9",
+    "FileReader": "^0.10.2",
+    "bufferjs": "^2.0.0",
+    "grunt": "^0.4.4",
+    "grunt-remove-logging": "^0.2.0"
   },
   "maintainers": [
     {

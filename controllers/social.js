@@ -1,4 +1,5 @@
-var secrets = require('../config/secrets');
+var nconf = require('nconf');
+var secrets = require('../config/' + nconf.get('env') + '/secrets');
 var User = require('../models/User');
 var querystring = require('querystring');
 var validator = require('validator');

@@ -37,7 +37,7 @@ var ensureCityRestaurantCategoryItemLinkage = function(cityName, restaurantName,
                 items.length.should.be.exactly(1);
                 items[0].name.should.be.exactly(itemName);
                 items[0]._restaurant.should.eql(restaurant._id);
-                next(err, city, restaurant, category, items[0]);
+                next(err, {city: city, restaurant: restaurant, category: category, item: items[0]});
             });
         }
     ], function(err, results) {

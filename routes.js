@@ -1,7 +1,8 @@
 'use strict';
 
 var passport = require('passport'),
-    passportConf = require('./config/passport'),
+    nconf = require('nconf'),
+    passportConf = require('./config/' + nconf.get('env') + '/passport'),
     post = require('./models/post'),
     city = require('./models/city'),
     item = require('./models/item'),

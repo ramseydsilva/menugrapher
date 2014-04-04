@@ -1,0 +1,10 @@
+{
+    "http": {
+        "port": "3000"
+    },
+    "db": {
+        "port": "27017",
+        "name": "devdb",
+        "host": "mongodb://localhost"
+    }
+}

@@ -1,10 +1,11 @@
-var _ = require('underscore');
-var async = require('async');
-var crypto = require('crypto');
-var nodemailer = require('nodemailer');
-var passport = require('passport');
-var User = require('../models/User');
-var secrets = require('../config/secrets');
+var _ = require('underscore'),
+    async = require('async'),
+    crypto = require('crypto'),
+    nodemailer = require('nodemailer'),
+    passport = require('passport'),
+    User = require('../models/User'),
+    nconf = require('nconf'),
+    secrets = require('../config/' + nconf.get('env') +'/secrets');
 
 /**
  * GET /login
