@@ -171,6 +171,14 @@ describe('Image uploading works', function() {
                 postHtml.should.containEql(post.pic.thumbUrl);
             });
 
+            it('and post page should contain user name and link to user page', function(done) {
+                request(app).get(post.url).end(function(err, res) {
+                    res.text.should.containEql(user.url);
+                    res.text.should.containEql(user.profile.name);
+                    done(err);
+                });
+            });
+
             it('and after post deleted, clear out the images', function(done) {
                 post.remove(function(err, post) {
                     fs.existsSync(post.originalPath).should.be.false;

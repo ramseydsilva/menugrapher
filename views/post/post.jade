@@ -13,8 +13,8 @@ block content
                             a(class='text-danger', href=post.deleteUrl) Delete
         div(class='panel-body')
             p(class='text-primary') Uploaded 
-                if !!post.user && !!post.user.name
-                    | by <a href='#{post.userUrl}'>#{post._user.profile.name}</a> 
+                if !!post._user && !!post._user.profile.name
+                    | by <a href='#{post._user.url}'>#{post._user.profile.name}</a> 
                 | #{time} 
 
                 if !!post._category && !!post._category.name
