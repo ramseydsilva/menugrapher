@@ -81,10 +81,7 @@
     "socketer": "0.0.6",
     "nconf": "^0.6.9",
     "FileReader": "^0.10.2",
-    "bufferjs": "^2.0.0",
-    "grunt": "^0.4.4",
-    "grunt-remove-logging": "^0.2.0",
-    "clock": "^0.1.5"
+    "bufferjs": "^2.0.0"
   },
   "maintainers": [
     {

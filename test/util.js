@@ -2,6 +2,8 @@
 
 var async = require('async'),
     nconf = require('nconf'),
+    path = require('path'),
+    fs = require('fs'),
     app = require('../app'),
     ioc = require('socket.io-client'),
     request = require('request'),
@@ -53,12 +55,6 @@ var loadDb = function(loadData, done) {
 };
 module.exports.loadDb = loadDb;
 
-var after = function (done) {
-    mongoose.disconnect();
-    done();
-};
-module.exports.after = after;
-
 var login = function(request, app, credentials, agent, url, done) {
     request(app).post('/login').send(credentials).expect(302).end(function(err, res) {
         if (err) done(err);
@@ -71,3 +67,31 @@ var login = function(request, app, credentials, agent, url, done) {
     });
 };
 module.exports.login = login;
+
+var rmdir = function(dir) {
+    var list = fs.readdirSync(dir);
+    for(var i = 0; i < list.length; i++) {
+        var filename = path.join(dir, list[i]);
+        var stat = fs.statSync(filename);
+
+        if(filename == "." || filename == "..") {
+            // pass these files
+        } else if(stat.isDirectory()) {
+            // rmdir recursively
+            rmdir(filename);
+        } else {
+            // rm fiilename
+            fs.unlinkSync(filename);
+        }
+    }
+    fs.rmdirSync(dir);
+};
+module.exports.rmdir = rmdir;
+
+var after = function (done) {
+    mongoose.disconnect();
+    rmdir(path.join(__dirname + "/public/uploads"));
+    fs.mkdirSync(path.join(__dirname, "public/uploads")); // Effectively empties the upload directory
+    done();
+};
+module.exports.after = after;

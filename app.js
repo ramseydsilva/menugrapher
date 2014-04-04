@@ -16,12 +16,12 @@ var express = require('express'),
 /**
  * Load configuration
  */
-nconf.argv().env();
+nconf.argv().env().file({ file: __dirname + '/config/' + nconf.get('env') + '/config.json' });
 nconf.defaults({ 
     'env': 'dev',
     'rootDirPrefix': ''
 });
-nconf.argv().env().file({ file: __dirname + '/config/' + nconf.get('env') + '/config.json' });
+
 
 /**
  * API keys + Passport configuration.
@@ -29,6 +29,7 @@ nconf.argv().env().file({ file: __dirname + '/config/' + nconf.get('env') + '/co
 
 var app = module.exports = express(); // This will allow app to be called form anywhere in program
 app.secrets = require('./config/' + nconf.get('env') + '/secrets');
+app.set('rootDir', path.join(__dirname, nconf.get('rootDirPrefix')));
 
 /**
  * Create Express server.
@@ -80,7 +81,7 @@ app.use(express.session({
   store: app.sessionStore
 }));
 
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: month }));
+app.use(express.static(path.join(app.get('rootDir'), 'public'), { maxAge: month }));
 app.use(express.favicon(path.join(__dirname, 'public/img/favicon.ico')));
 
 if (process.env.NODE_ENV == 'production') {
@@ -122,7 +123,6 @@ app.use(express.errorHandler());
 
 app.server = require('http').Server(app),
 app.socketio = require('./socket.io').socketio(app);
-app.set('rootDir', __dirname + nconf.get('rootDirPrefix'));
 
 var routes = require('./routes')(app);
 

@@ -7,5 +7,5 @@
         "name": "testdb",
         "host": "mongodb://localhost"
     },
-    "rootDirPrefix": "/test"
+    "rootDirPrefix": "test"
 }

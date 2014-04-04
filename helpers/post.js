@@ -37,7 +37,6 @@ PostHelpers.getUniquePath = function(filepath, next) {
 PostHelpers.getFilePath = function(filename, directory, user, callback) {
     var userDir = path.join(app.get('rootDir'), '/public/uploads/' + user.id);
     var dir = userDir + '/' + directory;
-    console.log(dir);
     async.series([
         function(next) {
             mkdirp(dir, function(err) {
@@ -65,7 +64,6 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
         function(next) {
             async.waterfall([
                 function(next) {
-                    console.log('entering waterfall');
                     city.findOneAndUpdate({ name: cityName }, {}, {upsert: true}, function(err, doc) {
                         if (err) throw err;
                         next(err, doc);
@@ -96,7 +94,6 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
             });
         }
     ], function(err, results) {
-        console.log(results);
         next(err, { city: results[0][0], restaurant: results[0][1], category: results[1], item: results[0][2] });
     });
 };
