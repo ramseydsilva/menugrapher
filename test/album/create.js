@@ -77,7 +77,7 @@ describe('Create new album works', function() {
         });
     });
 
-    it('Anonymous user cannot create album, Permission denied', function(done) {
+    it('but anonymous user cannot create album, Permission denied', function(done) {
         socketer.anonSocket(app, function(socket) {
             socket.once('connect', function() {
                 socket.emit('create-album', {
@@ -93,25 +93,47 @@ describe('Create new album works', function() {
         });
     });
 
-    it('User can create empty album', function(done) {
-        socketer.authSocket(app, {email: userFixture.user.email, password: userFixture.user.password}, '/login', function(authSocket) {
-            var socket = authSocket;
-            socket.once('connect', function() {
-                socket.emit('create-album', {
-                    album: '',
-                    create: true
+    describe('Empty album', function() {
+        var data, socket, album;
+
+        before(function(done) {
+            socketer.authSocket(app, {email: userFixture.user.email, password: userFixture.user.password}, '/login', function(authSocket) {
+                socket = authSocket;
+                socket.once('connect', function() {
+                    socket.emit('create-album', {
+                        album: '',
+                        create: true
+                    });
+                });
+                socket.once('create-album', function(albumData) {
+                    console.log('returned data is', albumData);
+                    data = albumData;
+                    Album.findOne({}, function(err, doc) {
+                        album = doc;
+                        console.log('returned album is', album);
+                        done();
+                    });
                 });
             });
-            socket.once('create-album', function(data) {
-                socket.disconnect(); // Free the socket
-                Album.findOne({}, function(err, album) {
-                    album._id.should.be.ok;
-                    album.name.should.be.ok;
-                    album.pics.length.should.be.exactly(0);
-                    data[0].elements.should.containEql({'#album': ''+album._id});
+        });
+
+        it('can be created by logged in user', function() {
+            console.log('entered test');
+            album._id.should.be.ok;
+            album.name.should.be.ok;
+            album.pics.length.should.be.exactly(0);
+            console.log(data);
+            data[0].elements.should.containEql({'#album': ''+album._id});
+        });
+
+        it('Empty album should be deleted on socket close', function(done) {
+            socket.disconnect(); // Also frees up socket
+            setTimeout(function() {
+                Album.find({}, function(err, docs) {
+                    docs.length.should.be.exactly(0);
                     done(err);
                 });
-            });
+            }, 500); // Wait half second to allow socket to disconnect
         });
     });
 
@@ -166,16 +188,16 @@ describe('Create new album works', function() {
                 });
             });
 
-            it('Album should contain post', function() {
+            it('and contain post', function() {
                 album.pics.length.should.be.exactly(1);
                 album.pics[0].should.be.eql(post._id);
             });
 
-            it('Album user should be current user', function() {
+            it('and album user should be current user', function() {
                 album._user.should.be.eql(user._id);
             });
 
-            it('Album link should work contain Image thumb, and be subscribed to album and post room', function(done) {
+            it('and album link should work contain Image thumb, and be subscribed to album and post room', function(done) {
                 request(app).get('/albums/' + album._id).end(function(err, res) {
                     res.text.should.containEql(post.pic.thumbUrl);
                     res.text.should.containEql(album.name);
@@ -188,7 +210,7 @@ describe('Create new album works', function() {
                 });
             });
 
-            it('User page should contain link to album and be subscribed to new albums', function(done) {
+            it('and user page should contain link to album and be subscribed to new albums', function(done) {
                 request(app).get(user.url).end(function(err, res) {
                     jsdom.env({html: res.text, src: [jquery], done: function (errors, window) {
                         var $ = window.$;

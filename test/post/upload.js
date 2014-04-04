@@ -76,7 +76,7 @@ describe('Image uploading works', function() {
         });
     });
 
-    it('Anonymous user cannot post image, permission denied', function(done) {
+    it('but anonymous user cannot post image, permission denied', function(done) {
         socketer.anonSocket(app, function(socket) {
             socket.once('connect', function() {
                 uploadImage(socket, postLinkData);
@@ -129,11 +129,11 @@ describe('Image uploading works', function() {
                 });
             });
 
-            it('Post was created via link upload', function() {
+            it('and should have an _id value', function() {
                 post._id.should.be.ok;
             });
 
-            it('Test to see image uploaded correctly and thumb was generated', function() {
+            it('and thumb was generated correctly', function() {
                 post.pic.originalPath.should.be.ok;
                 post.pic.originalUrl.should.be.ok;
                 post.pic.thumbPath.should.be.ok;
@@ -142,33 +142,41 @@ describe('Image uploading works', function() {
                 fs.existsSync(post.pic.thumbPath).should.be.true;
             });
 
-            it('Thumb is smaller than original image', function() {
+            it('and thumb is smaller than original image', function() {
                 fs.statSync(post.pic.thumbPath).size.should.be.lessThan(fs.statSync(post.pic.originalPath).size);
             });
 
-            it('Correct post user', function() {
+            it('and should have the user who created the post assigned to it', function() {
                 post._user.should.be.eql(user._id);
             });
 
-            it('Ensure correct City, Restaurant, Category, Item linkage', function(done) {
+            it('and should have correct City, Restaurant, Category, Item linkage', function(done) {
                 postUtil.ensureCityRestaurantCategoryItemLinkage(postData.city, postData.restaurant, postData.category, postData.item, function(err, results) {
                     done(err, results);
                 });
             });
 
-            it('Post html should contain city, restaurant, category names', function() {
+            it('and post html should contain city, restaurant, category names', function() {
                 postHtml.should.containEql(postData.city);
                 postHtml.should.containEql(postData.restaurant);
                 postHtml.should.containEql(postData.category);
             });
 
-            it('Post html should contain 4 edit buttons and 4 delete buttons', function() {
+            it('and post html should contain 4 edit buttons and 4 delete buttons', function() {
                 postHtml.match(/fa-times/g).length.should.be.exactly(4);
                 postHtml.match(/fa-pencil/g).length.should.be.exactly(4);
             });
 
-            it('Post html should contain thumb url', function() {
+            it('and post html should contain thumb url', function() {
                 postHtml.should.containEql(post.pic.thumbUrl);
+            });
+
+            it('and after post deleted, clear out the images', function(done) {
+                post.remove(function(err, post) {
+                    fs.existsSync(post.originalPath).should.be.false;
+                    fs.existsSync(post.thumbPath).should.be.false;
+                    done(err);
+                });
             });
 
             after(function(done) {
