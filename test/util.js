@@ -2,6 +2,7 @@
 
 var async = require('async'),
     nconf = require('nconf'),
+    app = require('../app'),
     ioc = require('socket.io-client'),
     request = require('request'),
     mongoose = require('mongoose');
@@ -15,6 +16,13 @@ var loadFixture = function(Model, fixture, next) {
 module.exports.loadFixture = loadFixture;
 
 var loadDb = function(loadData, done) {
+    if (arguments.length == 1) {
+        done = loadData;
+        loadData = function(next) {
+            next();
+        };
+    }
+
     function clearDB(next) {
         for (var i in mongoose.connection.collections) {
             mongoose.connection.collections[i].remove(function() {});

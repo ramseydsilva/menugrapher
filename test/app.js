@@ -1,50 +1,44 @@
-var request = require('supertest');
-var app = require('../app.js');
+var request = require('supertest'),
+    util = require('./util'),
+    app = require('../app.js');
 
-describe('GET /', function() {
-  it('should return 200 OK', function(done) {
-    request(app)
-      .get('/')
-      .expect(200, done);
-  });
-});
+describe('Main pages ', function() {
+    before(util.loadDb);
+    it('GET / should return 200 OK', function(done) {
+        request(app).get('/').end(function(err, res) {
+            done(err);
+        });
+    });
 
-describe('GET /login', function() {
-  it('should return 200 OK', function(done) {
+  it('GET /login should return 200 OK', function(done) {
     request(app)
       .get('/login')
       .expect(200, done);
   });
-});
 
-describe('GET /signup', function() {
-  it('should return 200 OK', function(done) {
+  it('GET /signup should return 200 OK', function(done) {
     request(app)
       .get('/signup')
       .expect(200, done);
   });
-});
 
-describe('GET /api', function() {
-  it('should return 200 OK', function(done) {
+  it('GET /api should return 200 OK', function(done) {
     request(app)
       .get('/api')
       .expect(200, done);
   });
-});
 
-describe('GET /contact', function() {
-  it('should return 200 OK', function(done) {
+  it('GET /contact should return 200 OK', function(done) {
     request(app)
       .get('/contact')
       .expect(200, done);
   });
-});
 
-describe('GET /random-url', function() {
-  it('should return 404', function(done) {
+  it('GET /random-url should return 404', function(done) {
     request(app)
       .get('/reset')
       .expect(404, done);
   });
+
+    after(util.after);
 });

@@ -50,6 +50,12 @@ describe('Image uploading works', function() {
         album: false
     };
 
+    var postImageOnlyData = postImageData;
+    postImageOnlyData['city'] = '';
+    postImageData['restaurant'] = '';
+    postImageData['category'] = '';
+    postImageData['item'] = '';
+
     function uploadImage(socket, postData) {
         var stream = ss.createStream();
         ss(socket).emit('image-upload', stream, postData);
@@ -89,6 +95,9 @@ describe('Image uploading works', function() {
     },{
         name: 'New post can be created via image upload, ensuring proper linkage',
         postData: postImageData
+    }, {
+        name: 'New post can be created without city, restaurant, category, item info',
+        postData: postImageOnlyData
     }];
 
     _.each(newPostTests, function(testInfo) {

@@ -40,7 +40,6 @@ describe('GET /users', function() {
                 $('a[href="' + user.url + '"]').length.should.be.exactly(1);
                 done();
             }});
-
         });
     });
 

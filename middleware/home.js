@@ -1,6 +1,6 @@
 'use strict';
 
-var user = require('../models/User'),
+var User = require('../models/User'),
     middleware = {};
 
 
@@ -21,9 +21,10 @@ middleware.redirectToLoginIfNotLoggedIn = function(req, res, next) {
 }
 
 middleware.userExists = function(req, res, next) {
-    user.findOne({_id: req.param('user')}, function(err, user) {
-        if (user) {
-            res.locals.currentUser = user;
+    User.findOne({_id: req.param('user')}, function(err, currentUser) {
+        if (currentUser) {
+            console.log(currentUser);
+            res.locals.currentUser = currentUser;
             next();
         } else {
             res.status(404);

@@ -83,7 +83,7 @@ postSocket.update = function(socket, callback) {
 postSocket.createAlbumCheckBox = function(socket, io, callback) {
     socket.on('create-album', function(data) {
         if (!!!socket.handshake.user.id) {
-            socket.emit('album', {error: 'Permission denied'});
+            socket.emit('create-album', {error: 'Permission denied'});
         } else {
             if (!!data.create) {
                 // Create album checked
@@ -105,7 +105,7 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
                                 album.create({ name: name, _user: socket.handshake.user.id, '_meta.socketId': socket.id}, function(err, doc) {
                                     if (err) throw err;
 
-                                    socket.emit("post-update", [{
+                                    socket.emit("create-album", [{
                                         action: 'val',
                                         elements: {
                                             '#album': doc._id

@@ -36,7 +36,6 @@ exports.user = function(req, res) {
         res.render('home/user', {
             breadcrumbs: results.breadcrumbs,
             posts: results.posts,
-            currentUser: res.locals.user,
             albums: results.albums
         });
     });
@@ -56,7 +55,6 @@ exports.users = function(req, res) {
 exports.home = function(req, res) {
     var breadcrumbs, categories, cities, myPosts, recentPosts;
 
-console.log(res.locals);
     async.parallel({
         breadcrumbs: function(next) {
             next(null, [breadcrumb.home()]);
