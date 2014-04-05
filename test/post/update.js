@@ -21,7 +21,7 @@ var request = require('supertest'),
 
 var agent = superagent.agent();
 
-describe('GET /users', function() {
+describe('Post ', function() {
     before(function(done) {
         util.loadDb(
             function(next) {
@@ -33,7 +33,7 @@ describe('GET /users', function() {
         });
     });
 
-    it('Updating non existant post gives error but creates new city, restaurant, category, items and links them together', function(done) {
+    it(' if non existant gives error but creates new city, restaurant, category, items and links them together', function(done) {
         socketer.anonSocket(app, function(socket) {
             socket.once('connect', function() {
                 socket.emit('post-update', {
@@ -55,6 +55,12 @@ describe('GET /users', function() {
             });
         });
     });
+
+    it('updates when post clicks save button on post edit page');
+    it('cannot be updated by anonymous or non post owner');
+    it('post city, category, restaurant can be removed by clicking x mark on post and post listeners are informed');
+    it('post can only be deleted by owner by clicking delete button on post page');
+    it('post can be deleted by clicking x mark on post');
 
     after(util.after);
 

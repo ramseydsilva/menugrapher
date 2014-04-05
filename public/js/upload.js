@@ -100,24 +100,6 @@ define([
             });
         });
 
-        $('#uploads').on('click', 'a.remove-category', function(e) {
-            socket.emit('post._category:remove', {
-                id: $(e.target).attr('post')
-            });
-        });
-
-        $('#uploads').on('click', 'a.remove-city', function(e) {
-            socket.emit('post._city:remove', {
-                id: $(e.target).attr('post')
-            });
-        });
-
-        $('#uploads').on('click', 'a.remove-restaurant', function(e) {
-            socket.emit('post._restaurant:remove', {
-                id: $(e.target).attr('post')
-            });
-        });
-
     });
 
 });

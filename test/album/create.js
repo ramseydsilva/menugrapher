@@ -199,23 +199,34 @@ describe('Create new album works', function() {
                 album._user.should.be.eql(user._id);
             });
 
-            it('and album link should work contain Image thumb, restaurant, category, city, and be subscribed to album and post room', function(done) {
-                request(app).get('/albums/' + album._id).end(function(err, res) {
+            it('and album link should work contain Image thumb, restaurant, category, city, and be subscribed to album and post room, but \
+                no edit or delete links', function(done) {
+                request(app).get(album.url).end(function(err, res) {
                     res.text.should.containEql(post.pic.thumbUrl);
                     res.text.should.containEql(album.name);
+                    res.text.should.containEql(!!album.description ? album.description : '');
 
                     jsdom.env({html: res.text, src: [jquery], done: function (errors, window) {
                         var $ = window.$;
                         if (!!postData.city) $('a:contains("' + postData.city + '")').length.should.be.greaterThan(1);
                         if (!!postData.restaurant) $('a:contains("' + postData.restaurant + '")').length.should.be.greaterThan(1);
                         if (!!postData.category) $('a:contains("' + postData.category + '")').length.should.be.greaterThan(1);
-                    }});
-
-                    jsdom.env({html: res.text, src: [jquery], done: function (errors, window) {
-                        var $ = window.$;
+                        $('a[href="'+album.editUrl+'"]').length.should.be.exactly(0);
+                        $('a[href="'+album.deleteUrl+'"]').length.should.be.exactly(0);
                         $('[room="post-' + post._id + '"]').length.should.be.exactly(1);
                         $('[room="album-' + album._id + '"]').length.should.be.exactly(1);
                         done();
+                    }});
+                });
+            });
+
+            it('and album page should contain edit and delete links for owner', function(done) {
+                socketer.authRequest(app, album.url, {email: user.email, password: user.profile.passwordString}, function(err, res) {
+                    jsdom.env({html: res.body, src: [jquery], done: function (errors, window) {
+                        var $ = window.$;
+                        $('a[href="'+album.editUrl+'"]').length.should.be.exactly(1);
+                        $('a[href="'+album.deleteUrl+'"]').length.should.be.exactly(1);
+                        done(errors);
                     }});
                 });
             });

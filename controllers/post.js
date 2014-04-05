@@ -2,17 +2,11 @@
 
 var async = require('async'),
     breadcrumb = require('../helpers/breadcrumb'),
-    ss = require('socket.io-stream'),
     post = require('../models/post'),
     city = require('../models/city'),
     category = require('../models/category'),
     restaurant = require('../models/restaurant'),
-    formidable = require('formidable'),
-    path = require('path'),
-    moment = require('moment'),
-    jade = require('jade'),
-    postSocket = require('../socket.io/post');
-
+    moment = require('moment');
 
 exports.posts = function(req, res) {
     var breadcrumbs = [ breadcrumb.home(), breadcrumb.posts('active') ];

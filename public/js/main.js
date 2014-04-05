@@ -107,6 +107,24 @@ define([
             });
         });
 
+        $('.album-update').on('click', function(e) {
+            socket.emit('album-update', {
+                id: $('.album').get(0).id,
+                name: $('#album-name').val(),
+                city: $('#city').val(),
+                restaurant: $('#restaurant').val(),
+                category: $('#category').val(),
+                description: $('#description').val()
+            });
+        });
+
+        $('.album-delete').on('click', function(e) {
+            socket.emit('album-delete', {
+                id: $('.album').get(0).id,
+                deletePics: $(e.currentTarget).attr('deletePics')
+            });
+        });
+
         $(document).keyup(function(e) {
             if ($('#back').length && e.keyCode == 27) {
                 window.location = $('#back').attr('href');
@@ -115,6 +133,24 @@ define([
 
         $('body').on('click', '.post-remove', function(e) {
             socket.emit('post:remove', {
+                id: $(e.target).attr('post')
+            });
+        });
+
+        $('body').on('click', 'a.remove-category', function(e) {
+            socket.emit('post._category:remove', {
+                id: $(e.target).attr('post')
+            });
+        });
+
+        $('body').on('click', 'a.remove-city', function(e) {
+            socket.emit('post._city:remove', {
+                id: $(e.target).attr('post')
+            });
+        });
+
+        $('body').on('click', 'a.remove-restaurant', function(e) {
+            socket.emit('post._restaurant:remove', {
                 id: $(e.target).attr('post')
             });
         });

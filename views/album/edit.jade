@@ -1,28 +1,42 @@
 extends ../layout
 
 block content
-    div(class='panel panel-default', room='album-#{album._id}')
+    div(class='panel panel-default album', id='#{album._id}', room='album-#{album._id}')
         div(class='panel-body', room='albums-user-#{album._user._id}')
 
-            div(class='clearfix row-fluid')
-                div(class='col-sm-3')
-                    - title = { name: album._user.profile.name + "'s albums", url: '' }
-                    - items = userAlbums
-                    - id = 'userAlbums-' + album._user._id
-                    include ../includes/leftmenu
+            div(class='col-sm-12')
+                div(class='container-fluid')
+                    div(class='row-fluid')
+                        div(class='col-sm-12')
+                            div.row-fluid.clearfix
+                                div.col-sm-12
+                                    legend.pull-left
+                                        | Edit Album
+                                        if album.userHasRights(user)
+                                            div.pull-right
+                                                a(class='btn btn-sm btn-danger', href=album.url) Cancel
+                                                button(class='btn btn-sm btn-warning album-update') Save Changes
+                            div.row-fluid
+                                div.col-sm-12
+                                    input(class='form-control', type=text, id='album-name', placeholder='Album name', value=album.name)
 
-                div(class='col-sm-9')
-                    div(class='container-fluid')
-                        div(class='row-fluid')
-                            div(class='col-sm-12')
-                                div.lead #{album.name}
-                                    if album.userHasRights(user)
-                                    div.pull-right
-                                        a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
-                                        a(class='btn btn-sm btn-danger', href=album.deleteUrl) Delete
+                            div.row-fluid
+                                - var post = album
+                                include ../includes/categorize
 
-                                - var cols = 3
-                                - var posts = album.pics.reverse()
-                                div#album-posts
+                            - var cols = 3
+                            - var posts = album.pics.reverse()
+                            - var target = 'blank'
+                            div.row-fluid.padded.clearfix#album-posts
                                 - each post in posts
-                                    include ../includes/post
+                                    include ../includes/postEdit
+
+                            div.row-fluid.padded
+                                div.col-sm-12
+                                    textarea(id='description', class='clearfix form-control', rows='8', placeholder="Enter a description")= album.description
+
+                                if album.userHasRights(user)
+                                    div.pull-right
+                                        a(class='btn btn-sm btn-danger', href=album.url) Cancel
+                                        button(class='btn btn-sm btn-warning album-update') Save Changes
+

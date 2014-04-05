@@ -79,6 +79,7 @@ define([
         socket.on('post-update', handleSocketEvent);
         socket.on('create-album', handleSocketEvent);
         socket.on('album-update', handleSocketEvent);
+        socket.on('album-delete', handleSocketEvent);
     });
 
     socket.ss = ss;

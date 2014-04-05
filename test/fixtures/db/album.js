@@ -3,11 +3,15 @@
 var albums = [
     {
         name: 'My first album',
-        description: 'This is a dummy description for my album',
+        description: 'This is a dummy description for my album'
     },
     {
-        title: 'My first post',
-        description: 'This is a dummy description',
+        name: 'My second album',
+        description: 'This is a dummy description'
+    },
+    {
+        name: 'Yet another one!',
+        description: 'My third album'
     }
 ];
 module.exports.albums = albums;

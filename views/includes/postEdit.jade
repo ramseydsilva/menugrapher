@@ -10,16 +10,16 @@ div(class="col-sm-#{cols} post-box post",id=post.id, room='post-#{post.id}')
             div(class='post-box-tags')
                 div(class='text-info')
                     | City: 
-                    span(class='_city') #{post._city.name}
+                    span(class='_city') #{!!post._city ? post._city.name : ""}
                     a(class='remove-city fa fa-times', title='Remove City', post='#{post.id}')
                     a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)
                 div(class='text-danger')
                     | Restaurant: 
-                    span(class='_restaurant') #{post._restaurant.name}
+                    span(class='_restaurant') #{!!post._restaurant ? post._restaurant.name : ""}
                     a(class='remove-restaurant fa fa-times', title='Remove Restaurant', post='#{post.id}')
                     a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)
                 div(class='text-warning')
                     | Category: 
-                    span(class='_category') #{post._category.name}
+                    span(class='_category') #{!!post._category ? post._category.name : ""}
                     a(class='remove-category fa fa-times', title='Remove Category', post='#{post.id}')
                     a(class='fa fa-pencil', href=post.editUrl, title='Edit Post', target=target)

@@ -6,7 +6,7 @@ block content
 
             div(class='clearfix row-fluid')
                 div(class='col-sm-3')
-                    - title = { name: album._user.profile.name + "'s albums", url: '' }
+                    - title = { name: (!!album._user ? album._user.profile.name : '') + "'s albums", url: '' }
                     - items = userAlbums
                     - id = 'userAlbums-' + album._user._id
                     include ../includes/leftmenu
@@ -18,17 +18,21 @@ block content
                                 div.lead #{album.name}
                                     if album.userHasRights(user)
                                     div.pull-right
-                                        a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
-                                        a(class='btn btn-sm btn-danger', href=album.deleteUrl) Delete
+                                        if (album.userHasRights(user))
+                                            a(class='btn btn-sm btn-success', href='/posts/new/?album=true&albumId=#{album._id}') Add Pictures
+                                            a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
+                                            a(class='btn btn-sm btn-danger', href=album.deleteUrl) Delete
                         div(class='row-fluid')
                             div(class='col-sm-12')
                                 - var item = album
                                 include ../includes/credits
 
-                        div(class='row-fluid')
+                        div(class='row-fluid padded clearfix')
                             div(class='col-sm-12')
                                 - var cols = 3
                                 - var posts = album.pics.reverse()
                                 div#album-posts
                                 - each post in posts
                                     include ../includes/post
+
+                        div.row-fluid.padded= album.description

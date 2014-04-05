@@ -23,16 +23,13 @@ exports.edit = function(req, res) {
     var breadcrumbs = [breadcrumb.home(), breadcrumb.albums(), breadcrumb.album(album, 'active'),
         { text: 'Edit', url: album.editUrl, class: 'active'} ];
 
-    Album.find({_user: album._user._id}).sort('-_id').exec(function(err, albums) {
-        res.render('album/edit', {
-            title: "Edit Album",
-            breadcrumbs: breadcrumbs,
-            userAlbums: albums,
-            back: {
-                text: 'Back to Album',
-                href: album.url
-            }
-        });
+    res.render('album/edit', {
+        title: "Edit Album",
+        breadcrumbs: breadcrumbs,
+        back: {
+            text: 'Back to Album',
+            href: album.url
+        }
     });
 };
 
@@ -41,15 +38,12 @@ exports.delete = function(req, res) {
     var breadcrumbs = [breadcrumb.home(), breadcrumb.albums(), breadcrumb.album(album, 'active'),
         { text: 'Delete', url: album.deleteUrl, class: 'active'} ];
 
-    Album.find({_user: album._user._id}).sort('-_id').exec(function(err, albums) {
-        res.render('album/delete', {
-            title: "Edit Album",
-            breadcrumbs: breadcrumbs,
-            userAlbums: albums,
-            back: {
-                text: 'Back to Album',
-                href: album.url
-            }
-        });
+    res.render('album/delete', {
+        title: "Edit Album",
+        breadcrumbs: breadcrumbs,
+        back: {
+            text: 'Back to Album',
+            href: album.url
+        }
     });
 };

@@ -3,13 +3,15 @@ if !!post
     - restaurant = !!post._restaurant ? post._restaurant.name : ''
     - category = !!post._category ? post._category.name : ''
     - item = !!post._item ? post._item.name : ''
+- col = !!album ? 4 : 3
 div(class='container-fluid padded')
     div(class='row-padded row-fluid')
-        div(class='col-sm-3')
+        div(class='col-sm-#{col}')
             input(id='city', api='/api/v1/cities', type='text', class='form-control', placeholder='City', autocomplete='off', value=city)
-        div(class='col-sm-3')
+        div(class='col-sm-#{col}')
             input(id='restaurant', api='/api/v1/restaurants', type='text', class='form-control', placeholder='Restaurant', autocomplete='off', value=restaurant)
-        div(class='col-sm-3')
+        div(class='col-sm-#{col}')
             input(id='category', api='/api/v1/categories', type='text', class='form-control', placeholder='Category', autocomplete='off', value=category)
-        div(class='col-sm-3')
-            input(id='item', api='/api/v1/items', type='text', class='form-control', placeholder='Menu Item', autocomplete='off', value=item)
+        if !album
+            div(class='col-sm-#{col}')
+                input(id='item', api='/api/v1/items', type='text', class='form-control', placeholder='Menu Item', autocomplete='off', value=item)
