@@ -42,6 +42,7 @@ var routes = function(app) {
     app.get('/users/:user', homeMiddleware.userExists, homeController.user);
     app.get('/albums/:album', albumMiddleware.albumExists, albumController.album);
     app.get('/albums/:album/edit', albumMiddleware.albumExists, albumMiddleware.userHasRights, albumController.edit);
+    app.get('/albums/:album/add', albumMiddleware.albumExists, albumMiddleware.userHasRights, albumController.add);
     app.get('/albums/:album/delete', albumMiddleware.albumExists, albumMiddleware.userHasRights, albumController.delete);
     app.get('/contact', contactController.getContact);
     app.post('/contact', contactController.postContact);

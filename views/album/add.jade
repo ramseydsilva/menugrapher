@@ -1,0 +1,49 @@
+extends ../layout
+
+block content
+    div(class='panel panel-default album')
+        div(class='panel-body')
+
+            div(class='clearfix row-fluid')
+
+                div(class='col-sm-12')
+                    div(class='container-fluid')
+                        div(class='row-fluid')
+                            div(class='col-sm-12')
+                                div.row
+                                    legend.pull-left
+                                        div.col-xs-6.col-xs-push-6
+                                            if album.userHasRights(user)
+                                                div.pull-right.text-right
+                                                    a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
+                                                    a(class='btn btn-sm btn-info', href=album.url) Done
+                                        div.col-xs-6.col-xs-pull-6 Add Pictures to #{album.name}
+
+                div(class='row-fluid')
+                    div(class='col-sm-5')
+                        form(class='form-horizontal')
+                            fieldset
+                                p.lead From computer
+                                input(id='image', type='file', name='image' multiple)
+
+
+                    div(class='col-sm-1') &nbsp;
+                    div(class='col-sm-6')
+                        form(class='form-horizontal')
+                            fieldset
+                                p.lead From internet
+                                input(type='text', class='image-url form-control', placeholder='Paste a url')
+
+                div(class='clearfix padded row-fluid')
+                    button(id='upload', class='btn btn-warning')
+                        i.fa.fa-upload
+                        | Upload
+                    input(type='hidden', id='album', value=(!!album._id) ? album._id : albumId)
+
+                div(class='clearfix padded row-fluid')
+                    div(id='uploads', class='row-fluid')
+                        - var cols = 3
+                        - var posts = album.pics.reverse()
+                        div#album-posts
+                        - each post in posts
+                            include ../includes/postEdit

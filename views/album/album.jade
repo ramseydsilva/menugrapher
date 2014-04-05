@@ -19,7 +19,7 @@ block content
                                     if album.userHasRights(user)
                                     div.pull-right
                                         if (album.userHasRights(user))
-                                            a(class='btn btn-sm btn-success', href='/posts/new/?album=true&albumId=#{album._id}') Add Pictures
+                                            a(class='btn btn-sm btn-success', href=album.addUrl) Add Pictures
                                             a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
                                             a(class='btn btn-sm btn-danger', href=album.deleteUrl) Delete
                         div(class='row-fluid')

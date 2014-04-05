@@ -11,18 +11,17 @@ block content
                         div(class='row-fluid')
                             div(class='col-sm-12')
                                 legend.pull-left
-                                    | Delete Album
-                                    if album.userHasRights(user)
-                                        div.pull-right
-                                            button(class='btn btn-sm btn-danger album-delete', deletePics='true') Delete Pics and Album
-                                            button(class='btn btn-sm btn-warning album-delete', deletePics='false') Delete Only Album
-                                            a(class='btn btn-sm btn-info', href=album.url) Cancel
-                                div.lead #{album.name}
-
-                                div.row-fluid.padded.clearfix= album.description
+                                    div.col-xs-6.col-xs-push-6
+                                        if album.userHasRights(user)
+                                            div.pull-right.text-right
+                                                button(class='btn btn-sm btn-danger album-delete', deletePics='true') Delete Pics and Album
+                                                button(class='btn btn-sm btn-warning album-delete', deletePics='false') Delete Only Album
+                                                a(class='btn btn-sm btn-success', href=album.url) Done
+                                                a(class='btn btn-sm btn-info', href=album.url) Cancel
+                                    div.col-xs-6.col-xs-pull-6 Delete Album #{(!!album.name) ? ": " + album.name : ""}
 
                                 - var cols = 3
                                 - var posts = album.pics.reverse()
                                 div#album-posts
                                 - each post in posts
-                                    include ../includes/post
+                                    include ../includes/postEdit

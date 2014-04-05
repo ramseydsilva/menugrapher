@@ -37,6 +37,10 @@ albumSchema.virtual('editUrl').get(function() {
     return this.url + '/edit';
 });
 
+albumSchema.virtual('addUrl').get(function() {
+    return this.url + '/add';
+});
+
 albumSchema.virtual('deleteUrl').get(function() {
     return this.url + '/delete';
 });

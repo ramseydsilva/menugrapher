@@ -47,3 +47,18 @@ exports.delete = function(req, res) {
         }
     });
 };
+
+exports.add = function(req, res) {
+    var album = res.locals.album;
+    var breadcrumbs = [breadcrumb.home(), breadcrumb.albums(), breadcrumb.album(album, 'active'),
+        { text: 'Add Pictures', url: album.addUrl, class: 'active'} ];
+
+    res.render('album/add', {
+        title: "Add Pictures",
+        breadcrumbs: breadcrumbs,
+        back: {
+            text: 'Back to Album',
+            href: album.url
+        }
+    });
+};

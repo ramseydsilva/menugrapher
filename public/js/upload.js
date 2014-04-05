@@ -21,20 +21,30 @@ define([
         var progressBar = $('<div class="progress progress-info progress-striped active"><div class="progress-bar"></div></div>');
         uploadBox.html(progressBar);
 
-        $('#uploads').append(uploadBox);
-        if($('#uploads .upload_box, #uploads .post-box').length % 4 == 0)
-            $('#uploads').append('<div class="clearfix"></div>');
+        $('#uploads').prepend(uploadBox);
 
         return progressBar;
-    }
+    };
+
+    function createDeleteAlbumClicked() {
+        var btn = $('#album-create i');
+        if (btn.hasClass('fa-square-o')) {
+            btn.removeClass('fa-square-o');
+            btn.addClass('fa-check-square');
+            btn.parent().removeClass('btn-default').addClass('btn-info');
+        } else {
+            btn.removeClass('fa-check-square');
+            btn.addClass('fa-square-o');
+            btn.parent().removeClass('btn-info').addClass('btn-default');
+        }
+        createDeleteAlbum();
+    };
 
     function createDeleteAlbum() {
-        if (!!$('#createAlbum').length) {
-            socket.emit('create-album', {
-                album: $('#album').val(),
-                create: $('#createAlbum')[0].checked
-            });
-        };
+        socket.emit('create-album', {
+            album: $('#album').val(),
+            create: $('#album-create i').hasClass('fa-check-square')
+        });
     };
 
     $(document).ready(function() {
@@ -46,8 +56,8 @@ define([
         });
 
         createDeleteAlbum();
-        $('#createAlbum').on('click', function(e) {
-            createDeleteAlbum();
+        $('#album-create').on('click', function(e) {
+            createDeleteAlbumClicked();
         });
 
         $('#upload').on('click', function(e){

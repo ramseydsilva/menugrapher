@@ -6,6 +6,7 @@ require.config({
         "underscore": "lib/underscore-min",
         "typeahead": "lib/bootstrap3-typeahead.min",
         "upload": "upload",
+        "album": "album",
         "sockets": "sockets",
     },
     shim: {
@@ -91,9 +92,8 @@ define([
     $(document).ready(function() {
 
         // load upload script only if user is on upload page
-        if(!!$('#upload').length) {
-            require(['upload']);
-        }
+        if(!!$('#upload').length) require(['upload']);
+        if(!!$('.album-update, .album-delete').length) require(['album']);
 
         $('.post-update').on('click', function(e) {
             socket.emit('post-update', {
@@ -104,24 +104,6 @@ define([
                 restaurant: $('#restaurant').val(),
                 category: $('#category').val(),
                 item: $('#item').val()
-            });
-        });
-
-        $('.album-update').on('click', function(e) {
-            socket.emit('album-update', {
-                id: $('.album').get(0).id,
-                name: $('#album-name').val(),
-                city: $('#city').val(),
-                restaurant: $('#restaurant').val(),
-                category: $('#category').val(),
-                description: $('#description').val()
-            });
-        });
-
-        $('.album-delete').on('click', function(e) {
-            socket.emit('album-delete', {
-                id: $('.album').get(0).id,
-                deletePics: $(e.currentTarget).attr('deletePics')
             });
         });
 

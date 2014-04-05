@@ -24,15 +24,18 @@ block content
                                 input(type='text', class='image-url form-control', placeholder='Paste a url')
 
                 div(class='clearfix padded row-fluid')
-                    div(class='col-sm-1')
-                        input(id='upload', type='submit', value='Upload', class='btn btn-warning')
-                    div(class='col-sm-11')
-                        h4
-                            input(type='checkbox', checked=album, id='createAlbum') 
-                            input(type='hidden', id='album', value=albumId)
-                            |  Create Album
-
-
+                    button(id='upload', class='btn btn-warning')
+                        i.fa.fa-upload
+                        | Upload
+                    if (!!album)
+                        button(id='album-create', class="btn btn-info")
+                            i.fa.fa-check-square
+                            | Make Album
+                    else
+                        button(id='album-create', class="btn btn-default")
+                            i.fa.fa-square-o
+                            | Make Album
+                    input(type='hidden', id='album', value=albumId)
 
                 div(class='clearfix padded row-fluid')
                     div(id='uploads', class='row-fluid')

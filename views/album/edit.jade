@@ -8,14 +8,15 @@ block content
                 div(class='container-fluid')
                     div(class='row-fluid')
                         div(class='col-sm-12')
-                            div.row-fluid.clearfix
-                                div.col-sm-12
-                                    legend.pull-left
-                                        | Edit Album
+                            div.row
+                                legend.pull-left
+                                    div.col-xs-6.col-xs-push-6
                                         if album.userHasRights(user)
-                                            div.pull-right
+                                            div.pull-right.text-right
                                                 a(class='btn btn-sm btn-danger', href=album.url) Cancel
                                                 button(class='btn btn-sm btn-warning album-update') Save Changes
+                                    div.col-xs-6.col-xs-pull-6 Edit Album #{(!!album.name) ? ": " + album.name : ""}
+
                             div.row-fluid
                                 div.col-sm-12
                                     input(class='form-control', type=text, id='album-name', placeholder='Album name', value=album.name)
