@@ -23,7 +23,6 @@ middleware.redirectToLoginIfNotLoggedIn = function(req, res, next) {
 middleware.userExists = function(req, res, next) {
     User.findOne({_id: req.param('user')}, function(err, currentUser) {
         if (currentUser) {
-            console.log(currentUser);
             res.locals.currentUser = currentUser;
             next();
         } else {

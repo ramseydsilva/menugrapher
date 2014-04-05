@@ -82,6 +82,8 @@
     "nconf": "^0.6.9",
     "FileReader": "^0.10.2",
     "bufferjs": "^2.0.0",
+    "jsdoc": "^3.3.0-alpha5",
+    "ink-docstrap": "^0.3.0-0"
   },
   "maintainers": [
     {

@@ -137,7 +137,7 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
             } else {
                 // Create album unchecked, delete only if album is empty
                 if (!!data.album) {
-                    albumHelpers.deleteAlbumIfEmpty({_id: data.album, _user: socket.handshake.user.id}, io);
+                    albumHelpers.deleteAlbumIfEmpty({_id: data.album, _user: socket.handshake.user.id}, socket, io);
                 }
             }
         }
@@ -152,7 +152,7 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
  */
 postSocket.deleteAlbum = function(socket, io, callback) {
     socket.on('disconnect', function(stream, data) {
-        albumHelpers.deleteAlbumIfEmpty({ _user: socket.handshake.user.id, '_meta.socketId': socket.id}, io);
+        albumHelpers.deleteAlbumIfEmpty({ _user: socket.handshake.user.id, '_meta.socketId': socket.id}, socket, io);
     });
 };
 

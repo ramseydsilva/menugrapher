@@ -9,7 +9,8 @@ var users = [
             website: '',
             location: '',
             gender: '',
-            name: 'John Smith'
+            name: 'John Smith',
+            passwordString: 'johnsmith'
         },
         tokens: []
     },
@@ -21,7 +22,8 @@ var users = [
             website: '',
             location: '',
             gender: '',
-            name: "Ramsey D'silva"
+            name: "Ramsey D'silva",
+            passwordString: 'ramseydsilva'
         },
         tokens: []
     }

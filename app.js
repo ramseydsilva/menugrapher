@@ -77,6 +77,11 @@ app.use(express.methodOverride());
 app.sessionStore = new MongoStore({
     url: app.secrets.db,
     auto_reconnect: true
+}, function(ret) {
+    // Start server only after MongoStore is initialized to avoid connection errors
+    app.server.listen(nconf.get('http:port'), function() {
+      console.log("✔ Express server listening on port %d in %s mode", nconf.get('http:port'), app.settings.env);
+    });
 });
 app.use(express.session({
   secret: app.secrets.sessionSecret,
@@ -128,10 +133,3 @@ app.socketio = require('./socket.io').socketio(app);
 
 var routes = require('./routes')(app);
 
-/**
- * Start Express server.
- */
-
-app.server.listen(nconf.get('http:port'), function() {
-  console.log("✔ Express server listening on port %d in %s mode", nconf.get('http:port'), app.settings.env);
-});

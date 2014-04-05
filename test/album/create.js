@@ -106,11 +106,9 @@ describe('Create new album works', function() {
                     });
                 });
                 socket.once('create-album', function(albumData) {
-                    console.log('returned data is', albumData);
                     data = albumData;
                     Album.findOne({}, function(err, doc) {
                         album = doc;
-                        console.log('returned album is', album);
                         done();
                     });
                 });
@@ -118,11 +116,9 @@ describe('Create new album works', function() {
         });
 
         it('can be created by logged in user', function() {
-            console.log('entered test');
             album._id.should.be.ok;
             album.name.should.be.ok;
             album.pics.length.should.be.exactly(0);
-            console.log(data);
             data[0].elements.should.containEql({'#album': ''+album._id});
         });
 
@@ -135,6 +131,7 @@ describe('Create new album works', function() {
                 });
             }, 500); // Wait half second to allow socket to disconnect
         });
+
     });
 
     var newAlbumTests = [{
@@ -174,7 +171,6 @@ describe('Create new album works', function() {
                             uploadImage(socket, postData);
 
                             socket.once('post-update', function(data) {
-                                socket.disconnect(); // Free the socket
                                 Post.find({}, function(err, posts) {
                                     post = posts[0];
                                     Album.findOne({_id: albumDoc._id}, function(err, doc) {
@@ -203,10 +199,18 @@ describe('Create new album works', function() {
                 album._user.should.be.eql(user._id);
             });
 
-            it('and album link should work contain Image thumb, and be subscribed to album and post room', function(done) {
+            it('and album link should work contain Image thumb, restaurant, category, city, and be subscribed to album and post room', function(done) {
                 request(app).get('/albums/' + album._id).end(function(err, res) {
                     res.text.should.containEql(post.pic.thumbUrl);
                     res.text.should.containEql(album.name);
+
+                    jsdom.env({html: res.text, src: [jquery], done: function (errors, window) {
+                        var $ = window.$;
+                        if (!!postData.city) $('a:contains("' + postData.city + '")').length.should.be.greaterThan(1);
+                        if (!!postData.restaurant) $('a:contains("' + postData.restaurant + '")').length.should.be.greaterThan(1);
+                        if (!!postData.category) $('a:contains("' + postData.category + '")').length.should.be.greaterThan(1);
+                    }});
+
                     jsdom.env({html: res.text, src: [jquery], done: function (errors, window) {
                         var $ = window.$;
                         $('[room="post-' + post._id + '"]').length.should.be.exactly(1);
@@ -227,7 +231,22 @@ describe('Create new album works', function() {
                 });
             });
 
+            it('and can\'t be deleted on socket close or unchecking checkbox', function(done) {
+                socket.emit('create-album', {
+                    album: album._id,
+                    create: false
+                });
+                socket.once('create-album', function(data) {
+                    data.error.should.be.equal('Permission denied');
+                    Album.findOne({_id: album._id}, function(err, albumDoc) {
+                        albumDoc._id.should.be.eql(album._id);
+                        done(err);
+                    });
+                });
+            });
+
             after(function(done) {
+                socket.disconnect(); // Free the socket
                 album.remove();
                 post.remove(done);
             });

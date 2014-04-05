@@ -12,23 +12,8 @@ block content
                         li
                             a(class='text-danger', href=post.deleteUrl) Delete
         div(class='panel-body')
-            p(class='text-primary') Uploaded 
-                if !!post._user && !!post._user.profile.name
-                    | by <a href='#{post._user.url}'>#{post._user.profile.name}</a> 
-                | #{time} 
-
-                if !!post._category && !!post._category.name
-                    | of 
-                    a(class='_category text-warning', href='#{post._category.url}') #{post._category.name}
-                    | 
-                if !!post._city && !!post._city.name
-                    | in 
-                    a(class='_city text-info', href='#{post._city.url}') #{post._city.name}
-                    | 
-                if !!post._restaurant && !!post._restaurant.name
-                    | at 
-                    a(class='_restaurant text-danger', href='#{post._restaurant.url}') #{post._restaurant.name}
-                    | 
+            - var item = post
+            include ../includes/credits
 
             img(src=post.pic.originalUrl, width='100%')
             br

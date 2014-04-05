@@ -2,6 +2,7 @@
 
 var Album = require('../../models/album'),
     should = require('should'),
+    socketer = require('socketer'),
     util = require('../util'),
     async = require('async'),
     albumUtil = require('./util'),
@@ -9,17 +10,17 @@ var Album = require('../../models/album'),
     cityFixture = require('../fixtures/db/city'),
     request = require('supertest');
 
-var album;
+var album, user;
 
 describe('Album ', function(done) {
     before(function(done) {
         util.loadDb(
             function(next) {
                 albumUtil.loadAlbum(next);
-            }, 
+            },
             function(err, results) {
                 album = results[1].albums[0];
-                console.log(album);
+                user = results[1].users[0];
                 var opts = {
                     _user: results[1].users[0]._id,
                     _city: results[1].cities[0]._id,
@@ -33,17 +34,42 @@ describe('Album ', function(done) {
         });
     });
 
+    it('cannot be edited by anonymous user', function(done) {
+        async.parallel([
+            function(next) {
+                socketer.anonRequest(app, album.editUrl, function(err, res) {
+                    res.statusCode.should.be.exactly(403);
+                    next(err);
+                });
+            },
+            function(next) {
+                socketer.anonRequest(app, album.deleteUrl, function(err, res) {
+                    res.statusCode.should.be.exactly(403);
+                    next(err);
+                });
+            },
+            function(next) {
+                socketer.authRequest(app, album.editUrl, {email: user.email, password: user.profile.passwordString}, function(err, res) {
+                    res.statusCode.should.be.exactly(200);
+                    next(err);
+                });
+            }
+        ], function(err, results) {
+            done(err);
+        });
+    });
+
     it('edit page displays correct values', function(done) {
-        request(app).get(album.editUrl).expect(200, function(err, res) {
-            res.text.should.containEql(album._restaurant.name);
-            res.text.should.containEql(album._city.name);
-            res.text.should.containEql(album._category.name);
+        socketer.authRequest(app, album.editUrl, {email: user.email, password: user.profile.passwordString}, function(err, res) {
+            res.body.should.containEql(album._restaurant.name);
+            res.body.should.containEql(album._city.name);
+            res.body.should.containEql(album._category.name);
             done(err);
         });
     });
 
     it('delete page deletes post', function(done) {
-        request(app).get(album.deleteUrl).expect(200, function(err, res) {
+        socketer.authRequest(app, album.deleteUrl, {email: user.email, password: user.profile.passwordString}, function(err, res) {
             done(err);
         });
     });

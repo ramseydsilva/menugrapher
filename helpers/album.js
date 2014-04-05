@@ -7,32 +7,42 @@ var Album = require('../models/album'),
     path = require('path'),
     jade = require('jade');
 
-var deleteAlbumIfEmpty = function(options, io, callback) {
+var deleteAlbumIfEmpty = function(options, socket, io, callback) {
     // Don't force delete if the album has pictures
-    deleteAlbum(options, false, io, callback);
+    deleteAlbum(options, false, socket, io, callback);
 };
 
 module.exports.deleteAlbumIfEmpty = deleteAlbumIfEmpty;
 
-var deleteAlbum = function(options, force, io, callback) {
+var deleteAlbum = function(options, force, socket, io, callback) {
     Album.findOne(options, function(err, album) {
         if (!!album) {
             var element = {};
             element['#album-' + album._id ] = '';
 
             // IF album is empty or if forceful delete
-            console.log('deleting album if empty', !!force, album.pics.length);
             if (!!force || album.pics.length == 0) {
                 album.remove(function(err, doc) {
-                    console.log('album deleted', doc);
                     if (err) throw err;
+
+                    socket.emit('create-album', {
+                        success: true
+                    });
 
                     io.sockets.in('albums-user-' + doc._user).emit('create-album', [{
                         action: 'remove',
                         elements: element
                     }]);
                 });
+            } else {
+                socket.emit('create-album', {
+                    error: 'Permission denied'
+                });
             }
+        } else {
+            socket.emit('create-album', {
+                error: 'Album not found'
+            });
         }
         if (!!callback)
             callback();

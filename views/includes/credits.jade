@@ -1,0 +1,15 @@
+p(class='text-primary') Uploaded 
+    if !!item._user && !!item._user.profile.name
+        | by <a href='#{item._user.url}'>#{item._user.profile.name}</a> 
+    | #{time} 
+    if !!item._category && !!item._category.name
+        | of 
+        a(class='_category text-warning', href='#{item._category.url}') #{item._category.name}
+        | 
+    if !!item._city && !!item._city.name
+        | in 
+        a(class='_city text-info', href='#{item._city.url}') #{item._city.name}
+        | 
+    if !!item._restaurant && !!item._restaurant.name
+        | at 
+        a(class='_restaurant text-danger', href='#{item._restaurant.url}') #{item._restaurant.name}

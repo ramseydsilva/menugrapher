@@ -20,7 +20,13 @@ block content
                                     div.pull-right
                                         a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
                                         a(class='btn btn-sm btn-danger', href=album.deleteUrl) Delete
+                        div(class='row-fluid')
+                            div(class='col-sm-12')
+                                - var item = album
+                                include ../includes/credits
 
+                        div(class='row-fluid')
+                            div(class='col-sm-12')
                                 - var cols = 3
                                 - var posts = album.pics.reverse()
                                 div#album-posts

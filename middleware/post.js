@@ -5,7 +5,6 @@ var post = require('../models/post'),
     middleware = {};
 
 middleware.postExists = function(req, res, next) {
-    console.log('checking if post exists');
     post.findOne({_id: req.param('post')}).populate('_user').populate('_city').populate('_restaurant').populate('_category').populate('_item').exec(function(err, post) {
         if (post) {
             res.locals.post = post;
@@ -21,7 +20,7 @@ middleware.userHasRights = function(req, res, next) {
     if (res.locals.post.userHasRights(req.user)) {
         next();
     } else {
-        res.status(405);
+        res.status(403);
         res.send();
     }
 };

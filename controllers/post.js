@@ -26,7 +26,6 @@ exports.posts = function(req, res) {
 };
 
 exports.new = function(req, res) {
-    console.log(req.query.city, req.query.category, req.query.restaurant);
     var breadcrumbs = [ breadcrumb.home(), breadcrumb.posts(), breadcrumb.newPost() ];
     res.render('post/newPost', {
         title: 'New Post',
@@ -54,7 +53,6 @@ exports.post = function(req, res) {
 
 exports.edit = function(req, res) {
     var post = res.locals.post;
-    console.log(post);
     var breadcrumbs = [ breadcrumb.home(), breadcrumb.city(post._city), breadcrumb.restaurant(post._restaurant), breadcrumb.post(post, 'active'),
         { text: 'Edit', url: post.editUrl, class: 'active'} ];
 

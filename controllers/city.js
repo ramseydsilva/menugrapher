@@ -14,7 +14,6 @@ exports.restaurants = function(req, res) {
         },
         restaurants: function(next) {
             restaurant.find({_city: city._id}, function(err, restaurants) {
-                console.log(err, restaurants);
                 next(err, restaurants);
             });
         }
@@ -38,7 +37,6 @@ exports.city = function(req, res) {
         },
         restaurants: function(next) {
             restaurant.find({_city: city._id}, function(err, restaurants) {
-                console.log(err, restaurants);
                 next(err, restaurants);
             });
         },

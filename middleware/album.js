@@ -7,7 +7,7 @@ var Album = require('../models/album'),
     middleware = {};
 
 middleware.albumExists = function(req, res, next) {
-    Album.findOne({_id: req.param('album')}).populate('_user').populate('pics').exec(function(err, album) {
+    Album.findOne({_id: req.param('album')}).populate('_city').populate('_restaurant').populate('_category').populate('_user').populate('pics').exec(function(err, album) {
         if (album) {
             async.map(album.pics, function(pic, callback) {
                 Post.findOne({_id: pic._id}).populate('_city').populate('_category').populate('_restaurant').exec(function(err, post) {
@@ -25,5 +25,15 @@ middleware.albumExists = function(req, res, next) {
         }
     });
 }
+
+middleware.userHasRights = function(req, res, next) {
+    if (res.locals.album.userHasRights(req.user)) {
+        next();
+    } else {
+        res.status(403);
+        res.send();
+    }
+};
+
 
 module.exports = middleware;
