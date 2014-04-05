@@ -11,7 +11,7 @@ var Album = require('../../models/album'),
     cityFixture = require('../fixtures/db/city'),
     request = require('supertest');
 
-var album, album2, album3, user;
+var album, album2, album3, album4, newRestaurant, newCategory, newCity, user;
 
 describe('Album', function(done) {
     before(function(done) {
@@ -23,6 +23,12 @@ describe('Album', function(done) {
                 album = results[1].albums[0];
                 album2 = results[1].albums[1];
                 album3 = results[1].albums[2];
+                album4 = results[1].albums[3];
+
+                newRestaurant = results[1].restaurants[1];
+                newCity = results[1].cities[1];
+                newCategory = results[1].categories[1];
+
                 user = results[1].users[0];
                 var opts = {
                     _user: results[1].users[0]._id,
@@ -30,11 +36,27 @@ describe('Album', function(done) {
                     _restaurant: results[1].restaurants[0]._id,
                     _category: results[1].categories[0]._id
                 };
-                var post1 = Post();
-                var post2 = Post();
-                post1.save(function(err, p1) {
-
-                    opts['$addToSet'] = {'pics': p1._id};
+                var post1 = Post({_user: user._id});
+                var post2 = Post({_user: user._id});
+                var post3 = Post({_user: user._id});
+                async.parallel({
+                    post1: function(next) {
+                        post1.save(function(err, p1) {
+                            next(err, p1);
+                        });
+                    },
+                    post2: function(next) {
+                        post2.save(function(err, p2) {
+                            next(err, p2);
+                        });
+                    },
+                    post3: function(next) {
+                        post3.save(function(err, p3) {
+                            next(err, p3);
+                        });
+                    },
+                }, function(err, results) {
+                    opts['$set'] = {'pics': [results.post1._id, results.post2._id]};
                     async.parallel({
                         album1: function(next) {
                             Album.findByIdAndUpdate(album._id, opts).populate('_restaurant').populate('_city').populate('_category').exec(function(err, doc) {
@@ -53,16 +75,47 @@ describe('Album', function(done) {
                                 album3 = doc;
                                 next(err);
                             });
+                        },
+                        album4: function(next) {
+                            opts['$set'] = {'pics': [results.post3._id]};
+                            Album.findByIdAndUpdate(album4._id, opts).populate('_restaurant').populate('_city').populate('_category').exec(function(err, doc) {
+                                album4 = doc;
+                                next(err);
+                            });
                         }
                     }, function(err, results) {
                         done(err);
                     });
-
                 });
-        });
+            });
     });
 
     describe('can be edited by owner', function(done) {
+
+        it('when trying to access add/edit/delete pages', function(done) {
+            async.parallel([
+                function(next) {
+                    socketer.authRequest(app, album.editUrl, {email: user.email, password: user.profile.passwordString}, function(err, res) {
+                        res.statusCode.should.be.exactly(200);
+                        next(err);
+                    });
+                },
+                function(next) {
+                    socketer.authRequest(app, album.deleteUrl, {email: user.email, password: user.profile.passwordString}, function(err, res) {
+                        res.statusCode.should.be.exactly(200);
+                        next(err);
+                    });
+                },
+                function(next) {
+                    socketer.authRequest(app, album.addUrl, {email: user.email, password: user.profile.passwordString}, function(err, res) {
+                        res.statusCode.should.be.exactly(200);
+                        next(err);
+                    });
+                }
+            ], function(err, results) {
+                done(err);
+            });
+        });
 
         it('and edit page displays correct values', function(done) {
             socketer.authRequest(app, album.editUrl, {email: user.email, password: user.profile.passwordString}, function(err, res) {
@@ -101,14 +154,120 @@ describe('Album', function(done) {
             });
         });
 
-        it('on editing city, category, restaurant, posts info also gets updated if empty');
+        it('and on editing city, category, restaurant, posts info gets updated if user selects apply to post', function(done) {
+            Post.update({_id: album.pics[0]._id}, {$unset: {_restaurant: 1, _city: 1, _category: 1}}, function(err, doc) {
+                socketer.authSocket(app, {email: user.email, password: user.profile.passwordString}, function(authSocket) {
+                    var description = 'new desc', name = 'My new title', city = 'Rio de Janeiro', restaurant = 'Copa cabanan', category = 'Mexican';
+                    authSocket.emit('album-update', {
+                        id: album._id,
+                        name: name,
+                        city: city,
+                        restaurant: restaurant,
+                        category: category,
+                        description: description,
+                        applyToPost: 'true'
+                    });
+                    authSocket.once('album-update', function(data) {
+                        authSocket.disconnect();
+                        Post.findOne({_id: album.pics[0]}).populate('_city').populate('_restaurant').populate('_category').exec(function(err, doc) {
+                            doc._city.name.should.be.exactly(city);
+                            doc._restaurant.name.should.be.exactly(restaurant);
+                            doc._category.name.should.be.exactly(category);
+                            done(err);
+                        });
+                    });
+                });
+            });
+        });;
+
+        it('and on editing city, category, restaurant, posts info doesn\'t get updated if empty', function(done) {
+            Post.collection.update({_id: album4.pics[0]._id}, {$unset: {_restaurant: 1, _city: 1, _category: 1}}, function(err, doc) {
+                socketer.authSocket(app, {email: user.email, password: user.profile.passwordString}, function(authSocket) {
+                    var description = 'new desc', name = 'My new title', city = 'Rio de Janeiro', restaurant = 'Copa cabanan', category = 'Mexican';
+                    authSocket.emit('album-update', {
+                        id: album._id,
+                        name: name,
+                        city: city,
+                        restaurant: restaurant,
+                        category: category,
+                        description: description
+                    });
+                    authSocket.once('album-update', function(data) {
+                        authSocket.disconnect();
+                        Post.findOne({_id: album4.pics[0]}).populate('_city').populate('_restaurant').populate('_category').exec(function(err, doc) {
+                            (!!doc._city).should.not.be.ok;
+                            (!!doc._restaurant).should.not.be.ok;
+                            (!!doc._category).should.not.be.ok;
+                            done(err);
+                        });
+                    });
+                });
+            });
+        });;
+
+        it('and on editing city, category, restaurant, posts info doesn\'t get updated if not empty', function(done) {
+            Post.update({_id: album.pics[0]}, {$set: {_restaurant: newRestaurant._id, _city: newCity._id, _category: newCategory._id}}, function(err, doc) {
+                socketer.authSocket(app, {email: user.email, password: user.profile.passwordString}, function(authSocket) {
+                    var description = 'new desc', name = 'My new title', city = 'Rio de Janeiro', restaurant = 'Copa cabanan', category = 'Mexican';
+                    authSocket.emit('album-update', {
+                        id: album._id,
+                        name: name,
+                        city: city,
+                        restaurant: restaurant,
+                        category: category,
+                        description: description
+                    });
+                    authSocket.once('album-update', function(data) {
+                        authSocket.disconnect();
+                        Post.findOne({_id: album.pics[0]}).populate('_city').populate('_restaurant').populate('_category').exec(function(err, doc) {
+                            doc._city.name.should.not.be.exactly(city);
+                            doc._restaurant.name.should.not.be.exactly(restaurant);
+                            doc._category.name.should.not.be.exactly(category);
+                            done(err);
+                        });
+                    });
+                });
+            });
+        });;
+
+        it('and on editing city, category, restaurant, posts info doesn\'t get updated if user selects don\'t apply to post', function(done) {
+            Post.update({_id: album.pics[0]}, {$set: {_restaurant: newRestaurant._id, _city: newCity._id, _category: newCategory._id}}, function(err, doc) {
+                socketer.authSocket(app, {email: user.email, password: user.profile.passwordString}, function(authSocket) {
+                    var description = 'new desc', name = 'My new title', city = 'Rio de Janeiro', restaurant = 'Copa cabanan', category = 'Mexican';
+                    authSocket.emit('album-update', {
+                        id: album._id,
+                        name: name,
+                        city: city,
+                        restaurant: restaurant,
+                        category: category,
+                        description: description,
+
+                    });
+                    authSocket.once('album-update', function(data) {
+                        authSocket.disconnect();
+                        Post.findOne({_id: album.pics[0]}).populate('_city').populate('_restaurant').populate('_category').exec(function(err, doc) {
+                            doc._city.name.should.not.be.exactly(city);
+                            doc._restaurant.name.should.not.be.exactly(restaurant);
+                            doc._category.name.should.not.be.exactly(category);
+                            done(err);
+                        });
+                    });
+                });
+            });
+        });;
 
     });
 
     describe('cannot be edited by anonymous user', function(done) {
 
-        it('when trying to access edit or delete pages', function(done) {
+        it('when trying to access add/edit/delete pages', function(done) {
             async.parallel([
+                function(next) {
+                    socketer.anonRequest(app, album.addUrl, function(err, res) {
+                        res.statusCode.should.be.exactly(403);
+                        next(err);
+                    });
+                },
                 function(next) {
                     socketer.anonRequest(app, album.editUrl, function(err, res) {
                         res.statusCode.should.be.exactly(403);
@@ -118,12 +277,6 @@ describe('Album', function(done) {
                 function(next) {
                     socketer.anonRequest(app, album.deleteUrl, function(err, res) {
                         res.statusCode.should.be.exactly(403);
-                        next(err);
-                    });
-                },
-                function(next) {
-                    socketer.authRequest(app, album.editUrl, {email: user.email, password: user.profile.passwordString}, function(err, res) {
-                        res.statusCode.should.be.exactly(200);
                         next(err);
                     });
                 }

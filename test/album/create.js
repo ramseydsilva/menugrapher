@@ -200,19 +200,24 @@ describe('Create new album works', function() {
             });
 
             it('and album link should work contain Image thumb, restaurant, category, city, and be subscribed to album and post room, but \
-                no edit or delete links', function(done) {
-                request(app).get(album.url).end(function(err, res) {
-                    res.text.should.containEql(post.pic.thumbUrl);
-                    res.text.should.containEql(album.name);
-                    res.text.should.containEql(!!album.description ? album.description : '');
+                no edit/delete/add links for anon user', function(done) {
+                socketer.anonRequest(app, album.url, function(err, res) {
+                    res.body.should.containEql(post.pic.thumbUrl);
+                    res.body.should.containEql(album.name);
+                    res.body.should.containEql(!!album.description ? album.description : '');
 
-                    jsdom.env({html: res.text, src: [jquery], done: function (errors, window) {
+                    res.body.should.not.containEql(album.addUrl);
+                    res.body.should.not.containEql(album.editUrl);
+                    res.body.should.not.containEql(album.deleteUrl);
+                    res.body.should.containEql(post.url);
+                    res.body.should.not.containEql(post.editUrl);
+                    res.body.should.not.containEql(post.deleteUrl);
+
+                    jsdom.env({html: res.body, src: [jquery], done: function (errors, window) {
                         var $ = window.$;
                         if (!!postData.city) $('a:contains("' + postData.city + '")').length.should.be.greaterThan(1);
                         if (!!postData.restaurant) $('a:contains("' + postData.restaurant + '")').length.should.be.greaterThan(1);
                         if (!!postData.category) $('a:contains("' + postData.category + '")').length.should.be.greaterThan(1);
-                        $('a[href="'+album.editUrl+'"]').length.should.be.exactly(0);
-                        $('a[href="'+album.deleteUrl+'"]').length.should.be.exactly(0);
                         $('[room="post-' + post._id + '"]').length.should.be.exactly(1);
                         $('[room="album-' + album._id + '"]').length.should.be.exactly(1);
                         done();
@@ -220,14 +225,15 @@ describe('Create new album works', function() {
                 });
             });
 
-            it('and album page should contain edit and delete links for owner', function(done) {
+            it('and album page should contain edit/delete/add links for owner and post edit/delete links', function(done) {
                 socketer.authRequest(app, album.url, {email: user.email, password: user.profile.passwordString}, function(err, res) {
-                    jsdom.env({html: res.body, src: [jquery], done: function (errors, window) {
-                        var $ = window.$;
-                        $('a[href="'+album.editUrl+'"]').length.should.be.exactly(1);
-                        $('a[href="'+album.deleteUrl+'"]').length.should.be.exactly(1);
-                        done(errors);
-                    }});
+                    res.body.should.containEql(album.addUrl);
+                    res.body.should.containEql(album.editUrl);
+                    res.body.should.containEql(album.deleteUrl);
+                    res.body.should.containEql(post.url);
+                    res.body.should.containEql(post.editUrl);
+                    res.body.should.containEql(post.deleteUrl);
+                    done();
                 });
             });
 

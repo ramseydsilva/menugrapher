@@ -15,8 +15,14 @@ block content
                     div(class='container-fluid')
                         div(class='row-fluid')
                             div(class='col-sm-12')
-                                if currentUser.profile.name
-                                    p.lead #{currentUser.profile.name}
+                                div.row
+                                    legend.pull-left
+                                        div.col-xs-6.col-xs-push-6
+                                            if user && currentUser.id == user.id
+                                                div.pull-right.text-right
+                                                    a(class='btn btn-sm btn-warning', href='/account') Edit Profile
+                                        div.col-xs-6.col-xs-pull-6= currentUser.profile.name
+
                                 - var cols = 3
                                 - each post in posts
                                     include ../includes/post

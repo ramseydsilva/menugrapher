@@ -11,7 +11,7 @@ albumSocket.update = function(socket) {
         if (!!!socket.handshake.user.id) {
             socket.emit('album-update', { error: 'Permission denied' });
         } else {
-            Album.findOne({_id: data.id, _user: socket.handshake.user.id}, function(err, album) {
+            Album.findOne({_id: data.id, _user: socket.handshake.user.id}).populate('pics').exec(function(err, album) {
                 if (err) throw err;
                 if (album) {
                     async.parallel([
@@ -24,6 +24,19 @@ albumSocket.update = function(socket) {
                         album._restaurant = results[0].restaurant._id;
                         album._category = results[0].category._id;
                         album.description = data.description;
+
+                        if (!!data.applyToPost) {
+                            async.each(album.pics, function(post, next) {
+                                if (post.userHasRights(socket.handshake.user)) {
+                                    var opts = {};
+                                    opts['_city'] = results[0].city.id;
+                                    opts['_category'] = results[0].category.id;
+                                    opts['_restaurant'] = results[0].restaurant.id;
+                                    postHelpers.updatePost(post, opts, socket, 'album', next);
+                                }
+                            });
+                        }
+
                         album.save(function(err, doc) {
                             if (err) throw err;
                             socket.emit('album-update', [{

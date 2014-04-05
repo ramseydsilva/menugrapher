@@ -15,13 +15,17 @@ block content
                     div(class='container-fluid')
                         div(class='row-fluid')
                             div(class='col-sm-12')
-                                div.lead #{album.name}
-                                    if album.userHasRights(user)
-                                    div.pull-right
-                                        if (album.userHasRights(user))
-                                            a(class='btn btn-sm btn-success', href=album.addUrl) Add Pictures
-                                            a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
-                                            a(class='btn btn-sm btn-danger', href=album.deleteUrl) Delete
+                                div.row
+                                    legend.pull-left
+                                        div.col-xs-6.col-xs-push-6
+                                            if album.userHasRights(user)
+                                                div.pull-right.text-right
+                                                    a(class='btn btn-sm btn-success', href=album.addUrl) Add Pictures
+                                                    a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
+                                                    a(class='btn btn-sm btn-danger', href=album.deleteUrl) Delete
+                                        div.col-xs-6.col-xs-pull-6= album.name
+
+
                         div(class='row-fluid')
                             div(class='col-sm-12')
                                 - var item = album

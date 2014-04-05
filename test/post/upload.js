@@ -156,7 +156,7 @@ describe('Image uploading works', function() {
                 });
             });
 
-            it('and post html should contain city, restaurant, category names', function() {
+            it('and post html should contain city, restaurant, category names, and edit url', function() {
                 postHtml.should.containEql(postData.city);
                 postHtml.should.containEql(postData.restaurant);
                 postHtml.should.containEql(postData.category);
@@ -171,10 +171,36 @@ describe('Image uploading works', function() {
                 postHtml.should.containEql(post.pic.thumbUrl);
             });
 
-            it('and post page should contain user name and link to user page', function(done) {
-                request(app).get(post.url).end(function(err, res) {
-                    res.text.should.containEql(user.url);
-                    res.text.should.containEql(user.profile.name);
+            it('and post page should contain user name and link to user page, but no edit and delete url for anon user', function(done) {
+                socketer.anonRequest(app, post.url, function(err, res) {
+                    res.body.should.containEql(user.url);
+                    res.body.should.containEql(user.profile.name);
+                    res.body.should.not.containEql(post.editUrl);
+                    res.body.should.not.containEql(post.deleteUrl);
+                    done(err);
+                });
+            });
+
+            it('and post page should contain edit and delete url for user', function(done) {
+                socketer.authRequest(app, post.url, {email: user.email, password: user.profile.passwordString}, function(err, res) {
+                    res.body.should.containEql(post.editUrl);
+                    res.body.should.containEql(post.deleteUrl);
+                    done(err);
+                });
+            });
+
+            it('and user profile page should contain post edit, delete buttons for user', function(done) {
+                socketer.authRequest(app, user.url, {email: user.email, password: user.profile.passwordString}, function(err, res) {
+                    res.body.should.containEql(post.editUrl);
+                    res.body.should.containEql(post.deleteUrl);
+                    done(err);
+                });
+            });
+
+            it('and user profile page should not contain post edit, delete buttons for anon user', function(done) {
+                socketer.anonRequest(app, user.url, function(err, res) {
+                    res.body.should.not.containEql(post.editUrl);
+                    res.body.should.not.containEql(post.deleteUrl);
                     done(err);
                 });
             });

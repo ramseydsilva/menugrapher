@@ -128,4 +128,41 @@ PostHelpers.newPost = function(postData, socket, elementId, callback) {
     });
 };
 
+/**
+ * Updates post info (title, description, city, category, restaurant, item
+ *
+ * @method updatePost
+ * @async
+ */
+PostHelpers.updatePost = function(post, opts, socket, page, callback) {
+
+    Post.findOneAndUpdate({_id: post._id}, opts, function(err, post) {
+        if (page == 'post') {
+            // Emit to socket instructing refresh only if on post page
+            socket.emit('post-update', [{
+                action: 'redirect',
+                url: post.url
+            }]);
+        }
+
+        // All other clients with this post should update their info
+        var elementsToUpdate = {};
+        elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
+        elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
+        elementsToUpdate['#' + post.id + ' ._city'] = post._city.name;
+        elementsToUpdate['#' + post.id + ' ._restaurant'] = post._restaurant.name;
+        elementsToUpdate['#' + post.id + ' ._category'] = post._category.name;
+
+        socket.broadcast.to('post-' + post.id).emit('post-update', [{
+            action: 'html',
+            elements: elementsToUpdate
+        }]);
+
+        if (!!callback)
+            callback(err, post);
+
+    });
+
+};
+
 module.exports = PostHelpers;

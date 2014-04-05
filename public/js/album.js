@@ -24,7 +24,8 @@ define([
                 city: $('#city').val(),
                 restaurant: $('#restaurant').val(),
                 category: $('#category').val(),
-                description: $('#description').val()
+                description: $('#description').val(),
+                applyToPost: e.currentTarget.hasAttribute('applyToPost')
             });
         });
 

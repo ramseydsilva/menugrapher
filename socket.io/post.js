@@ -28,38 +28,16 @@ postSocket.update = function(socket, callback) {
             ], function(err, results) {
                 if (post) {
                     if (post.userHasRights(socket.handshake.user)) {
-                        post.title = data.title;
-                        post.description = data.description;
-                        post._city = results[0].city.id;
-                        post._category = results[0].category.id;
-                        post._restaurant = results[0].restaurant.id;
-                        post._item = results[0].item.id;
+                        var opts = {
+                            title: data.title,
+                            description: data.description,
+                            _city: results[0].city.id,
+                            _category: results[0].category.id,
+                            _restaurant: results[0].restaurant.id,
+                            _item: results[0].item.id
+                        };
+                        postHelpers.updatePost(post, opts, socket, 'post');
 
-                        post.save(function(err, post, numberAffected) {
-                            // Emit to socket instructing refresh
-                            socket.emit('post-update', [{
-                                action: 'redirect',
-                                url: post.url
-                            }]);
-
-                            // All other clients with this post should update their info
-                            Post.findOne({ _id: post._id }).populate('_city').populate('_restaurant').populate('_category').exec(function(err, post) {
-                                var elementsToUpdate = {};
-                                elementsToUpdate['#' + post.id + ' .post-title'] = post.title;
-                                elementsToUpdate['#' + post.id + ' .post-description'] = post.description;
-                                elementsToUpdate['#' + post.id + ' ._city'] = post._city.name;
-                                elementsToUpdate['#' + post.id + ' ._restaurant'] = post._restaurant.name;
-                                elementsToUpdate['#' + post.id + ' ._category'] = post._category.name;
-
-                                socket.broadcast.to('post-' + post.id).emit('post-update', [{
-                                    action: 'html',
-                                    elements: elementsToUpdate
-                                }]);
-
-                                if (!!callback)
-                                    callback(err, post);
-                            });
-                        });
                     } else {
                         socket.emit('post', {error: 'Permission denied'});
                     }

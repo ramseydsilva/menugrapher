@@ -33,7 +33,7 @@ describe('Post ', function() {
         });
     });
 
-    it(' if non existant gives error but creates new city, restaurant, category, items and links them together', function(done) {
+    it('if non existant gives error but creates new city, restaurant, category, items and links them together', function(done) {
         socketer.anonSocket(app, function(socket) {
             socket.once('connect', function() {
                 socket.emit('post-update', {
@@ -56,7 +56,7 @@ describe('Post ', function() {
         });
     });
 
-    it('updates when post clicks save button on post edit page');
+    it('updates when user clicks save button on post edit page');
     it('cannot be updated by anonymous or non post owner');
     it('post city, category, restaurant can be removed by clicking x mark on post and post listeners are informed');
     it('post can only be deleted by owner by clicking delete button on post page');

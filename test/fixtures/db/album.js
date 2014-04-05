@@ -12,6 +12,10 @@ var albums = [
     {
         name: 'Yet another one!',
         description: 'My third album'
+    },
+    {
+        name: 'Album4!!!!',
+        description: 'Heres four'
     }
 ];
 module.exports.albums = albums;

@@ -14,7 +14,8 @@ block content
                                         if album.userHasRights(user)
                                             div.pull-right.text-right
                                                 a(class='btn btn-sm btn-danger', href=album.url) Cancel
-                                                button(class='btn btn-sm btn-warning album-update') Save Changes
+                                                button(class='btn btn-sm btn-warning album-update') Save Album
+                                                button(class='btn btn-sm btn-info album-update', applyToPost='true') Save Album & Pics
                                     div.col-xs-6.col-xs-pull-6 Edit Album #{(!!album.name) ? ": " + album.name : ""}
 
                             div.row-fluid
