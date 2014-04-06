@@ -56,9 +56,16 @@ define([
                         $(key).remove();
                         // TODO unsubscribe
                     });
+                case "before":
+                    _.each(data.elements, function(value, key) {
+                        $(key).before(value);
+                        subscribeElements($('<div>'+value+'</div>').find('[room]'));
+                    });
+                    break;
                 case "after":
                     _.each(data.elements, function(value, key) {
                         $(key).after(value);
+                        subscribeElements($('<div>'+value+'</div>').find('[room]'));
                     });
                     break;
                 case "val":

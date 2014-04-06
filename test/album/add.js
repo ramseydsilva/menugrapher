@@ -24,7 +24,8 @@ describe('On adding pictures to album', function(done) {
         restaurant: 'Salad King',
         category: 'Thai',
         item: 'Noodles',
-        album: ''
+        album: '',
+        create: true
     }, album, post, user;
 
     function uploadImage(socket, postData) {

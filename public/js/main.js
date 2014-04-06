@@ -12,7 +12,8 @@ require.config({
     shim: {
         "bootstrap": ["jquery"],
         "typeahead": ["jquery"],
-        "jqueryui": ["jquery"]
+        "jqueryui": ["jquery"],
+        "upload": ["sockets"]
     }
 });
 

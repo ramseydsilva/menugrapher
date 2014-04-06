@@ -7,7 +7,7 @@ block content
             div(class='clearfix row-fluid')
                 div(class='col-sm-3')
                     - var title = { name: restaurant.name + ' Menu', url: '' }
-                    - var items = restaurant.menu
+                    - var items = restaurant.nonEmptyMenu
                     include ../includes/leftmenu
 
                 div(class='col-sm-9')

@@ -34,7 +34,8 @@ describe('Create new album works', function() {
         restaurant: 'Salad King',
         category: 'Thai',
         item: 'Noodles',
-        album: ''
+        album: '',
+        create: true
     };
 
     var postImageData = {
@@ -48,7 +49,8 @@ describe('Create new album works', function() {
         restaurant: 'Petit France',
         category: 'French',
         item: 'Poulet roti',
-        album: ''
+        album: '',
+        create: true
     };
 
     var postImageOnlyData = postImageData;
@@ -122,11 +124,11 @@ describe('Create new album works', function() {
             data[0].elements.should.containEql({'#album': ''+album._id});
         });
 
-        it('Empty album should be deleted on socket close', function(done) {
+        it('Empty album should not be deleted on socket close', function(done) {
             socket.disconnect(); // Also frees up socket
             setTimeout(function() {
                 Album.find({}, function(err, docs) {
-                    docs.length.should.be.exactly(0);
+                    docs.length.should.not.be.exactly(0);
                     done(err);
                 });
             }, 500); // Wait half second to allow socket to disconnect
@@ -152,33 +154,19 @@ describe('Create new album works', function() {
             before(function(done) {
                 socketer.authSocket(app, {email: userFixture.user.email, password: userFixture.user.password}, '/login', function(authSocket) {
                     socket = authSocket;
-
-                    socket.once('connect', function() {
-                        socket.emit('create-album', {
-                            album: '',
-                            create: true
-                        });
-                    });
-                    socket.once('create-album', function(data) {
-                        var albumId = data[0].elements['#album'];
-
-                        Album.findOne({_id: albumId}, function(err, albumDoc) {
-                            albumDoc._id.should.be.ok;
-                            albumDoc.name.should.be.ok;
-                            albumDoc.pics.length.should.be.exactly(0);
-
-                            postData['album'] = albumId;
-                            uploadImage(socket, postData);
-
-                            socket.once('post-update', function(data) {
-                                Post.find({}, function(err, posts) {
-                                    post = posts[0];
-                                    Album.findOne({_id: albumDoc._id}, function(err, doc) {
-                                        album = doc;
-                                        done();
-                                    });
-                                });
-                            });
+                    uploadImage(socket, postData);
+                    socket.once('post-update', function(data) {
+                        async.parallel({
+                            post: function(next) {
+                                Post.findOne({}, next);
+                            },
+                            album: function(next) {
+                                Album.findOne().sort('-_id').exec(next);
+                            },
+                        }, function(err, results) {
+                            album = results.album;
+                            post = results.post;
+                            done(err);
                         });
                     });
                 });
@@ -248,17 +236,38 @@ describe('Create new album works', function() {
                 });
             });
 
-            it('and can\'t be deleted on socket close or unchecking checkbox', function(done) {
+            it('and can be deleted on unchecking checkbox and album header elements should be removed from page', function(done) {
                 socket.emit('create-album', {
                     album: album._id,
-                    create: false
+                    delete: true
                 });
                 socket.once('create-album', function(data) {
-                    data.error.should.be.equal('Permission denied');
+                    (!!data.error).should.not.be.ok;
+                    var toRemoveHeader = _.find(data, function(item) { return ['remove'].indexOf(item.action) != -1 });
+                    toRemoveHeader.should.be.ok;
                     Album.findOne({_id: album._id}, function(err, albumDoc) {
-                        albumDoc._id.should.be.eql(album._id);
+                        (!!albumDoc).should.not.be.ok;
                         done(err);
                     });
+                });
+            });
+
+            it('puts album header onto upload image page and links all the current posts to the album', function(done) {
+                socket.emit('create-album', {
+                    album: '',
+                    create: true
+                });
+
+                socket.once('create-album', function(data) {
+                    console.log(data);
+                    var html = _.find(data, function(item) { return ['html', 'append', 'prepend', 'before', 'after'].indexOf(item.action) != -1 });
+                    html.should.be.ok;
+                    var albumId = _.find(data, function(item) { return item.action == 'val' }).elements['#album'];
+                    Album.findOne({_id: albumId}, function(err, doc) {
+                        album = doc;
+                        (!!doc).should.be.ok;
+                    });
+                    done();
                 });
             });
 

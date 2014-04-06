@@ -8,6 +8,7 @@ var request = require('supertest'),
     ss = require('socket.io-stream'),
     async = require('async'),
     app = require('../../app'),
+    Album = require('../../models/album'),
     User = require('../../models/User'),
     Post = require('../../models/post'),
     City = require('../../models/city'),
@@ -209,6 +210,13 @@ describe('Image uploading works', function() {
                 post.remove(function(err, post) {
                     fs.existsSync(post.originalPath).should.be.false;
                     fs.existsSync(post.thumbPath).should.be.false;
+                    done(err);
+                });
+            });
+
+            it('and is not part of an album', function(done) {
+                Album.findOne({pics: post.id}, function(err, doc) {
+                    (!!doc).should.not.be.ok;
                     done(err);
                 });
             });

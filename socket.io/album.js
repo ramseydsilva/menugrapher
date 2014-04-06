@@ -4,7 +4,28 @@ var Album = require('../models/album'),
     Post = require('../models/post'),
     async = require('async'),
     postHelpers = require('../helpers/post'),
+    albumHelpers = require('../helpers/album'),
     albumSocket = {};
+
+/** This socket fires when user either checks or uncheckes
+ * the create album checkbox. If an album id has been specified,
+ * then it does nothing. Successively, it either broadcast add or remove
+ * event to all album user client sockets.
+ */
+albumSocket.createAlbumCheckBox = function(socket, io, callback) {
+    socket.on('create-album', function(data) {
+        if (!!!socket.handshake.user.id) {
+            socket.emit('create-album', {error: 'Permission denied'});
+        } else if (!!data.create) {
+            albumHelpers.createOrGetAlbum(data.album, socket, io);
+        } else if (!!data.album && !!data.delete) {
+            albumHelpers.deleteAlbum({_id: data.album, _user: socket.handshake.user.id}, true, socket, io);
+        } else {
+            socket.emit('create-album', {error: 'Permission denied'});
+        }
+    });
+};
+
 
 albumSocket.update = function(socket) {
     socket.on('album-update', function(data) {
@@ -94,6 +115,7 @@ albumSocket.remove = function(socket) {
 albumSocket.socket = function(io, socket, app) {
     albumSocket.update(socket);
     albumSocket.remove(socket);
+    albumSocket.createAlbumCheckBox(socket, io);
 };
 
 module.exports = albumSocket;

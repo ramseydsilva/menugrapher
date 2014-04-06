@@ -26,6 +26,14 @@ define([
         return progressBar;
     };
 
+    function createDeleteAlbum() {
+        socket.emit('create-album', {
+            album: $('#album').val(),
+            create: $('#album-create i').hasClass('fa-check-square'),
+            delete: !$('#album-create i').hasClass('fa-check-square')
+        });
+    };
+
     function createDeleteAlbumClicked() {
         var btn = $('#album-create i');
         if (btn.hasClass('fa-square-o')) {
@@ -40,13 +48,6 @@ define([
         createDeleteAlbum();
     };
 
-    function createDeleteAlbum() {
-        socket.emit('create-album', {
-            album: $('#album').val(),
-            create: $('#album-create i').hasClass('fa-check-square')
-        });
-    };
-
     $(document).ready(function() {
 
         $(document).keyup(function(e) {
@@ -55,10 +56,13 @@ define([
             }
         });
 
-        createDeleteAlbum();
-        $('#album-create').on('click', function(e) {
-            createDeleteAlbumClicked();
-        });
+        if ($('#album-create').length > 0) {
+            // Run this only if on new post page, not album pages
+            createDeleteAlbum();
+            $('#album-create').on('click', function(e) {
+                createDeleteAlbumClicked();
+            });
+        }
 
         $('#upload').on('click', function(e){
             e.preventDefault();

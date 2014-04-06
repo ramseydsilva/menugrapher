@@ -1,0 +1,9 @@
+div(id='albumHeader', class='row-fluid')
+    div(class='col-sm-12')
+        div.row
+            legend.pull-left
+                div.col-xs-6.col-xs-push-6
+                    if album.userHasRights(user)
+                        div.pull-right.text-right
+                            a(class='btn btn-sm btn-warning', href=album.editUrl) Edit
+                div.col-xs-6.col-xs-pull-6= album.name

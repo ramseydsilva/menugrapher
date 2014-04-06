@@ -1,6 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose'),
+    _ = require('underscore'),
     item = require('./item'),
     user = require('./User'),
     city = require('./city');
@@ -21,6 +22,10 @@ var restaurantSchema = new mongoose.Schema({
 
 restaurantSchema.virtual('url').get(function() {
     return "/restaurants/" + this._id;
+});
+
+restaurantSchema.virtual('nonEmptyMenu').get(function() {
+    return _.filter(this.menu, function(item) { return !!item.name && item.name != ''; });
 });
 
 restaurantSchema.index( { 'menu._id': 1 } );

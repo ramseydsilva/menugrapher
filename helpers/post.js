@@ -98,12 +98,19 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
     });
 };
 
-PostHelpers.newPost = function(postData, socket, elementId, callback) {
-    var newPost = new Post(postData);
-    newPost.save(function(err, newPost, numberAffected) {
-
-        Post.findOne({_id: newPost._id}).populate('_category').populate('_city').populate('_restaurant').exec(function(err, post) {
-            // Generate post html to send to client
+PostHelpers.socketNewPost = function(post, elementId, socket, callback) {
+    async.waterfall([
+        function(next) {
+            if (!post._city.name || !post._restaurant.name || !post._category.name) {
+                // Populate attrs
+                Post.findOne({_id: post._id}).populate('_category').populate('_city').populate('_restaurant').exec(function(err, post) {
+                    next(err, post);
+                });
+            } else {
+                next(null, post);
+            }
+        },
+        function(post, next) {
             fs.readFile(path.join(app.get('views'), 'includes/postEdit.jade'), 'utf8', function (err, data) {
                 if (err) throw err;
 
@@ -121,10 +128,16 @@ PostHelpers.newPost = function(postData, socket, elementId, callback) {
                     elements: elementsToUpdate
                 }]);
 
-                callback(err, post);
-
+                next(err, post);
             });
-        });
+        }
+    ], callback);
+};
+
+PostHelpers.newPost = function(postData, socket, elementId, callback) {
+    var newPost = new Post(postData);
+    newPost.save(function(err, newPost) {
+        PostHelpers.socketNewPost(newPost, elementId, socket, callback);
     });
 };
 
