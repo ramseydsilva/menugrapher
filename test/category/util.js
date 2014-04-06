@@ -5,8 +5,8 @@ var util = require('../util'),
     _ = require('underscore'),
     categoryFixture = require('../fixtures/db/category');
 
-var categories = [];
 var loadCategories = function(next) {
+    var categories = [];
     _.each(categoryFixture.categories, function(category) {
         util.loadFixture(Category, category, function(err, doc) {
             if (err) next(err);

@@ -5,8 +5,8 @@ var util = require('../util'),
     _ = require('underscore'),
     restaurantFixture = require('../fixtures/db/restaurant');
 
-var restaurants = [];
 var loadRestaurants = function(next) {
+    var restaurants = [];
     _.each(restaurantFixture.restaurants, function(restaurant) {
         util.loadFixture(Restaurant, restaurant, function(err, doc) {
             if (err) next(err);

@@ -5,8 +5,8 @@ var util = require('../util'),
     _ = require('underscore'),
     itemFixture = require('../fixtures/db/item');
 
-var items = [];
 var loadItems = function(next) {
+    var items = [];
     _.each(itemFixture.items, function(item) {
         util.loadFixture(Item, item, function(err, doc) {
             if (err) next(err);

@@ -53,9 +53,9 @@ describe('Create new album works', function() {
 
     var postImageOnlyData = postImageData;
     postImageOnlyData['city'] = '';
-    postImageData['restaurant'] = '';
-    postImageData['category'] = '';
-    postImageData['item'] = '';
+    postImageOnlyData['restaurant'] = '';
+    postImageOnlyData['category'] = '';
+    postImageOnlyData['item'] = '';
 
     function uploadImage(socket, postData) {
         var stream = ss.createStream();
@@ -261,6 +261,8 @@ describe('Create new album works', function() {
                     });
                 });
             });
+
+            it('has a generic name of Album 1, Album 2, Album 3 etc. not My new album 1 etc');
 
             after(function(done) {
                 socket.disconnect(); // Free the socket

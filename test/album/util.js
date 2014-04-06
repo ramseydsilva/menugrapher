@@ -10,8 +10,8 @@ var util = require('../util'),
     categoryUtil = require('../category/util'),
     albumFixture = require('../fixtures/db/album');
 
-var albums = [];
 var loadAlbums = function(next) {
+    var albums = [];
     _.each(albumFixture.albums, function(album) {
         util.loadFixture(Album, album, function(err, doc) {
             if (err) next(err);

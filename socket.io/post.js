@@ -9,7 +9,7 @@ var Post = require('../models/post'),
     ss = require('socket.io-stream'),
     postHelpers = require('../helpers/post'),
     albumHelpers = require('../helpers/album'),
-    album = require('../models/album'),
+    Album = require('../models/album'),
     postSocket = {};
 
 /** This socket handles the post update page. It allows all users
@@ -68,19 +68,19 @@ postSocket.createAlbumCheckBox = function(socket, io, callback) {
                 // First find if album already exists given the albumId
                 async.waterfall([
                     function(next) {
-                        album.findOne({ _id: data.album}, function(err, doc) {
+                        Album.findOne({ _id: data.album}, function(err, doc) {
                             next(null, doc);
                         });
                     },
                     function(existingAlbum, next) {
                         if (!!!existingAlbum) {
                             // Can't find album, create new one but first query for previously created albums starting with 'Album '
-                            album.findOne({name: /^Album\ /i, _user:socket.handshake.user.id}, {}, { sort: {'_id' : -1}}, function(err, previousAlbum) {
+                            Album.findOne({name: /^Album\ /i, _user:socket.handshake.user.id}, {}, { sort: {'_id' : -1}}, function(err, previousAlbum) {
                                 var name = 'Album 1';
                                 if (!!previousAlbum && previousAlbum.name) {
                                     name = previousAlbum.name.replace(/[0-9]+(?!.*[0-9])/, parseInt(previousAlbum.name.match(/[0-9]+(?!.*[0-9])/), 10)+1);
                                 }
-                                album.create({ 
+                                Album.create({ 
                                     name: name, 
                                     _user: socket.handshake.user.id,
                                     '_meta.socketId': socket.id
@@ -212,7 +212,7 @@ postSocket.imageUpload = function(socket, io, callback) {
                         });
                     }
                 }, function(err, results) {
-                    postHelpers.newPost({
+                    var opts = {
                         user: {
                             _id: socket.handshake.user.id,
                             name: socket.handshake.user.profile.name
@@ -228,15 +228,41 @@ postSocket.imageUpload = function(socket, io, callback) {
                         _restaurant: results.post.restaurant.id,
                         _category: results.post.category.id,
                         _item: results.post.item.id
-                    }, socket, elementId, function(err, post) {
-
-                        // Assign to album
-                        if (!!data.album) {
-                            albumHelpers.assignPostToAlbum(post, data.album, socket.handshake.user, io, function(err, doc) {
-                                if (!!callback)
-                                    callback(err, post, doc)
+                    };
+                    async.waterfall([
+                        function(next) {
+                            // Populate values with album values
+                            if ((results.post.city.name == "" || results.post.restaurant.name == "" || results.post.category.name == "") && data.album) {
+                                Album.findById(data.album, function(err, doc){
+                                    if (err) next(err);
+                                    if (doc) {
+                                        if (!!doc._city && results.post.city.name == "") {
+                                            opts['_city'] = doc._city;
+                                        }
+                                        if (!!doc._restaurant && results.post.restaurant.name == "")
+                                            opts['_restaurant'] = doc._restaurant;
+                                        if (!!doc._category && results.post.category.name == "")
+                                            opts['_category'] = doc._category;
+                                        next(err);
+                                    }
+                                });
+                            } else {
+                                next(null);
+                            }
+                        },
+                        function(next) {
+                            console.log(opts);
+                            postHelpers.newPost(opts, socket, elementId, function(err, post) {
+                                // Assign to album
+                                if (!!data.album) {
+                                    albumHelpers.assignPostToAlbum(post, data.album, socket.handshake.user, io, function(err, doc) {
+                                        if (!!callback)
+                                            callback(err, post, doc)
+                                    });
+                                }
                             });
                         }
+                    ], function(err, results) {
                     });
                 });
             });
