@@ -103,7 +103,7 @@ describe('Image uploading works', function() {
 
     _.each(newPostTests, function(testInfo) {
         describe(testInfo.name, function() {
-            var post, postHtml, socket, postData = testInfo.postData;
+            var album, post, postHtml, socket, postData = testInfo.postData;
 
             before(function(done) {
                 util.loadDb(
@@ -221,8 +221,33 @@ describe('Image uploading works', function() {
                 });
             });
 
+            it('if album is created after post is added, it assigns post to album', function(done) {
+                socketer.authSocket(app, {email: userFixture.user.email, password: userFixture.user.password}, '/login', function(authSocket) {
+                    socket = authSocket;
+                    socket.once('connect', function() {
+                        socket.emit('create-album', {
+                            album: '',
+                            create: true,
+                            pics: [post.id]
+                        });
+                    });
+                    socket.once('create-album', function(albumData) {
+                        socket.disconnect(); // Free the socket
+                        Album.findOne(function(err, doc) {
+                            album = doc;
+                            Album.findOne({pics: post._id}, function(err, doc) {
+                                (!!doc).should.be.ok;
+                                done(err);
+                            });
+                        });
+                    });
+                });
+            });
+
             after(function(done) {
-                post.remove(done);
+                album.remove(function() {
+                    post.remove(done);
+                });
             });
         });
     });

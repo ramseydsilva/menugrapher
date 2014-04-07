@@ -5,6 +5,7 @@ var Album = require('../models/album'),
     async = require('async'),
     postHelpers = require('../helpers/post'),
     albumHelpers = require('../helpers/album'),
+    _ = require('underscore'),
     albumSocket = {};
 
 /** This socket fires when user either checks or uncheckes
@@ -17,7 +18,19 @@ albumSocket.createAlbumCheckBox = function(socket, io, callback) {
         if (!!!socket.handshake.user.id) {
             socket.emit('create-album', {error: 'Permission denied'});
         } else if (!!data.create) {
-            albumHelpers.createOrGetAlbum(data.album, socket, io);
+            albumHelpers.createOrGetAlbum(data.album, socket, io, function(err, album) {
+                /*
+                // Assign previously added pics to album
+                if (!!data.pics) {
+                    _.each(data.pics, function(pic) {
+                        if (!!pic && album.pics.indexOf(pic) == -1) {
+                            Post.findOne({_id: pic}, function(err, post) {
+                                if (post) albumHelpers.assignPostToAlbum(post, album, socket.handshake.user, io);
+                            });
+                        }
+                    });
+                }*/
+            });
         } else if (!!data.album && !!data.delete) {
             albumHelpers.deleteAlbum({_id: data.album, _user: socket.handshake.user.id}, true, socket, io);
         } else {
@@ -25,7 +38,6 @@ albumSocket.createAlbumCheckBox = function(socket, io, callback) {
         }
     });
 };
-
 
 albumSocket.update = function(socket) {
     socket.on('album-update', function(data) {

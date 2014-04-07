@@ -122,47 +122,51 @@ module.exports.deleteAlbum = deleteAlbum;
 var assignPostToAlbum = function(post, album, currentUser, io, callback) {
     if (!!album) {
         album.update({ $addToSet: {pics: post._id}}, function(err, numberUpdated) {
-            async.parallel({
-                assignRestaurantCityCategory: function(next) {
-                    if (!!!album._restaurant && post._restaurant)
-                        album._restaurant = post._restaurant;
-                    if (!!!album._city && post._city)
-                        album._city = post._city;
-                    if (!!!album._category && post._category)
-                        album._category = post._category;
-                    console.log(album);
-                    album.save(function(err, album) {
-                        next(err, album);
-                    });
-                },
-                generatePostHtml: function(next) {
-                    if (err) throw err;
-
-                    // Generate post html to send to client
-                    fs.readFile(path.join(app.get('views'), 'includes/post.jade'), 'utf8', function (err, data) {
+            if (!!numberUpdated) { // Check if post was added if doesn't already exist
+                async.parallel({
+                    assignRestaurantCityCategory: function(next) {
+                        if (!!!album._restaurant && post._restaurant)
+                            album._restaurant = post._restaurant;
+                        if (!!!album._city && post._city)
+                            album._city = post._city;
+                        if (!!!album._category && post._category)
+                            album._category = post._category;
+                        console.log(album);
+                        album.save(function(err, album) {
+                            next(err, album);
+                        });
+                    },
+                    generatePostHtml: function(next) {
                         if (err) throw err;
 
-                        var elementsToUpdate = {},
-                            fn = jade.compile(data),
-                            postHtml = fn({
-                                post: post,
-                                user: currentUser,
-                                cols: 3,
-                                target: '_blank'
-                            });
+                        // Generate post html to send to client
+                        fs.readFile(path.join(app.get('views'), 'includes/post.jade'), 'utf8', function (err, data) {
+                            if (err) throw err;
 
-                        elementsToUpdate['#album-posts'] = postHtml;
-                        io.sockets.in('album-' + album._id).emit('album-update', [{
-                            action: 'append',
-                            elements: elementsToUpdate
-                        }]);
+                            var elementsToUpdate = {},
+                                fn = jade.compile(data),
+                                postHtml = fn({
+                                    post: post,
+                                    user: currentUser,
+                                    cols: 3,
+                                    target: '_blank'
+                                });
 
-                        next(err);
+                            elementsToUpdate['#album-posts'] = postHtml;
+                            io.sockets.in('album-' + album._id).emit('album-update', [{
+                                action: 'append',
+                                elements: elementsToUpdate
+                            }]);
 
-                    });
-            }}, function(err, results) {
+                            next(err);
+
+                        });
+                }}, function(err, results) {
+                    if (!!callback) callback(err, {post: post, album: album});
+                });
+            } else {
                 if (!!callback) callback(err, {post: post, album: album});
-            });
+            }
         });
     } else {
         if (!!callback) callback(null, {post: post, album: album});
