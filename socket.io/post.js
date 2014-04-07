@@ -118,7 +118,7 @@ postSocket.imageUpload = function(socket, io, callback) {
                 // Create city, restaurant, category first before saving post
                 async.parallel({
                     album: function(next) {
-                        if (!!data.album) {
+                        if (!!data.album || !!data.create) {
                             albumHelpers.createOrGetAlbum(data.album, socket, io, next);
                         } else {
                             next(null, null);
@@ -166,7 +166,7 @@ postSocket.imageUpload = function(socket, io, callback) {
                             albumHelpers.assignPostToAlbum(post, results.album, socket.handshake.user, io, next);
                         }
                     ], function(err, results) {
-                        postHelpers.socketNewPost(results.post, elementId, socket, callback);
+                        postHelpers.socketNewPost(results.post, results.album, elementId, socket, callback);
                     });
                 });
             });

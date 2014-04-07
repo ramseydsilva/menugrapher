@@ -131,7 +131,6 @@ var assignPostToAlbum = function(post, album, currentUser, io, callback) {
                             album._city = post._city;
                         if (!!!album._category && post._category)
                             album._category = post._category;
-                        console.log(album);
                         album.save(function(err, album) {
                             next(err, album);
                         });
@@ -159,7 +158,6 @@ var assignPostToAlbum = function(post, album, currentUser, io, callback) {
                             }]);
 
                             next(err);
-
                         });
                 }}, function(err, results) {
                     if (!!callback) callback(err, {post: post, album: album});

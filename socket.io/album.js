@@ -19,17 +19,16 @@ albumSocket.createAlbumCheckBox = function(socket, io, callback) {
             socket.emit('create-album', {error: 'Permission denied'});
         } else if (!!data.create) {
             albumHelpers.createOrGetAlbum(data.album, socket, io, function(err, album) {
-                /*
                 // Assign previously added pics to album
                 if (!!data.pics) {
-                    _.each(data.pics, function(pic) {
+                    _.each(data.pics.split(','), function(pic) {
                         if (!!pic && album.pics.indexOf(pic) == -1) {
-                            Post.findOne({_id: pic}, function(err, post) {
+                            Post.findOne({_id: pic, _user: socket.handshake.user._id}, function(err, post) {
                                 if (post) albumHelpers.assignPostToAlbum(post, album, socket.handshake.user, io);
                             });
                         }
                     });
-                }*/
+                }
             });
         } else if (!!data.album && !!data.delete) {
             albumHelpers.deleteAlbum({_id: data.album, _user: socket.handshake.user.id}, true, socket, io);

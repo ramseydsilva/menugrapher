@@ -98,7 +98,7 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
     });
 };
 
-PostHelpers.socketNewPost = function(post, elementId, socket, callback) {
+PostHelpers.socketNewPost = function(post, album, elementId, socket, callback) {
     async.waterfall([
         function(next) {
             if (!post._city.name || !post._restaurant.name || !post._category.name) {
@@ -116,17 +116,12 @@ PostHelpers.socketNewPost = function(post, elementId, socket, callback) {
 
                 var elementsToUpdate = {},
                     fn = jade.compile(data),
-                    postHtml = fn({ 
-                        post: post,
-                        cols: 3,
-                        target: '_blank'
-                    });
+                    postHtml = fn({ post: post, cols: 3, target: '_blank' });
 
                 elementsToUpdate['#' + elementId] = postHtml;
-                socket.emit("post-update", [{
-                    action: 'replaceWith',
-                    elements: elementsToUpdate
-                }]);
+                socket.emit("post-update", [
+                    { action: 'replaceWith', elements: elementsToUpdate }
+                ]);
 
                 next(err, post);
             });

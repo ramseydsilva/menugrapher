@@ -103,7 +103,7 @@ describe('Image uploading works', function() {
 
     _.each(newPostTests, function(testInfo) {
         describe(testInfo.name, function() {
-            var album, post, postHtml, socket, postData = testInfo.postData;
+            var post, postHtml, socket, postData = testInfo.postData;
 
             before(function(done) {
                 util.loadDb(
@@ -206,14 +206,6 @@ describe('Image uploading works', function() {
                 });
             });
 
-            it('and after post deleted, clear out the images', function(done) {
-                post.remove(function(err, post) {
-                    fs.existsSync(post.originalPath).should.be.false;
-                    fs.existsSync(post.thumbPath).should.be.false;
-                    done(err);
-                });
-            });
-
             it('and is not part of an album', function(done) {
                 Album.findOne({pics: post.id}, function(err, doc) {
                     (!!doc).should.not.be.ok;
@@ -228,27 +220,30 @@ describe('Image uploading works', function() {
                         socket.emit('create-album', {
                             album: '',
                             create: true,
-                            pics: [post.id]
+                            pics: post.id
                         });
                     });
                     socket.once('create-album', function(albumData) {
                         socket.disconnect(); // Free the socket
-                        Album.findOne(function(err, doc) {
-                            album = doc;
-                            Album.findOne({pics: post._id}, function(err, doc) {
+                        setTimeout(function() {
+                            Album.findOne({pics: post.id}, function(err, doc) {
                                 (!!doc).should.be.ok;
-                                done(err);
+                                doc.remove(done(err));
                             });
-                        });
+                        }, 500);
                     });
                 });
             });
 
-            after(function(done) {
-                album.remove(function() {
-                    post.remove(done);
+            it('and after post deleted, clear out the images', function(done) {
+                post.remove(function(err, post) {
+                    fs.existsSync(post.originalPath).should.be.false;
+                    fs.existsSync(post.thumbPath).should.be.false;
+                    done(err);
                 });
             });
+
+            after(function(done) { post.remove(done); });
         });
     });
 

@@ -30,7 +30,8 @@ define([
         socket.emit('create-album', {
             album: $('#album').val(),
             create: $('#album-create i').hasClass('fa-check-square'),
-            delete: !$('#album-create i').hasClass('fa-check-square')
+            delete: !$('#album-create i').hasClass('fa-check-square'),
+            pics: _.map($('.post'), function(post) { return $(post).attr('id') }).join(',')
         });
     };
 
@@ -79,7 +80,8 @@ define([
                     restaurant: $('#restaurant').val(),
                     category: $('#category').val(),
                     item: $('#item').val(),
-                    album: $('#album').val()
+                    album: $('#album').val(),
+                    pics: _.map($('.post'), function(post) { return $(post).attr('id') }).join(',')
                 });
                 blobStream.on('data', function(chunk) {
                     size += chunk.length;
@@ -104,7 +106,8 @@ define([
                         restaurant: $('#restaurant').val(),
                         category: $('#category').val(),
                         item: $('#item').val(),
-                        album: $('#album').val()
+                        album: $('#album').val(),
+                        pics: _.map($('.post'), function(post) { return $(post).attr('id') }).join(',')
                     });
                     socket.on('downloadProgress', function(data) {
                         progressBar.find('.progress-bar').css('width', data.progress);
