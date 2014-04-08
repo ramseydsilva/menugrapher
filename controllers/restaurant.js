@@ -19,7 +19,7 @@ exports.restaurant = function(req, res) {
             });
         },
     }, function(err, results) {
-        res.render('home/restaurant', {
+        res.render('restaurant/restaurant', {
             title: 'Restaurant | ' + restaurant.name,
             breadcrumbs: results.breadcrumbs,
             posts: results.posts,

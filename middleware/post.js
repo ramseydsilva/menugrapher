@@ -46,7 +46,6 @@ middleware.getUploadUrl = function(req, res, next) {
     if (!!category) query['category'] = category.name;
 
     res.locals.uploadUrl = uploadUrl + '?' + querystring.stringify(query);
-
     next();
 };
 

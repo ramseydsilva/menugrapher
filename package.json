@@ -64,7 +64,10 @@
     "gm": "^1.14.2",
     "mkdirp": "^0.3.5",
     "jquery": "^2.1.1-beta1",
-    "mocha": "^1.17.1"
+    "mocha": "^1.17.1",
+    "node-geocoder": "^2.1.0",
+    "temboo": "^1.7.7",
+    "google-places": "0.0.2"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

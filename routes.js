@@ -56,10 +56,10 @@ var routes = function(app) {
 
     // City, Restaurant, Category
     app.get('/cities', cityController.cities);
-    app.get('/cities/:city', cityMiddleware.cityExists, postMiddleware.getUploadUrl, cityController.city);
+    app.get('/cities/:city', cityMiddleware.cityExists, cityMiddleware.cityLatLng, postMiddleware.getUploadUrl, cityController.city);
     app.get('/cities/:city/restaurants', cityMiddleware.cityExists, postMiddleware.getUploadUrl, cityController.restaurants);
     app.get('/restaurants', restaurantController.restaurants);
-    app.get('/restaurants/:restaurant', restaurantMiddleware.restaurantExists, postMiddleware.getUploadUrl, restaurantController.restaurant);
+    app.get('/restaurants/:restaurant', restaurantMiddleware.restaurantExists, restaurantMiddleware.getRestaurantData, postMiddleware.getUploadUrl, restaurantController.restaurant);
     app.get('/categories', categoryController.categories);
     app.get('/categories/:category', categoryMiddleware.categoryExists, postMiddleware.getUploadUrl, categoryController.category);
     app.get('/items/:item', itemMiddleware.itemExists, postMiddleware.getUploadUrl, itemController.item);

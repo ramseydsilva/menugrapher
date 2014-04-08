@@ -87,6 +87,7 @@ define([
         socket.on('create-album', handleSocketEvent);
         socket.on('album-update', handleSocketEvent);
         socket.on('album-delete', handleSocketEvent);
+        socket.on('restaurant-info', handleSocketEvent);
     });
 
     socket.ss = ss;

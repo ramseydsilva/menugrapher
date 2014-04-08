@@ -5,7 +5,7 @@ var fs = require('fs'),
     app = require('../app'),
     mkdirp = require('mkdirp'),
     jade = require('jade'),
-    city = require('../models/city'),
+    City = require('../models/city'),
     Restaurant = require('../models/restaurant'),
     category = require('../models/category'),
     item = require('../models/item'),
@@ -13,7 +13,6 @@ var fs = require('fs'),
     path = require('path'),
     Post = require('../models/post'),
     PostHelpers = {};
-
 
 PostHelpers.getExtension = function(filename) {
     var ext = path.extname(filename||'').split('.');
@@ -64,9 +63,14 @@ PostHelpers.getOrCreateCityRestaurantCategoryItem = function(cityName, restauran
         function(next) {
             async.waterfall([
                 function(next) {
-                    city.findOneAndUpdate({ name: cityName }, {}, {upsert: true}, function(err, doc) {
+                    City.findOne({ name: cityName }, {}, {upsert: true}, function(err, doc) {
                         if (err) throw err;
-                        next(err, doc);
+                        if (doc) {
+                            next(null, doc);
+                        } else {
+                            var newCity = new City({name: cityName});
+                            newCity.save(function(err, doc) { next(null, doc) });
+                        }
                     });
                 },
                 function(city, next) {

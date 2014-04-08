@@ -1,6 +1,7 @@
 'use strict';
 
 var city = require('../models/city'),
+    fetch = require('../fetch/city'),
     middleware = {};
 
 middleware.cityExists = function(req, res, next) {
@@ -15,4 +16,7 @@ middleware.cityExists = function(req, res, next) {
     });
 }
 
+middleware.cityLatLng = function(req, res, next) {
+    fetch.getLatLng(res.locals.city, next);
+}
 module.exports = middleware;

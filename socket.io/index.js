@@ -3,6 +3,7 @@
 var fs = require('fs'),
     passportSocketIo = require("passport.socketio"),
     albumSocket = require('./album').socket,
+    restaurantSocket = require('./restaurant').socket,
     postSocket = require('./post').socket;
 
 // To be instantiated once from app.js
@@ -32,6 +33,7 @@ module.exports.socketio = function(app) {
     io.on('connection', function(socket){ 
         postSocket(io, socket, app);
         albumSocket(io, socket, app);
+        restaurantSocket(io, socket, app);
 
         socket.on('connect', function() {
             console.log("Socket connected");

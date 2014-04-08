@@ -1,0 +1,8 @@
+div.col-sm-7
+    p.lead= restaurant.name
+    if restaurant.website
+        a(href='#{restaurant.website}', target='blank') #{restaurant.website}
+    div.restaurant-info
+div.col-sm-5
+    div#map-canvas
+    span= restaurant.location.address

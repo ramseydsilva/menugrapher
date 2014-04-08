@@ -1,0 +1,15 @@
+style(type='text/css').
+    #map-canvas { height: 200px; }
+
+if restaurant.location
+    script.
+        restaurantPage = true;
+        restaurant = {
+            id: '#{restaurant.id}',
+            name: "#{restaurant.name}",
+            location: {
+                latitude: '#{restaurant.location.latitude}',
+                longitude: '#{restaurant.location.longitude}'
+            }
+        };
+        fetch = #{restaurant.refetch}; // Fetch if not been fetched before or if refetch is set to true

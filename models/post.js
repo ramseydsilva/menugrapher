@@ -34,7 +34,6 @@ postSchema.virtual('url').get(function() {
 });
 
 postSchema.virtual('editUrl').get(function() {
-    console.log('getting edit url', this.url);
     return this.url + '/edit';
 });
 

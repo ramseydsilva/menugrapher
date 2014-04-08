@@ -51,8 +51,14 @@ module.exports = {
     clientID: process.env.GOOGLE_ID || '775503769978-iempb0534c54fav8d5n4damgdf3h14ub.apps.googleusercontent.com',
     clientSecret: process.env.GOOGLE_SECRET || 'G_KEi-ghGY1waxb5XK9WjISJ',
     callbackURL: '/auth/google/callback',
+    key: 'AIzaSyAcUFm4EWVzRBcVYpoOY-shghCI9Qphq8A', 
     passReqToCallback: true
   },
+
+    googleMaps: {
+        project: '775503769978',
+        projectId: 'a1-2-3-4-56789'
+    },
 
   linkedinAuth: true,
   linkedin: {
