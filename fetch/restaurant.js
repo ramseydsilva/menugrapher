@@ -13,10 +13,10 @@ var geocoderProvider = 'google',
     httpAdapter = 'https',
     app = require('../app'),
     googleplaces = require('../googleplaces'),
-    gp = new googleplaces(app.secrets.google.key),
+    gp = new googleplaces(app.secrets.google.serverKey),
     postHelpers = require('../helpers/post'),
     extra = {
-        apiKey: app.secrets.google.key,
+        apiKey: app.secrets.google.serverKey,
         formatter: null
     },
     geocoder = require('node-geocoder').getGeocoder(geocoderProvider, httpAdapter, extra),
@@ -48,6 +48,14 @@ fetch.save = function(data, source, callback) {
                         createNew = true;
                     }
                 });
+            } else if (!!data._city) {
+                Restaurant.find({_name: data.name, _city: data._city}, function(err, docs) {
+                    if (docs.length == 1) {
+                        Restaurant.findOneAndUpdate({_id: data.id}, opts, callback);
+                    } else {
+                        createNew = true; // Too many restaurants returned, create new one instead
+                    }
+                });
             } else {
                 createNew = true;
             }
@@ -59,12 +67,12 @@ fetch.save = function(data, source, callback) {
             }
 
         } else if (source.indexOf('googleMaps') != -1) {
-            Restaurant.update({_id: data.id}, opts, callback);
+            if (!!callback) Restaurant.findOneAndUpdate({_id: data.id}, opts, callback);
         } else {
-            callback(new Error('Unidentified source'), null);
+            if (!!callback) callback(new Error('Unidentified source'), null);
         }
     } else {
-        callback(new Error('No data supplied'), null);
+        if (!!callback) callback(new Error('No data supplied'), null);
     }
 };
 
@@ -106,6 +114,7 @@ fetch.googlePlacesDetail = function(restaurant, force, callback) {
             gp.details({
                 reference: restaurant.fetch.googleReference
             }, function(err, result) {
+                console.log(err, result);
                 if (!err) {
                     fetch.save({
                         id: restaurant._id,

@@ -3,38 +3,41 @@ extends layout
 block content
     div(class='panel panel-default')
         div(class='panel-body')
-            div(class='container-fluid')
+            div.row
+                div(class='col-sm-12')
+                    legend.lead Welcome to Menugrapher
+                    ol(class='text-success')
+                        li Post, organize and share your food photography
+                        li Search local restaurant listings and menues
+                        li Place orders quickly with our multi-method ordering system
+                    br
+                    if !user
+                        a(class="btn btn-success", href="signup")
+                            i(class="fa fa-arrow-circle-o-right")
+                            | Start now
+                            a.btn.btn-link(href='/login') or Login
 
-                div(class='clearfix row-fluid')
-                    div(class='col-sm-3')
-                        - var title = { name: 'Cities', url: '/cities' }
-                        - var items = cities
-                        include includes/leftmenu
+            div.row
+                div(class='col-sm-12')
+                    legend.lead Cities
+                    - var items = cities;
+                    - var search = true;
+                    - var placeholder = 'Search a City';
+                    - var api='/api/v1/cities';
+                    include includes/itemList
 
-                        - title = { name: 'Categories', url: '/categories' }
-                        - items = categories
-                        include includes/leftmenu
+            div.row.padded
+                div.col-sm-12
+                    legend.lead Categories
+                    - items = categories
+                    - var search = true;
+                    - var placeholder = 'Search Categories';
+                    - var api='/api/v1/categories';
+                    include includes/itemList
 
-                    div(class='col-sm-9')
-                        div(class='container-fluid')
-                            div(class='row-fluid')
-                                div(class='col-sm-12')
-                                    p(class='text-success lead') Welcome to Menugrapher
-                                    ol(class='text-success')
-                                        li Post, organize and share your food photography!
-                                        li Search local restaurant listings and menues.
-                                        li Place orders quickly with our multi-method ordering system.
-                                    br
-                                    if !user
-                                        a(class="btn btn-success", href="signup")
-                                            i(class="fa fa-arrow-circle-o-right")
-                                            | Start now
-                                            a.btn.btn-link(href='/login') or Login
-
-                                    hr(class='padded clearfix')
-
-                            div(class='row-fluid')
-                                div(class='col-sm-12')
-                                    - var cols = 3
-                                    include includes/posts
+            div.row.padded
+                div(class='col-sm-12')
+                    legend.lead Posts
+                    - var cols = 3
+                    include includes/posts
 

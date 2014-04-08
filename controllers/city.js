@@ -36,7 +36,7 @@ exports.city = function(req, res) {
             next(null, [ breadcrumb.home(), breadcrumb.city(city, 'active') ]);
         },
         restaurants: function(next) {
-            restaurant.find({_city: city._id}, function(err, restaurants) {
+            restaurant.find({_city: city._id}).sort('-hits').limit(20).exec(function(err, restaurants) {
                 next(err, restaurants);
             });
         },

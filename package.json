@@ -67,7 +67,8 @@
     "mocha": "^1.17.1",
     "node-geocoder": "^2.1.0",
     "temboo": "^1.7.7",
-    "google-places": "0.0.2"
+    "google-places": "0.0.2",
+    "htmlparser2": "^3.7.1"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

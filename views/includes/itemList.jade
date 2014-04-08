@@ -1,0 +1,15 @@
+div(id=id, class='list-group')
+    if (!!search)
+        div.list-group-item.search
+            i.fa.fa-search.pull-right
+            input(type="text" class="list-search form-control" placeholder=placeholder api=api autocomplete="off")
+        div.search-results
+
+    div.original
+        if !!items.length
+            for item in items
+                if !!item.name
+                    a(class='list-group-item', href=item.url)= item.name
+        else
+            a(class='list-group-item') Empty
+

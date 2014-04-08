@@ -9,6 +9,8 @@ html
     title #{title} | Menugrapher - Photographs of Menus
     != css('styles')
     script(data-main="/js/main" src="/js/require.js")
+    script.
+        key = '#{secrets.google.clientKey}';
 
     block header
 
@@ -20,6 +22,9 @@ html
         include partials/breadcrumbs
 
         block content
+
+    div#map
+    div(room='main')
 
     include partials/footer
     script.

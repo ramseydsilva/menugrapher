@@ -1,16 +1,32 @@
 extends ../layout
 
+block header
+    script.
+        city = {
+            id: "#{city._id}",
+            name: "#{city.name}",
+            location: {
+                latitude: "#{city.location.latitude}",
+                longitude: "#{city.location.longitude}"
+            }
+        }
+
 block content
     div(class='panel panel-default')
         div(class='panel-body')
-            div(class='container-fluid')
-                div(class='row-fluid')
-                    div(class='col-sm-3')
-                        - var title = { name: 'Restaurants in ' + city.name, url: city.restaurantsUrl }
-                        - var items = restaurants
-                        include ../includes/leftmenu
+            div.row
+                div(class='col-sm-12')
+                    legend.lead Restaurants in #{city.name}
+                    - var items = restaurants;
+                    - var search = true;
+                    - var placeholder = 'Search for restaurants in ' + city.name;
+                    - var api='/api/v1/restaurants';
+                    include ../includes/itemList
 
-                    div(class='col-sm-9')
-                        p.lead Posts in #{city.name}
-                        - var cols = 3
-                        include ../includes/posts
+            div.row.padded
+                div(class='col-sm-12')
+                    legend.lead Posts in #{city.name}
+                    - var cols = 3
+                    include ../includes/posts
+
+

@@ -9,6 +9,7 @@ var Restaurant = require('../models/restaurant'),
 middleware.restaurantExists = function(req, res, next) {
     Restaurant.findOne({_id: req.param('restaurant')}).populate('_city').populate('menu').exec(function(err, restaurant) {
         if (restaurant) {
+            restaurant.update({ $inc: { hits: 1 }}).exec(); // Update the hits
             res.locals.restaurant = restaurant;
             next();
         } else {
@@ -19,12 +20,13 @@ middleware.restaurantExists = function(req, res, next) {
 }
 
 middleware.getRestaurantData = function(req, res, cb) {
-    var restaurant = res.locals.restaurant;
+    var restaurant = res.locals.restaurant,
+        updated = false;
     async.series({
         googleMaps: function(next) {
             fetch.googleMaps(restaurant, function(err, doc) {
-                restaurant.populate('fetch.googleMaps', function(err, doc) {
-                    restaurant = doc;
+                doc.populateData('fetch.googleMaps', function(err, doc) {
+                    updated = true;
                     next(err, doc);
                 });
             });
@@ -32,8 +34,8 @@ middleware.getRestaurantData = function(req, res, cb) {
         googlePlacesSearch: function(next) {
             fetch.googlePlacesSearch(restaurant, function(err, doc) {
                 if (!err && !!doc) {
-                    restaurant = doc;
-                    restaurant.populate('fetch.googlePlacesSearch', next);
+                    updated = true;
+                    doc.populateData('fetch.googlePlacesSearch', next);
                 } else {
                     next(null, restaurant);
                 }
@@ -42,16 +44,22 @@ middleware.getRestaurantData = function(req, res, cb) {
         googlePlacesDetail: function(next) {
             fetch.googlePlacesDetail(restaurant, function(err, doc) {
                 if (!err && !!doc) {
-                    restaurant = doc;
-                    restaurant.populate('fetch.googlePlacesDetail', next);
+                    updated = true;
+                    doc.populateData('fetch.googlePlacesDetail', true, next);
                 } else {
-                    next(null, restaurant);
+                    doc.populateData('fetch.googlePlacesDetail', true, next);
                 }
             });
         }
     }, function(err, results) {
-        res.locals.restaurant = restaurant;
-        cb();
+        if (updated) {
+            Restaurant.findOne({_id: restaurant._id}).populate('_city').populate('menu').exec(function(err, doc) {
+                res.locals.restaurant = doc;
+                cb();
+            });
+        } else {
+            cb();
+        }
     });
 }
 module.exports = middleware;

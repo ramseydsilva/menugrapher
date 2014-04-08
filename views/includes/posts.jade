@@ -1,6 +1,12 @@
 - var elementsInRow = 12/cols
-- each _, x in posts
-    - if ((x % elementsInRow == 0))
-        div(class='row')
-            - each post, y in posts.slice(x, x+elementsInRow)
-                include post
+if !!posts.length
+    - each _, x in posts
+        - if ((x % elementsInRow == 0))
+            div(class='row')
+                - each post, y in posts.slice(x, x+elementsInRow)
+                    include post
+else
+    div
+        | No posts yet. 
+        a(href="#{!!uploadUrl ? uploadUrl : '/posts/new'}")
+            | Click here to post a new one.

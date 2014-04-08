@@ -6,19 +6,26 @@ block header
 block content
     div(class='panel panel-default restaurant', room='restaurant-#{restaurant._id}')
         div(class='panel-body')
+            include includes/info
 
-            div(class='clearfix row-fluid')
-                div(class='col-sm-3')
-                    - var title = { name: restaurant.name + ' Menu', url: '' }
-                    - var items = restaurant.nonEmptyMenu
-                    include ../includes/leftmenu
+            div.row
+                legend.lead Menu
+                - var items = restaurant.nonEmptyMenu
+                include ../includes/itemList
 
-                div(class='col-sm-9')
-                    div(class='container-fluid')
-                        div(class='row')
-                            include includes/info
-                        hr.clearfix
-                        div(class='row')
-                            p.lead Posts in #{restaurant.name}
-                            - var cols = 3
-                            include ../includes/posts
+            div.row.padded
+                legend.lead Posts
+                - var cols = 3
+                include ../includes/posts
+
+            if (!!restaurant.reviews.user_reviews.length)
+                div.row.review-container
+                    legend.lead Google Reviews
+                    - var counter = 0;
+                    - for rv in restaurant.reviews.user_reviews.slice(0,4)
+                        - counter += 1;
+                        div(class='col-sm-3 #{counter > 2 ? "hidden-xs": ""}')
+                            div.panel
+                                a(target='blank', href=rv.author_url)= rv.author_name
+                                | : !{truncateWords_html(rv.text, 30)} 
+                                a(target='blank', href=restaurant.links.google) . . .

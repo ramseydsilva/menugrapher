@@ -12,4 +12,10 @@ if restaurant.location
                 longitude: '#{restaurant.location.longitude}'
             }
         };
+
+        city = {
+            id: "#{restaurant._city._id}",
+            name: "#{restaurant._city.name}"
+        }
+
         fetch = #{restaurant.refetch}; // Fetch if not been fetched before or if refetch is set to true

@@ -45,7 +45,7 @@ define([
                             socket.emit('googlePlacesSearch', {
                                 id: restaurant.id,
                                 name: search.name,
-                                city: search.vicinity.split(', ')[1],
+                                city: search.vicinity.split(', ')[search.vicinity.split(', ').length-1],
                                 res: search 
                             });
 
@@ -54,7 +54,7 @@ define([
                                     socket.emit('googlePlacesDetail', {
                                         id: restaurant.id,
                                         name: detail.name,
-                                        city: search.vicinity.split(', ')[1],
+                                        city: search.vicinity.split(', ')[search.vicinity.split(', ').length-1],
                                         res: detail
                                     });
                                 }

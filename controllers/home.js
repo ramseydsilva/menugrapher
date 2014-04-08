@@ -60,12 +60,12 @@ exports.home = function(req, res) {
             next(null, [breadcrumb.home()]);
         },
         categories: function(next) {
-            category.find({}, function(err, categories) {
+            category.find().sort('-hits').limit(10).exec(function(err, categories) {
                 next(err, categories);
             });
         },
         cities: function(next) {
-            city.find({}, function(err, cities) {
+            city.find().sort('-hits').limit(10).exec(function(err, cities) {
                 next(err, cities);
             });
         },
@@ -80,38 +80,12 @@ exports.home = function(req, res) {
         categories = results.categories;
         cities = results.cities;
 
-        if (!!!req.user) {
-            res.render('home', {
-                title: 'Home',
-                breadcrumbs: breadcrumbs,
-                posts: results.posts,
-                categories: categories,
-                cities: cities
-            });
-        } else {
-            async.parallel({
-                myPosts: function(next) { 
-                    post.find({ '_user': req.user.id }).sort('-_id').populate('_city')
-                        .populate('_restaurant').populate('_category').exec(function(err, posts){
-                        next(err, posts);
-                    });
-                },
-                recentPosts: function(next) {
-                    recentPosts = post.find({ '_user': {'$ne': req.user.id }}).sort('-_id')
-                        .populate('_city').populate('_restaurant').populate('_category').exec(function(err, posts){
-                        next(err, posts);
-                    });
-                }
-            }, function(err, results) {
-                res.render('home/dashboard', {
-                    title: 'Home',
-                    breadcrumbs: breadcrumbs,
-                    myPosts: results.myPosts,
-                    recentPosts: results.recentPosts,
-                    categories: categories,
-                    cities: cities
-                });
-            });
-        }
+        res.render('home', {
+            title: 'Home',
+            breadcrumbs: breadcrumbs,
+            posts: results.posts,
+            categories: categories,
+            cities: cities
+        });
     });
 };

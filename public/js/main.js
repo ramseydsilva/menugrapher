@@ -36,6 +36,30 @@ define([
         lat = 43.653226,
         lng = -79.3831843;
 
+    if (typeof restaurant != "undefined" && typeof restaurant.location != "undefined" && typeof restaurant.location.longitude != "undefined"
+        && !!restaurant.location.longitude) {
+        lat = restaurant.location.latitude;
+        long = restaurant.location.longitude;
+    } else if (typeof city != "undefined" && typeof city.location != "undefined" && typeof city.location.longitude != "undefined"
+        && !!city.location.longitude) {
+        lat = city.location.latitude;
+        lng = city.location.longitude
+    }
+
+    function weatherapiCitySearch(query, callback) {
+       $.ajax({
+            url: "http://api.openweathermap.org/data/2.5/find?type=like&q=" + query,
+            dataType: "json",
+            success: function (data) {
+                if (data.cod == "200") {
+                    callback(null, data);
+                } else {
+                    callback(new Error('no results returned'), null);
+                }
+            }
+        });
+    }
+
     function fetchCity(api, query, callback) {
         $.ajax({
             url: api + "?name=~" + query,
@@ -56,13 +80,11 @@ define([
         fetchCity($('#city').attr('api'), $('#city').val(), function(){});
     }
 
-    function fetchRestaurant(api, query, callback) {
-         restoResults = [];
+    function googleRestaurantSearch(query, callback) {
          var myOptions = {
             center: new google.maps.LatLng(lat, lng)
          }
          var map = new google.maps.Map(document.getElementById('map'), myOptions);
-         var countryRestrict = { 'country': 'us' };
          var places = new google.maps.places.PlacesService(map);
          var search = {
              radius: 15000,
@@ -72,8 +94,19 @@ define([
          }
          places.nearbySearch(search, function(results, status) {
              if (status == google.maps.places.PlacesServiceStatus.OK) {
-                _.map(results, function(r) {
-                    var city = r.vicinity.split(', ')[1];
+                 callback(null, results);
+             } else {
+                 callback(new Error('no results returned'), null)
+             }
+         });
+    }
+
+    function fetchRestaurant(api, query, callback) {
+        restoResults = [];
+        googleRestaurantSearch(query, function(err, res) {
+            if (!err) {
+                _.map(res, function(r) {
+                    var city = r.vicinity.split(', ')[r.vicinity.split(', ').length-1];
                     restoResults.push(r.name);
                     socket.emit('googlePlacesSearch', {
                         id: '',
@@ -82,8 +115,8 @@ define([
                         res: r
                     });
                  });
-             }
-         });
+            }
+        });
 
         var cityQuery = !!cities[$('#city').val()] ? "&_city=" + cities[$('#city').val()] : "";
 
@@ -116,6 +149,76 @@ define([
                 });
                 result = _.uniq(result);
                 callback(result);
+            }
+        });
+    };
+
+    function fetchListItem(e, query, callback) {
+        var api = e.$element.attr('api');
+        var apiQuery = api + "?name=~" + query;
+        var urlPrefix = 'cities'
+        if (api.indexOf('restaurant') != -1) {
+            if (!!city)
+                apiQuery += '&_city=' + city.id; // city is specified as global var on this page
+            urlPrefix = 'restaurants';
+        } else if (api.indexOf('categor') != -1) {
+            urlPrefix = 'categories';
+        }
+        $.ajax({
+            url: apiQuery,
+            dataType: "json",
+            success: function (data) {
+                var searchBox = e.$element.parent().parent();
+                searchBox.find('.original').hide();
+                searchBox.find('.search-results').show();
+                searchBox.find('.search-results').empty();
+
+                if (!!data) {
+                    var result = _.map(data, function(d) {
+                        searchBox.find('.search-results').append('<a class="list-group-item" href="/' + urlPrefix + '/' + d._id + '">' + d.name + '</a>');
+                    });
+                } else {
+                    searchBox.find('.search-results').append('<a class="list-group-item">Search didn\'t return any results</a>');
+                }
+
+                if (api.indexOf('cities') != -1) {
+                    weatherapiCitySearch(query, function(err, data) {
+                        if (!err) {
+                            _.map(data.list, function(c) {
+                                if (c.name != "") {
+                                    socket.emit('newCity', {
+                                        lat: c.coord.lat,
+                                        lng: c.coord.lon,
+                                        name: c.name,
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+
+                if (api.indexOf('restaurant') != -1) {
+                    googleRestaurantSearch(query, function(err, res) {
+                        if (!err) {
+                            _.map(res, function(r) {
+                                var city = r.vicinity.split(', ')[r.vicinity.split(', ').length-1];
+                                restoResults.push(r.name);
+                                socket.emit('googlePlacesSearch', {
+                                    id: '',
+                                    name: r.name,
+                                    city: city,
+                                    _city: (!!city && !!city.id ? city.id : ''),
+                                    res: r
+                                });
+                             });
+                        }
+                    });
+                }
+
+                if (query.length < 1) {
+                    searchBox.find('.original').show();
+                    searchBox.find('.search-results').hide();
+                }
             }
         });
     };
@@ -217,6 +320,16 @@ define([
                 fetchItem($('#item').attr('api'), query, callback);
             }
         });
+
+        $('.list-search').typeahead({
+            displayKey: "name",
+            items: "all",
+            autoSelect: false,
+            source: function(query, callback) {
+                fetchListItem(this, query, callback);
+            }
+        });
+
 
     });
 });

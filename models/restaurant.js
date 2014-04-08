@@ -26,11 +26,22 @@ var restaurantSchema = new mongoose.Schema({
         google: String,
         yelp: String
     },
+    contact: {
+        phone: String,
+        email: String
+    },
     location: {
         longitude: String,
         latitude: String,
         address: String
     },
+    reviews: {
+        price: String,
+        rating: String,
+        user_reviews: [{}]
+    },
+    photos: [{}],
+    hits: { type: Number, default: 1, index: true },
     fetch: {}
 }, schemaOptions);
 
@@ -47,7 +58,7 @@ restaurantSchema.virtual('nonEmptyMenu').get(function() {
 });
 
 restaurantSchema.method({
-    populate: function(source, force, callback) {
+    populateData: function(source, force, callback) {
         if (!callback) {
             callback = force;
             force = false;
@@ -64,6 +75,11 @@ restaurantSchema.method({
             this.location.latitude = base.geometry.location.lat || base.geometry.location.k;
             this.location.longitude = base.geometry.location.lng || base.geometry.location.A;
             this.location.address = base.formatted_address;
+            this.contact.phone = base.formatted_phone_number;
+            this.reviews.rating = base.rating;
+            this.reviews.price = base.price_level;
+            this.reviews.user_reviews = base.reviews;
+            this.photos = base.photos;
             this.website = base.website;
             this.links.google = base.url;
             this.fetch.googlePlacesDetail.populated = true;

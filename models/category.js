@@ -6,7 +6,8 @@ var schemaOptions = {
 };
 
 var categorySchema = new mongoose.Schema({
-    name: String
+    name: String,
+    hits: { type: Number, default: 1, index: true}
 }, schemaOptions);
 
 categorySchema.virtual('url').get(function() {

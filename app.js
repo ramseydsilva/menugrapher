@@ -133,3 +133,6 @@ app.socketio = require('./socket.io').socketio(app);
 
 var routes = require('./routes')(app);
 
+app.locals.truncateWords_html = function(html, words){
+    return html.split(/\s/).slice(0, words).join(" ")
+}

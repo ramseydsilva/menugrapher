@@ -2,7 +2,7 @@
 
 var googleplaces = require('../googleplaces'),
     app = require('../app'),
-    gp = new googleplaces(app.secrets.google.key),
+    gp = new googleplaces(app.secrets.google.serverKey),
     fetch = {};
 
 fetch.getLatLng = function(city, force, callback) {
@@ -17,11 +17,11 @@ fetch.getLatLng = function(city, force, callback) {
                 city.location.longitude = res[0].geometry.location.lng;
                 city.save(callback);
             } else {
-                callback(null, city);
+                if (!!callback) callback(null, city);
             }
         });
     } else {
-        callback(null, city);
+        if (!!callback) callback(null, city);
     }
 }
 

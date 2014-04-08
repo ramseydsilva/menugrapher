@@ -1,8 +1,25 @@
-div.col-sm-7
-    p.lead= restaurant.name
-    if restaurant.website
-        a(href='#{restaurant.website}', target='blank') #{restaurant.website}
-    div.restaurant-info
-div.col-sm-5
-    div#map-canvas
-    span= restaurant.location.address
+div.row
+    legend.lead= restaurant.name
+        img(class='pull-right', src='/img/powered-by-google.png')
+
+    div.col-sm-7
+        if restaurant.website
+            a(href='#{restaurant.website}', target='blank') #{restaurant.website}
+            br
+            br
+        if restaurant.reviews.price
+            | Price: #{restaurant.reviews.price}
+            br
+        if restaurant.reviews.rating
+            | Rating: #{restaurant.reviews.rating}
+            br
+
+        div.google-photos.padded-10
+            for photo in restaurant.photos.reverse().splice(0,3)
+                img(class='padded-all-5', src='https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&maxheight=150&photoreference=#{photo.photo_reference}&key=#{secrets.google.clientKey}&sensor=false')
+
+    div.padded-10
+    div.col-sm-5
+        div#map-canvas.panel
+        div.padded-10= restaurant.location.address
+

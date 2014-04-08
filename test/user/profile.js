@@ -76,8 +76,7 @@ describe('GET /users', function() {
         var req = request(app).get('/');
         agent.attachCookies(req);
         req.end(function(err, res) {
-            res.text.should.containEql('Cities').and.containEql('Categories').and.containEql('My uploads').and.containEql('Recent uploads')
-                .and.containEql('Home').and.containEql('Profile').and.containEql('Upload Picture');
+            res.text.should.containEql('Cities').and.containEql('Categories').and.containEql('Home').and.containEql('Profile').and.containEql('Upload Picture');
             done(err);
         });
     });

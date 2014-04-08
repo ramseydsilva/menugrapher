@@ -1,5 +1,4 @@
 var mongoose = require('mongoose'),
-    fetch = require('../fetch/city'),
     restaurant = require('./restaurant');
 
 var schemaOptions = {
@@ -9,6 +8,7 @@ var schemaOptions = {
 
 var citySchema = new mongoose.Schema({
     name: String,
+    hits: { type: Number, default: 1, index: true },
     location: {
         longitude: String,
         latitude: String
@@ -23,10 +23,9 @@ citySchema.virtual('restaurantsUrl').get(function() {
     return this.url + '/restaurants';
 });
 
-citySchema.pre('save', function(next) {
-    fetch.getLatLng(this, function(err, doc) {
-        next();
-    });
+citySchema.post('save', function() {
+    var fetch = require('../fetch/city');
+    fetch.getLatLng(this);
 });
 
 module.exports = mongoose.model("city", citySchema);
