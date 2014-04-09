@@ -27,7 +27,7 @@ define([
     "bootstrap",
     "typeahead",
     "google",
-    "async!https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyAcUFm4EWVzRBcVYpoOY-shghCI9Qphq8A&sensor=true",
+    "async!https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyCQ_QKpoLjr3GGsuUrQ8eNfIbP-Ty2qzoQ&sensor=true",
 ], function($, _, socket) {
 
     var cities = {},
