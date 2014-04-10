@@ -27,6 +27,7 @@ postSocket.update = function(socket, callback) {
                 }
             ], function(err, results) {
                 if (post) {
+                    console.log(socket.handshake.user);
                     if (post.userHasRights(socket.handshake.user)) {
                         var opts = {
                             title: data.title,

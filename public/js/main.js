@@ -34,7 +34,10 @@ define([
         restaurants = {},
         restoResults = [],
         lat = 43.653226,
-        lng = -79.3831843;
+        lng = -79.3831843,
+        weatherApiCities = [],
+        restaurantSearchResults = [],
+        restaurantSearchQueries = [];
 
     if (typeof restaurant != "undefined" && typeof restaurant.location != "undefined" && typeof restaurant.location.longitude != "undefined"
         && !!restaurant.location.longitude) {
@@ -61,6 +64,7 @@ define([
     }
 
     function fetchCity(api, query, callback) {
+        restaurantSearchQueries = []; // Reset queries so we can stop fetching from google
         $.ajax({
             url: api + "?name=~" + query,
             dataType: "json",
@@ -185,7 +189,8 @@ define([
                     weatherapiCitySearch(query, function(err, data) {
                         if (!err) {
                             _.map(data.list, function(c) {
-                                if (c.name != "") {
+                                if (c.name != "" && weatherApiCities.indexOf(c.name) == -1) {
+                                    weatherApiCities.push(c.name); // Cache results so don't push multiple times
                                     socket.emit('newCity', {
                                         lat: c.coord.lat,
                                         lng: c.coord.lon,
@@ -197,19 +202,22 @@ define([
                     });
                 }
 
-                if (api.indexOf('restaurant') != -1) {
+                if (api.indexOf('restaurant') != -1 && restaurantSearchQueries.indexOf(query) == -1) {
+                    restaurantSearchQueries.push(query);
                     googleRestaurantSearch(query, function(err, res) {
                         if (!err) {
                             _.map(res, function(r) {
-                                var city = r.vicinity.split(', ')[r.vicinity.split(', ').length-1];
-                                restoResults.push(r.name);
-                                socket.emit('googlePlacesSearch', {
-                                    id: '',
-                                    name: r.name,
-                                    city: city,
-                                    _city: (!!city && !!city.id ? city.id : ''),
-                                    res: r
-                                });
+                                if (restaurantSearchResults.indexOf(r.name) == -1) { // Disable repeats
+                                    restaurantSearchResults.push(r.name);
+                                    var city = r.vicinity.split(', ')[r.vicinity.split(', ').length-1];
+                                    socket.emit('googlePlacesSearch', {
+                                        id: '',
+                                        name: r.name,
+                                        city: city,
+                                        _city: (!!city && !!city.id ? city.id : ''),
+                                        res: r
+                                    });
+                                }
                              });
                         }
                     });

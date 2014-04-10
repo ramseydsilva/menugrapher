@@ -1,7 +1,9 @@
-/**
- * Module dependencies.
- */
+'use strict';
 
+/**
+ * OurExpress app
+ * @module app
+ */
 var express = require('express'),
     MongoStore = require('connect-mongo')(express),
     flash = require('express-flash'),
@@ -12,11 +14,7 @@ var express = require('express'),
     expressValidator = require('express-validator'),
     connectAssets = require('connect-assets');
 
-
-/**
- * Load configuration
- */
-
+// Load configurations depending on the environment
 nconf.argv().env();
 nconf.file({ file: __dirname + '/config/' + nconf.get('env') + '/config.json' });
 nconf.defaults({ 
@@ -25,55 +23,44 @@ nconf.defaults({
 });
 nconf.argv().env().file({ file: __dirname + '/config/' + nconf.get('env') + '/config.json' });
 
-/**
- * API keys + Passport configuration.
- */
+// This will allow app to be called form anywhere in program
+var app = module.exports = express(); 
 
-var app = module.exports = express(); // This will allow app to be called form anywhere in program
+// Load secrets
 app.secrets = require('./config/' + nconf.get('env') + '/secrets');
-app.set('rootDir', path.join(__dirname, nconf.get('rootDirPrefix')));
 
-/**
- * Create Express server.
- */
-
-
-/**
- * Mongoose configuration.
- */
-
+// Connect to mongodb
 app.secrets.db = nconf.get('db:host') + ':' + nconf.get('db:port') + '/' + nconf.get('db:name');
 mongoose.connect(app.secrets.db);
 mongoose.connection.on('error', function() {
   console.error('✗ MongoDB Connection Error. Please make sure MongoDB is running.');
 });
 
-/**
- * Express configuration.
- */
-
-var hour = 3600000;
-var day = (hour * 24);
-var month = (day * 30);
-
+// Load views and templating engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(connectAssets({
-  paths: ['public/css', 'public/js'],
-  helperContext: app.locals
+    paths: ['public/css', 'public/js'],
+    helperContext: app.locals
 }));
 app.use(express.compress());
+app.locals.truncateWords_html = function(html, words){
+    return html.split(/\s/).slice(0, words).join(" ")
+}
+
+// Logger
 app.use(express.logger('dev'));
 
+// Load middlewares
 app.cookieParser = express.cookieParser;  // Attach this to app to be called from socket.js
 app.use(express.cookieParser());
-
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(expressValidator());
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 
+// Use Mongo as our session store
 app.sessionStore = new MongoStore({
     url: app.secrets.db,
     auto_reconnect: true
@@ -88,7 +75,9 @@ app.use(express.session({
   store: app.sessionStore
 }));
 
-app.use(express.static(path.join(app.get('rootDir'), 'public'), { maxAge: month }));
+// Our static files
+app.set('rootDir', path.join(__dirname, nconf.get('rootDirPrefix')));
+app.use(express.static(path.join(app.get('rootDir'), 'public'), { maxAge: 3600000 * 24 * 30})); // Set maxage to a month
 app.use(express.favicon(path.join(__dirname, 'public/img/favicon.ico')));
 
 if (process.env.NODE_ENV == 'production') {
@@ -98,10 +87,8 @@ if (process.env.NODE_ENV == 'production') {
     });
 };
 
-
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use(flash());
 
 // Keep track of previous URL
@@ -120,19 +107,15 @@ app.use(function(req, res, next) {
     next();
 });
 
+// Load routes
 app.use(app.router);
 app.use(function(req, res) {
   res.status(404);
   res.render('404');
 });
 app.use(express.errorHandler());
-
-
-app.server = require('http').Server(app),
-app.socketio = require('./socket.io').socketio(app);
-
 var routes = require('./routes')(app);
 
-app.locals.truncateWords_html = function(html, words){
-    return html.split(/\s/).slice(0, words).join(" ")
-}
+// Start server and sockets
+app.server = require('http').Server(app),
+app.socketio = require('./socket.io').socketio(app);
