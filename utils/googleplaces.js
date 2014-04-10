@@ -4,40 +4,36 @@ var request = require('request'),
     xtend = require('xtend');
 
 /**
- * Provides access to Google Places API
- * @namespace
- * @property {String} key Google API key
- * @property {String} searchUrl Url to search query
- * @property {String} detailsUrl Url to detail query
- * @property {String} textUrl Url to textual query
+ * @class {GooglePlaces} Provides access to Google Places API
+ * @constructor Constructs a new GooglePlaces class
+ * @param {Object} options Google API key
  */
-var defaults = {
-    key: key,
-    sensor: false,
-    query: '',
-    name: '',
-    reference: '',
-    radius: 5000,
-    types: 'food',
-    location: ('43.653226, -79.3831843'),
-    searchUrl: 'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
-    detailsUrl: 'https://maps.googleapis.com/maps/api/place/details/json',
-    textUrl: 'https://maps.googleapis.com/maps/api/place/textsearch/json',
+var GooglePlaces = function(options) {
+    this.defaults = {
+        key: '',
+        sensor: false,
+        query: '',
+        name: '',
+        reference: '',
+        radius: 5000, // Defaults to a 5K radius
+        types: 'food', // Defaults to food establishments
+        location: ('43.653226, -79.3831843'), // Defaults to Toronto
+        searchUrl: 'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
+        detailsUrl: 'https://maps.googleapis.com/maps/api/place/details/json',
+        textUrl: 'https://maps.googleapis.com/maps/api/place/textsearch/json',
+    };
+
+    xtend(this.defaults, options);
 };
 
 /**
- * Performs google places text search
- * @method text
- * @param {String} query Search query
+ * @method request Sends a request to the specified url
+ * @param {String} url The url where the request needs to be sent
+ * @param {Object} qs Query parameters to be sent with this request
  * @param {GooglePlaces~requestCallback} callback
  */
-GooglePlaces.prototype.text = function(query, callback) {
-    var qs = {
-        query: this.query,
-        sensor: this.sensor,
-        key: this.key
-    }
-    request.get(textUrl, {
+GooglePlaces.prototype.request = function(url, qs, callback) {
+    request.get(url, {
         qs: qs,
         json: true
     }, function(err, res, json) {
@@ -51,65 +47,60 @@ GooglePlaces.prototype.text = function(query, callback) {
             callback(new Error("Non ok status returned"), null);
         }
     });
+};
+
+/**
+ * @method text Performs google places text search
+ * @param {Object} options Override GooglePlaces defaults with options for this query
+ * @param {GooglePlaces~requestCallback} callback
+ */
+GooglePlaces.prototype.text = function(options, callback) {
+    this.defaults = xtend(this.defaults, options);
+    var qs = {
+        query: this.defaults.query,
+        sensor: this.defaults.sensor,
+        key: this.defaults.key
+    }
+    this.request(this.defaults.textUrl, qs, callback);
 },
 
 /**
- * Performs google places basic search
- * @method search
- * @param {String} query Search query
+ * @method search Performs google places basic search
+ * @param {Object} options Override GooglePlaces defaults with options for this query
  * @param {GooglePlaces~requestCallback} callback
  */
-GooglePlaces.prototype.search = function(query, callback) {
+GooglePlaces.prototype.search = function(options, callback) {
+    this.defaults = xtend(defaults, options);
     var qs = {
-        location: this.location,
-        radius: this.radius,
-        types: this.types,
-        name: this.name || this.query,
-        sensor: this.sensor,
-        key: this.key
+        location: this.defaults.location,
+        radius: this.defaults.radius,
+        types: this.defaults.types,
+        name: this.defaults.name || this.defaults.query,
+        sensor: this.defaults.sensor,
+        key: this.defaults.key
     }
-    request.get(searchUrl, {
-        qs: qs,
-        json: true
-    }, function(err, res, json) {
-        if (!err && json.status == "OK") {
-            if (typeof json == "object" && json.results.length > 0) {
-                callback(null, json.results);
-            } else {
-                callback(new Error("No results returned"), null);
-            }
-        } else {
-            callback(new Error("Non ok status returned"), null);
-        }
-    });
+    this.request(this.defaults.searchUrl, qs, callback);
 },
 
 /**
- * Performs google places detail search
- * @method search
- * @param {String} query Search query
+ * @method details Performs google places detail search
+ * @param {Object} options Override GooglePlaces defaults with options for this query
  * @param {GooglePlaces~requestCallback} callback
  */
-GooglePlaces.prototype.details = function(callback) {
+GooglePlaces.prototype.details = function(options, callback) {
+    this.defaults = xtend(this.defaults, options);
     var qs = {
-        reference: this.reference,
-        sensor: this.sensor,
-        key: this.key
+        reference: this.defaults.reference,
+        sensor: this.defaults.sensor,
+        key: this.defaults.key
     }
-    request.get(detailsUrl, {
-        qs: qs,
-        json: true
-    }, function(err, res, json) {
-        if (!err && json.status == "OK") {
-            if (typeof json == "object" && !!json.result) {
-                callback(null, json.result);
-            } else {
-                callback(new Error("No results returned"), null);
-            }
-        } else {
-            callback(new Error("Non ok status returned"), null);
-        }
-    });
+    this.request(this.defaults.detailsUrl, qs, callback);
 }
+
+/**
+ * @callback requestCallback callback that returns the API query
+ * @param {Error} Any error occured during request
+ * @param {Array} Array of results returned
+ */
 
 module.exports = GooglePlaces

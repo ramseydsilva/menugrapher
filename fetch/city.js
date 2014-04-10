@@ -1,8 +1,8 @@
 'use strict';
 
-var googleplaces = require('../googleplaces'),
+var googleplaces = require('googleplacesapi'),
     app = require('../app'),
-    gp = new googleplaces(app.secrets.google.serverKey),
+    gp = new googleplaces({key: app.secrets.google.serverKey}),
     fetch = {};
 
 fetch.getLatLng = function(city, force, callback) {
@@ -13,8 +13,9 @@ fetch.getLatLng = function(city, force, callback) {
     if (force || !city.location || !city.location.latitude || !city.location.longitude) {
         gp.text({query: city.name}, function(err, res) {
             if (!err) {
-                city.location.latitude = res[0].geometry.location.lat;
-                city.location.longitude = res[0].geometry.location.lng;
+                var result = res.results[0];
+                city.location.latitude = result.geometry.location.lat;
+                city.location.longitude = result.geometry.location.lng;
                 city.save(callback);
             } else {
                 if (!!callback) callback(null, city);

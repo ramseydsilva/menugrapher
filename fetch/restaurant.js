@@ -12,8 +12,8 @@ var geocoderProvider = 'google',
     async = require('async'),
     httpAdapter = 'https',
     app = require('../app'),
-    googleplaces = require('../googleplaces'),
-    gp = new googleplaces(app.secrets.google.serverKey),
+    googleplaces = require('googleplacesapi'),
+    gp = new googleplaces({key: app.secrets.google.serverKey}),
     postHelpers = require('../helpers/post'),
     extra = {
         apiKey: app.secrets.google.serverKey,
@@ -113,9 +113,9 @@ fetch.googlePlacesDetail = function(restaurant, force, callback) {
         if (!restaurant.fetch.googlePlacesDetail || force) {
             gp.details({
                 reference: restaurant.fetch.googleReference
-            }, function(err, result) {
-                console.log(err, result);
+            }, function(err, res) {
                 if (!err) {
+                    var result = res.result;
                     fetch.save({
                         id: restaurant._id,
                         name: result.name,
@@ -152,8 +152,9 @@ fetch.googlePlacesSearch = function(restaurant, force, callback) {
             gp.search({
                 name: restaurant.name+', '+restaurant._city.name,
                 location: restaurant.location.latitude+', '+restaurant.location.longitude
-            }, function(err, results) {
+            }, function(err, res) {
                 if (!err) {
+                    results = res.results
                     async.each(results, function(res, next) {
                         fetch.save({
                             id: restaurant._id,
