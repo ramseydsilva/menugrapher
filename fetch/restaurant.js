@@ -186,7 +186,7 @@ fetch.crawlWebsite = function(website, mainCallback) {
     var maxDepth = 2;
     var allLinks = {};
     var defaults = {
-        links: ['facebook', 'google', 'yelp', 'yellowpages', 'openrice', 'twitter', 'foursquare', 'linkedin'],
+        links: ['facebook', 'google', 'yelp', 'yellowpages', 'openrice', 'twitter', 'foursquare', 'linkedin', 'instagram'],
         blacklisted: ['twitterapi']
     };
     var linkCrawledIndex = [];
