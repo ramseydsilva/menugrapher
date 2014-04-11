@@ -182,7 +182,7 @@ fetch.googlePlacesSearch = function(restaurant, force, callback) {
     }
 }
 
-fetch.crawlWebsite = function(website, callback) {
+fetch.crawlWebsite = function(website, mainCallback) {
     var maxDepth = 2;
     var allLinks = {};
     var defaults = {
@@ -195,7 +195,7 @@ fetch.crawlWebsite = function(website, callback) {
     var allowedDomains = [];
     var sameDomain = true;
     var results = [];
-    var maxLinks = 10;
+    var maxLinks = 50;
 
     this.getAbsoluteUrl = function(absoluteUrl, relativeUrl) {
         var protocol = 'http', domain = '', link = '';
@@ -217,86 +217,92 @@ fetch.crawlWebsite = function(website, callback) {
 
     var that = this;
 
-    if (sameDomain && typeof website == 'string') {
-        var domain = website.split(/^(([^:\/?#]+):)?(\/\/([^\/?#]*))?()?/)[4];
-        var protocol = website.split(/^(([^:\/?#]+):)?(\/\/([^\/?#]*))?()?/)[2];
-        allowedDomains.push('^'+protocol+'://([a-z0-9]*\\.)?'+domain);
-    }
-    if (typeof website == 'string') {
-        website = { depth: 1, text: 'main', href: website, links: [], crawled: false};
-        allLinks = website;
-    }
+    this.crawl = function(website, callback) {
+        console.log('in crawler', website);
+        if (sameDomain && typeof website == 'string') {
+            var domain = website.split(/^(([^:\/?#]+):)?(\/\/([^\/?#]*))?()?/)[4];
+            var protocol = website.split(/^(([^:\/?#]+):)?(\/\/([^\/?#]*))?()?/)[2];
+            allowedDomains.push('^'+protocol+'://([a-z0-9]*\\.)?'+domain);
+        }
+        if (typeof website == 'string') {
+            website = { depth: 1, text: 'main', href: website, links: [], crawled: false};
+            allLinks = website;
+        }
 
-    if (website.depth <= maxDepth  // max depth not reached
-        && website.href.indexOf('http') != -1 // url is absolute
-        && (!sameDomain || new RegExp(allowedDomains.join("|")).test(website.href)) // website is in list of allowed domains
-        ) {
-        request.get(website.href, function(err, res) {
-            requestsMade+=1;
-            if (!!err) {
-                requestsErrors+=1;
-                console.log('An error has occured', err);
-                callback(err, results);
-            } else {
-                requestsSuccess+=1;
-                jsdom.env({
-                    html: res.body,
-                    src: [jquery],
-                    done: function (err, window) {
-                        website.crawled = true;
-                        if (err) {
-                            if (!!callback) callback(err, results);
-                        } else {
-                            var $ = window.$;
-                            var pageLinks = $('a');
-                            if (pageLinks.length > maxLinks) {
-                                callback(new Error("Too many links on page"), results);
+        if (website.depth <= maxDepth  // max depth not reached
+            && website.href.indexOf('http') != -1 // url is absolute
+            && (!sameDomain || new RegExp(allowedDomains.join("|")).test(website.href)) // website is in list of allowed domains
+            ) {
+            request.get(website.href, function(err, res) {
+                console.log(website.href);
+                requestsMade+=1;
+                if (!!err) {
+                    requestsErrors+=1;
+                    console.log('An error has occured', err);
+                    callback(err, results);
+                } else {
+                    requestsSuccess+=1;
+                    jsdom.env({
+                        html: res.body,
+                        src: [jquery],
+                        done: function (err, window) {
+                            website.crawled = true;
+                            if (err) {
+                                if (!!callback) callback(err, results);
                             } else {
-                                async.each(pageLinks, function(pageLink, done) {
-                                    var l = pageLink;
-                                    var href = $(l).attr('href');
-                                    if (!!href) {
-                                        var link = {
-                                            depth: website.depth+1,
-                                            text: $(l).text(),
-                                            href: that.getAbsoluteUrl(website.href, href),
-                                            links: [],
-                                            crawled: false
-                                        };
-                                        var match = new RegExp(defaults.links.join("|")).exec(link.href);
-                                        var matchBlacklisted = new RegExp(defaults.blacklisted.join("|")).exec(link.href);
-                                        if (!!match && !matchBlacklisted) {
-                                            var result = {source: match[0], link: link.href};
-                                            if (!_.findWhere(results, result)) {
-                                                console.log(result);
-                                                results.push(result);
+                                var $ = window.$;
+                                var pageLinks = $('a');
+                                console.log(pageLinks.length);
+                                if (pageLinks.length > maxLinks) {
+                                    callback(new Error("Too many links on page"), results);
+                                } else {
+                                    async.each(pageLinks, function(pageLink, done) {
+                                        var l = pageLink;
+                                        var href = $(l).attr('href');
+                                        if (!!href) {
+                                            var link = {
+                                                depth: website.depth+1,
+                                                text: $(l).text(),
+                                                href: that.getAbsoluteUrl(website.href, href),
+                                                links: [],
+                                                crawled: false
+                                            };
+                                            var match = new RegExp(defaults.links.join("|")).exec(link.href);
+                                            var matchBlacklisted = new RegExp(defaults.blacklisted.join("|")).exec(link.href);
+                                            if (!!match && !matchBlacklisted) {
+                                                var result = {source: match[0], link: link.href};
+                                                if (!_.findWhere(results, result)) {
+                                                    console.log(result);
+                                                    results.push(result);
+                                                }
                                             }
-                                        }
 
-                                        website.links.push(link);
-                                        if (!new RegExp(notAllowed.join("|")).test(link.href) && linkCrawledIndex.indexOf(link.href) == -1) {
-                                            linkCrawledIndex.push(link.href);
-                                            that.crawlWebsite(link, function(err, res) {
-                                                done(err, res);
-                                            });
+                                            website.links.push(link);
+                                            if (!new RegExp(notAllowed.join("|")).test(link.href) && linkCrawledIndex.indexOf(link.href) == -1) {
+                                                linkCrawledIndex.push(link.href);
+                                                that.crawl(link, function(err, res) {
+                                                    done(err, res);
+                                                });
+                                            } else {
+                                                done(null, null);
+                                            }
                                         } else {
                                             done(null, null);
                                         }
-                                    } else {
-                                        done(null, null);
-                                    }
-                                }, function(err, res) {
-                                    if (!!callback) callback(err, results);
-                                });
+                                    }, function(err, res) {
+                                        if (!!callback) callback(err, results);
+                                    });
+                                }
                             }
                         }
-                    }
-                });
-            }
-        });
-    } else {
-        if (!!callback) callback(null, results);
+                    });
+                }
+            });
+        } else {
+            if (!!callback) callback(null, results);
+        }
     }
+    this.crawl(website, mainCallback);
 }
 
 

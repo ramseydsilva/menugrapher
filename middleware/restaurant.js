@@ -52,20 +52,24 @@ middleware.getRestaurantData = function(req, res, cb) {
             });
         },
         scrapeWebsite: function(next) {
-            next();
             Restaurant.findOne({_id: restaurant._id}).exec(function(err, doc) {
                 console.log(doc.links);
                 if (!!doc.website && doc.links.length ==0) {
                     console.log('gonna crawl');
                     fetch.crawlWebsite(doc.website, function(err, result) {
+                        if (!!err) console.log('crawler error', err);
                         if (!err && !!result) {
                             console.log('done', result);
                             doc.links = result
                             doc.save(function(err, res) {
                                 next();
                             });
+                        } else {
+                            next();
                         }
                     });
+                } else {
+                    next();
                 }
             });
         },
