@@ -50,7 +50,25 @@ middleware.getRestaurantData = function(req, res, cb) {
                     doc.populateData('fetch.googlePlacesDetail', true, next);
                 }
             });
-        }
+        },
+        scrapeWebsite: function(next) {
+            next();
+            Restaurant.findOne({_id: restaurant._id}).exec(function(err, doc) {
+                console.log(doc.links);
+                if (!!doc.website && doc.links.length ==0) {
+                    console.log('gonna crawl');
+                    fetch.crawlWebsite(doc.website, function(err, result) {
+                        if (!err && !!result) {
+                            console.log('done', result);
+                            doc.links = result
+                            doc.save(function(err, res) {
+                                next();
+                            });
+                        }
+                    });
+                }
+            });
+        },
     }, function(err, results) {
         if (updated) {
             Restaurant.findOne({_id: restaurant._id}).populate('_city').populate('menu').exec(function(err, doc) {

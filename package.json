@@ -71,7 +71,8 @@
     "underscore": "~1.6.0",
     "validator": "^3.4.0",
     "winston": "~0.7.3",
-    "xtend": "^2.2.0"
+    "xtend": "^2.2.0",
+    "jsdom": "^0.10.5"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

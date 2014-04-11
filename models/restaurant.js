@@ -21,11 +21,7 @@ var restaurantSchema = new mongoose.Schema({
     website: String,
     description: String,
     hours: String,
-    links: {
-        facebook: String,
-        google: String,
-        yelp: String
-    },
+    links: [{}],
     contact: {
         phone: String,
         email: String

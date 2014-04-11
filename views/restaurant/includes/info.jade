@@ -14,6 +14,9 @@ div.row
             | Rating: #{restaurant.reviews.rating}
             br
 
+        for link in restaurant.links
+            a(href=link.link, target=blank) #{link.source} 
+
         div.google-photos.padded-10
             for photo in restaurant.photos.reverse().splice(0,3)
                 img(class='padded-all-5', src='https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&maxheight=150&photoreference=#{photo.photo_reference}&key=#{secrets.google.clientKey}&sensor=false')
