@@ -15,7 +15,7 @@ div.row
             br
 
         for link in restaurant.links
-            a(href=link.link, target=blank) #{link.source} 
+            a(href=link.link, target="blank") #{link.source} 
 
         div.google-photos.padded-10
             for photo in restaurant.photos.reverse().splice(0,3)
