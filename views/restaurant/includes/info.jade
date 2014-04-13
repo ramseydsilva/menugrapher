@@ -15,7 +15,10 @@ div.row
             br
 
         for link in restaurant.links
-            a(href=link.link, target="blank") #{link.source} 
+            a(href=link.link, target="blank")
+                i(class="social fa fa-#{link.source}")
+
+        div.clearfix
 
         div.google-photos.padded-10
             for photo in restaurant.photos.reverse().splice(0,3)

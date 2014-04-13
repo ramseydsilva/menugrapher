@@ -4,6 +4,7 @@ var Restaurant = require('../models/restaurant'),
     _ = require('underscore'),
     async = require('async'),
     fetch = require('../fetch/restaurant'),
+    linker = require('socialfinder'),
     middleware = {};
 
 middleware.restaurantExists = function(req, res, next) {
@@ -51,26 +52,17 @@ middleware.getRestaurantData = function(req, res, cb) {
                 }
             });
         },
-        scrapeWebsite: function(next) {
+        getLinks: function(next) {
             Restaurant.findOne({_id: restaurant._id}).exec(function(err, doc) {
-                console.log(doc.links);
-                if (!!doc.website && doc.links.length ==0) {
-                    console.log('gonna crawl');
-                    fetch.crawlWebsite(doc.website, function(err, result) {
-                        if (!!err) console.log('crawler error', err);
-                        if (!err && !!result) {
-                            console.log('done', result);
-                            doc.links = result
-                            doc.save(function(err, res) {
-                                next();
-                            });
-                        } else {
-                            next();
-                        }
+                if (!!doc.website && doc.links.length == 0) {
+                    var l = new linker();
+                    l.crawl(doc.website)
+                    .progressed(function(data) {
+                        console.log('Progressed: ', data);
+                        doc.update({$addToSet: {links: data}}, function() {});
                     });
-                } else {
-                    next();
                 }
+                next();
             });
         },
     }, function(err, results) {
