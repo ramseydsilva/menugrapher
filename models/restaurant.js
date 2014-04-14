@@ -18,7 +18,7 @@ var schemaOptions = {
 var restaurantSchema = new mongoose.Schema({
     name: String,
     slug: { type: String, index: true },
-    url: { type: String, unique: true },
+    url: { type: String },
     _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
     city: {},
     _category: { type: mongoose.Schema.ObjectId, ref : 'category' },
@@ -144,6 +144,7 @@ restaurantSchema.pre('save', function(next) {
             that.makeUrl(next);
         }
     ], function(err, results) {
+        if (err) console.log(err);
         next();
     });
 });

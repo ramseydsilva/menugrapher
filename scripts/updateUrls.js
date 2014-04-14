@@ -28,7 +28,9 @@ mongoose.connect(db, function(err) {
 
     var restaurants = Restaurant.find({}).exec(function(err, docs) {
         _.each(docs, function(doc) {
-            doc.save();
+            doc.save(function(err) {
+                if (err) console.log('Error in save', err);
+            });
         });
     });
 
