@@ -5,7 +5,6 @@ var Restaurant = require('../models/restaurant'),
     _ = require('underscore'),
     async = require('async'),
     fetch = require('../fetch/restaurant'),
-    linker = require('socialfinder'),
     middleware = {};
 
 middleware.restaurantExists = function(req, res, next) {
@@ -16,11 +15,13 @@ middleware.restaurantExists = function(req, res, next) {
             });
         },
         slug: function(next) {
+            var opts;
             if (req.param('city')) {
-                Restaurant.findOne({'city.slug': req.param('city'), slug: req.param('restaurant')}, next);
+                opts = {'city.slug': req.param('city'), slug: req.param('restaurant')};
             } else {
-                Restaurant.findOne({slug: req.param('restaurant')}, next);
+                opts = {slug: req.param('restaurant')};
             }
+            Restaurant.findOne(opts).populate('menu').exec(next);
         }
     }, function(err, results) {
         var restaurant = (results.id || results.slug);
@@ -67,18 +68,13 @@ middleware.getRestaurantData = function(req, res, cb) {
                 }
             });
         },
-        getLinks: function(next) {
+        getLinksAndMenu: function(next) {
             Restaurant.findOne({_id: restaurant._id}).exec(function(err, doc) {
-                if (!!doc.website && doc.links.length == 0) {
-                    var l = new linker();
-                    l.crawl(doc.website)
-                    .progressed(function(data) {
-                        console.log('Progressed: ', data);
-                        doc.update({$addToSet: {links: data}}, function() {});
-                    });
+                if (!doc.dateCrawledWebsite || Date.now() > (doc.dateCrawledWebsite + (30*60*60))) { // crawl every 30 mins
+                    doc.crawl();
                 }
-                next();
             });
+            next();
         },
     }, function(err, results) {
         if (updated) {

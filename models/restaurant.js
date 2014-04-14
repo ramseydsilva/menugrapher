@@ -5,6 +5,8 @@ var mongoose = require('mongoose'),
     async = require('async'),
     item = require('./item'),
     slug = require('slug'),
+    linker = require('socialfinder'),
+    ItemKeywords = require('./itemkeywords'),
     user = require('./User'),
     city = require('./city'),
     oprop = require('oprop');
@@ -25,6 +27,7 @@ var restaurantSchema = new mongoose.Schema({
     menu: [{type: mongoose.Schema.ObjectId, ref: 'item', unique: true}],
     image: {url: String, path: String},
     website: String,
+    dateCrawledWebsite: Date,
     description: String,
     hours: String,
     links: [{}],
@@ -52,7 +55,9 @@ restaurantSchema.virtual('refetch').get(function() {
 });
 
 restaurantSchema.virtual('nonEmptyMenu').get(function() {
-    return _.filter(this.menu, function(item) { return !!item.name && item.name != ''; });
+    return _.filter(this.menu, function(item) {
+        return !!item.name && item.name != '';
+    });
 });
 
 restaurantSchema.method({
@@ -128,6 +133,53 @@ restaurantSchema.method({
             this.url = "/restaurants/" + this._id;
         }
         if (!!next) next();
+    },
+    addMenuItem: function(itemName, next) {
+        var that = this;
+        mongoose.model('item').findOneAndUpdate({ name: itemName, _restaurant: this._id }, {}, {upsert: true}, function(err, doc) {
+            if (err) throw err;
+            mongoose.model('restaurant').update({_id: that._id}, { $addToSet: {menu: doc._id }}, function(err, _) {
+                if (err) throw err;
+                if (next) next(err, doc);
+            });
+        });
+    },
+    crawl: function(next) {
+        var doc = this;
+
+        async.parallel({
+            getItemKeywords: function(next) {
+                ItemKeywords.find({}).exec(function(err, items) {
+                    var menuKeywords = _.map(items, function(item) {
+                        return item.name;
+                    });
+                    next(null, menuKeywords);
+                });
+            }
+        }, function(err, results) {
+            console.log(results.getItemKeywords);
+            var l = new linker({
+                getMenu: true,
+                menuKeywords: results.getItemKeywords
+            });
+            l.crawl(doc.website)
+            .progressed(function(data) {
+                console.log('Progressed: ', data);
+                if (!!data.item) {
+                    doc.addMenuItem(data.item, function(err, doc) {
+                        console.log('Menu item added: ', doc.name);
+                    });
+                } else {
+                    doc.update({$addToSet: {links: data}}, function() {});
+                }
+            })
+            .finally(function(err, res) {
+                console.log('finished crawl');
+                doc.dateCrawledWebsite = Date.now();
+                if (next) doc.save(next); else doc.save();
+            });
+
+        });
     }
 });
 
