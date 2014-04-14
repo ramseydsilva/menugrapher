@@ -15,7 +15,7 @@ div.row
             br
 
         for link in restaurant.links
-            a(href=link.href, target="blank")
+            a(href=(link.link||link.href), target="blank")
                 i(class="social fa fa-#{link.source}")
 
         div.clearfix
