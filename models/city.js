@@ -1,5 +1,6 @@
 var mongoose = require('mongoose'),
     slug = require('slug'),
+    async = require('async'),
     restaurant = require('./restaurant');
 
 var schemaOptions = {
@@ -10,6 +11,7 @@ var schemaOptions = {
 var citySchema = new mongoose.Schema({
     name: String,
     slug: { type: String, index: true },
+    url: { type: String },
     hits: { type: Number, default: 1, index: true },
     location: {
         longitude: String,
@@ -17,19 +19,19 @@ var citySchema = new mongoose.Schema({
     }
 }, schemaOptions);
 
-citySchema.virtual('url').get(function() {
-    if (!!this.slug)
-        return "/cities/" + this.slug;
-    return "/cities/" + this._id;
-});
-
 citySchema.virtual('restaurantsUrl').get(function() {
     return this.url + '/restaurants';
 });
 
 citySchema.method({
     makeSlug: function(iterator, force, next) {
+        if (!force && !next) {
+            next = iterator;
+            iterator = 0;
+            force = false;
+        }
         var that = this;
+        console.log('making slug', this.id, this.name, !!this.name, !this.slug);
         if (force || (!!this.name && !this.slug)) {
             var _slug = slug(this.name.toLowerCase() + (!!iterator ? '-'+iterator: ''));
             mongoose.model("city").findOne({slug: _slug}, function(err, exists) {
@@ -37,17 +39,37 @@ citySchema.method({
                     that.makeSlug(iterator+1, force, next);
                 } else {
                     that.slug = _slug;
+                    console.log('making slug', that.slug);
                     if (!!next) next();
                 }
             });
         } else {
             if (!!next) next();
         }
+    },
+    makeUrl: function(next) {
+        if (!!this.slug) {
+            this.url = "/cities/" + this.slug;
+        } else {
+            this.url = "/cities/" + this._id;
+        }
+        if (!!next) next();
     }
 });
 
 citySchema.pre('save', function(next) {
-    this.makeSlug(0, false, next);
+    var that = this;
+    async.series([
+        function(next) {
+            that.makeSlug(0, false, next);
+        },
+        function(next) {
+            that.makeUrl(next);
+        }
+    ], function(err, results) {
+        console.log('in save', that.slug, that.url);
+        next();
+    });
 });
 
 citySchema.post('save', function() {

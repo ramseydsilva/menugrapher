@@ -19,10 +19,8 @@ middleware.cityExists = function(req, res, next) {
     }, function(err, results) {
         var city = (results.id || results.slug);
         if (!!city) {
-            if (!city.slug) {
-                city.makeSlug(0, false, function() {
-                    city.save()
-                });
+            if (!city.slug || !city._url) {
+                city.save()
             }
             city.update({ $inc: { hits: 1 }}).exec(); // Update the hits
             res.locals.city = city;
