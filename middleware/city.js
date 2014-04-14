@@ -2,11 +2,28 @@
 
 var City = require('../models/city'),
     fetch = require('../fetch/city'),
+    async = require('async'),
     middleware = {};
 
 middleware.cityExists = function(req, res, next) {
-    City.findOne({_id: req.param('city')}).exec(function(err, city) {
-        if (city) {
+    // Query by id and slug
+    async.parallel({
+        id: function(next) {
+            City.findOne({_id: req.param('city')}, function(err, doc) {
+                next(null, doc)
+            });
+        },
+        slug: function(next) {
+            City.findOne({slug: req.param('city')}, next);
+        }
+    }, function(err, results) {
+        var city = (results.id || results.slug);
+        if (!!city) {
+            if (!city.slug) {
+                city.makeSlug(0, false, function() {
+                    city.save()
+                });
+            }
             city.update({ $inc: { hits: 1 }}).exec(); // Update the hits
             res.locals.city = city;
             next();

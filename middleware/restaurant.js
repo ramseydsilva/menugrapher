@@ -1,6 +1,7 @@
 'use strict';
 
 var Restaurant = require('../models/restaurant'),
+    City = require('../models/city'),
     _ = require('underscore'),
     async = require('async'),
     fetch = require('../fetch/restaurant'),
@@ -8,8 +9,31 @@ var Restaurant = require('../models/restaurant'),
     middleware = {};
 
 middleware.restaurantExists = function(req, res, next) {
-    Restaurant.findOne({_id: req.param('restaurant')}).populate('_city').populate('menu').exec(function(err, restaurant) {
-        if (restaurant) {
+    async.parallel({
+        id: function(next) {
+            Restaurant.findOne({_id: req.param('restaurant')}, function(err, doc) {
+                next(null, doc)
+            });
+        },
+        slug: function(next) {
+            if (req.param('city')) {
+                Restaurant.findOne({'city.slug': req.param('city'), slug: req.param('restaurant')}, next);
+            } else {
+                Restaurant.findOne({slug: req.param('restaurant')}, next);
+            }
+        }
+    }, function(err, results) {
+        var restaurant = (results.id || results.slug);
+        if (!!restaurant) {
+            if (!restaurant.slug) {
+                restaurant.makeSlug(0, false, function() {
+                    restaurant.save()
+                });
+            } else {
+                Restaurant.findById(restaurant.id).populate('_city').exec(function(err, doc) {
+                    doc.save();
+                });
+            }
             restaurant.update({ $inc: { hits: 1 }}).exec(); // Update the hits
             res.locals.restaurant = restaurant;
             next();

@@ -151,6 +151,9 @@ var routes = function(app) {
     app.get('/auth/venmo/callback', passport.authorize('venmo', { failureRedirect: '/api' }), function(req, res) {
       res.redirect('/api/venmo');
     });
+
+    app.get('/:city/:restaurant', restaurantMiddleware.restaurantExists, restaurantMiddleware.getRestaurantData, postMiddleware.getUploadUrl, restaurantController.restaurant);
+
 };
 
 module.exports = routes;

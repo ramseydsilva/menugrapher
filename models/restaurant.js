@@ -3,8 +3,10 @@
 var mongoose = require('mongoose'),
     _ = require('underscore'),
     item = require('./item'),
+    slug = require('slug'),
     user = require('./User'),
-    city = require('./city');
+    city = require('./city'),
+    oprop = require('oprop');
 
 var schemaOptions = {
     toObject: { virtuals: true },
@@ -14,7 +16,9 @@ var schemaOptions = {
 
 var restaurantSchema = new mongoose.Schema({
     name: String,
+    slug: { type: String, index: true },
     _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
+    city: {},
     _category: { type: mongoose.Schema.ObjectId, ref : 'category' },
     menu: [{type: mongoose.Schema.ObjectId, ref: 'item', unique: true}],
     image: {url: String, path: String},
@@ -42,6 +46,10 @@ var restaurantSchema = new mongoose.Schema({
 }, schemaOptions);
 
 restaurantSchema.virtual('url').get(function() {
+    if (!!this.getProperty('city.slug') && !!this.slug)
+        return '/'+this.city.slug+'/'+this.slug;
+    if (!!this.slug)
+        return "/restaurants/" + this.slug;
     return "/restaurants/" + this._id;
 });
 
@@ -92,7 +100,31 @@ restaurantSchema.method({
         } else {
             callback(null, this);
         }
+    },
+    makeSlug: function(iterator, force, next) {
+        var that = this;
+        if (force || (!!this.name && !this.slug)) {
+            var _slug = slug(this.name.toLowerCase() + (!!iterator ? '-'+iterator: ''));
+            mongoose.model("restaurant").findOne({_city: (this._city.id || this._city), slug: _slug}, function(err, exists) {
+                if (!!exists) {
+                    that.makeSlug(iterator+1, force, next);
+                } else {
+                    that.slug = _slug;
+                    if (!!next) next();
+                }
+            });
+        } else {
+            if (!!next) next();
+        }
     }
+});
+
+restaurantSchema.pre('save', function(next) {
+    if (!!this._city.name) {
+        console.log('city save', this._city);
+        this.city = this._city.toJSON();
+    }
+    this.makeSlug(0, false, next);
 });
 
 restaurantSchema.index( { 'menu._id': 1 } );
