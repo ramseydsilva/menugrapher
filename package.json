@@ -62,7 +62,7 @@
     "paypal-rest-sdk": "~0.6.4",
     "redis": "0.8.3",
     "request": "~2.34.0",
-    "socialfinder": "0.0.0",
+    "socialfinder": "0.0.1",
     "socket.io": "~0.9.16",
     "socket.io-stream": "~0.5.3",
     "temboo": "^1.7.7",
