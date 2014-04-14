@@ -11,7 +11,7 @@ var schemaOptions = {
 var citySchema = new mongoose.Schema({
     name: String,
     slug: { type: String, index: true },
-    url: { type: String },
+    url: { type: String, unique: true },
     hits: { type: Number, default: 1, index: true },
     location: {
         longitude: String,
@@ -31,7 +31,6 @@ citySchema.method({
             force = false;
         }
         var that = this;
-        console.log('making slug', this.id, this.name, !!this.name, !this.slug);
         if (force || (!!this.name && !this.slug)) {
             var _slug = slug(this.name.toLowerCase() + (!!iterator ? '-'+iterator: ''));
             mongoose.model("city").findOne({slug: _slug}, function(err, exists) {
@@ -67,7 +66,6 @@ citySchema.pre('save', function(next) {
             that.makeUrl(next);
         }
     ], function(err, results) {
-        console.log('in save', that.slug, that.url);
         next();
     });
 });

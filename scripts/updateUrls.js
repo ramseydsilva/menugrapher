@@ -3,6 +3,7 @@
 var mongoose = require('mongoose'),
     nconf = require('nconf');
     _ = require('underscore'),
+    Restaurant = require('../models/restaurant'),
     City = require('../models/city');
 
 // Load configurations depending on the environment
@@ -19,6 +20,12 @@ mongoose.connect(db, function(err) {
     if (!!err) throw err;
 
     var cities = City.find({}).exec(function(err, docs) {
+        _.each(docs, function(doc) {
+            doc.save();
+        });
+    });
+
+    var restaurants = Restaurant.find({}).exec(function(err, docs) {
         _.each(docs, function(doc) {
             doc.save();
         });

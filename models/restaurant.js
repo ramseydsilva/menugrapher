@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose'),
     _ = require('underscore'),
+    async = require('async'),
     item = require('./item'),
     slug = require('slug'),
     user = require('./User'),
@@ -17,6 +18,7 @@ var schemaOptions = {
 var restaurantSchema = new mongoose.Schema({
     name: String,
     slug: { type: String, index: true },
+    url: { type: String, unique: true },
     _city: { type: mongoose.Schema.ObjectId, ref : 'city' },
     city: {},
     _category: { type: mongoose.Schema.ObjectId, ref : 'category' },
@@ -44,14 +46,6 @@ var restaurantSchema = new mongoose.Schema({
     hits: { type: Number, default: 1, index: true },
     fetch: {}
 }, schemaOptions);
-
-restaurantSchema.virtual('url').get(function() {
-    if (!!this.getProperty('city.slug') && !!this.slug)
-        return '/'+this.city.slug+'/'+this.slug;
-    if (!!this.slug)
-        return "/restaurants/" + this.slug;
-    return "/restaurants/" + this._id;
-});
 
 restaurantSchema.virtual('refetch').get(function() {
     return !this.fetch || (!!this.fetch ? !this.fetch.googlePlacesDetail : true);
@@ -101,6 +95,14 @@ restaurantSchema.method({
             callback(null, this);
         }
     },
+    saveCity: function(next) {
+        var that = this;
+        mongoose.model("city").findOne({_id: (this._city._id || this._city)}, function(err, city) {
+            if (!!err) throw err;
+            that.city = city.toJSON();
+            if (!!next) next();
+        });
+    },
     makeSlug: function(iterator, force, next) {
         var that = this;
         if (force || (!!this.name && !this.slug)) {
@@ -116,15 +118,34 @@ restaurantSchema.method({
         } else {
             if (!!next) next();
         }
+    },
+    makeUrl: function(next) {
+        if (!!this.slug && !!this.getProperty('city.slug')) {
+            this.url = '/'+this.city.slug+'/'+this.slug;
+        } else if (!!this.slug) {
+            this.url = "/restaurants/" + this.slug;
+        } else {
+            this.url = "/restaurants/" + this._id;
+        }
+        if (!!next) next();
     }
 });
 
 restaurantSchema.pre('save', function(next) {
-    if (!!this._city.name) {
-        console.log('city save', this._city);
-        this.city = this._city.toJSON();
-    }
-    this.makeSlug(0, false, next);
+    var that = this;
+    async.series([
+        function(next) {
+            that.saveCity(next);
+        },
+        function(next) {
+            that.makeSlug(0, false, next);
+        },
+        function(next) {
+            that.makeUrl(next);
+        }
+    ], function(err, results) {
+        next();
+    });
 });
 
 restaurantSchema.index( { 'menu._id': 1 } );
