@@ -11,4 +11,4 @@ var itemKeywordsSchema = new mongoose.Schema({
     name: String
 }, schemaOptions);
 
-module.exports = mongoose.model("itemkeywords", itemKeywordsSchema);
+module.exports = mongoose.model("itemkeywordsblacklisted", itemKeywordsSchema);

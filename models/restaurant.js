@@ -7,6 +7,7 @@ var mongoose = require('mongoose'),
     slug = require('slug'),
     linker = require('socialfinder'),
     ItemKeywords = require('./itemkeywords'),
+    ItemKeywordsBlacklisted = require('./itemkeywordsblacklisted'),
     user = require('./User'),
     city = require('./city'),
     oprop = require('oprop');
@@ -155,12 +156,21 @@ restaurantSchema.method({
                     });
                     next(null, menuKeywords);
                 });
+            },
+            getItemKeywordsBlacklisted: function(next) {
+                ItemKeywordsBlacklisted.find({}).exec(function(err, items) {
+                    var menuKeywordsBlacklisted = _.map(items, function(item) {
+                        return item.name;
+                    });
+                    next(null, menuKeywordsBlacklisted);
+                });
             }
         }, function(err, results) {
             if (!!doc.website) {
                 var l = new linker({
                     getMenu: true,
-                    menuKeywords: results.getItemKeywords
+                    menuKeywords: results.getItemKeywords,
+                    menuKeywordsBlacklisted: results.getItemKeywordsBlacklisted
                 });
                 l.crawl(doc.website)
                 .progressed(function(data) {
