@@ -157,28 +157,30 @@ restaurantSchema.method({
                 });
             }
         }, function(err, results) {
-            console.log(results.getItemKeywords);
-            var l = new linker({
-                getMenu: true,
-                menuKeywords: results.getItemKeywords
-            });
-            l.crawl(doc.website)
-            .progressed(function(data) {
-                console.log('Progressed: ', data);
-                if (!!data.item) {
-                    doc.addMenuItem(data.item, function(err, doc) {
-                        console.log('Menu item added: ', doc.name);
-                    });
-                } else {
-                    doc.update({$addToSet: {links: data}}, function() {});
-                }
-            })
-            .finally(function(err, res) {
-                console.log('finished crawl');
-                doc.dateCrawledWebsite = Date.now();
-                if (next) doc.save(next); else doc.save();
-            });
-
+            if (!!doc.website) {
+                var l = new linker({
+                    getMenu: true,
+                    menuKeywords: results.getItemKeywords
+                });
+                l.crawl(doc.website)
+                .progressed(function(data) {
+                    console.log('Progressed: ', data);
+                    if (!!data.item) {
+                        doc.addMenuItem(data.item, function(err, doc) {
+                            console.log('Menu item added: ', doc.name);
+                        });
+                    } else {
+                        doc.update({$addToSet: {links: data}}, function() {});
+                    }
+                })
+                .finally(function(err, res) {
+                    console.log('finished crawl');
+                    doc.dateCrawledWebsite = Date.now();
+                    if (next) doc.save(next); else doc.save();
+                });
+            } else {
+                if (next) next(new Error("No website url"), doc);
+            }
         });
     }
 });
