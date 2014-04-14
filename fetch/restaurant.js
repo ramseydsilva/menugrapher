@@ -67,7 +67,12 @@ fetch.save = function(data, source, callback) {
 
             if (createNew) {
                 postHelpers.getOrCreateCityRestaurantCategoryItem(data.city, data.name, '', '', function(err, results) {
-                    Restaurant.findOneAndUpdate({_id: results.restaurant.id}, opts, callback);
+                    Restaurant.findOneAndUpdate({_id: results.restaurant.id}, opts, function() {
+                        // Save to populate fields
+                        Restaurant.findOne({_id: results.restaurant.id}, function(err, doc) {
+                            doc.save();
+                        });
+                    });
                 });
             }
 
