@@ -179,7 +179,11 @@ define([
 
                 if (!!data) {
                     var result = _.map(data, function(d) {
-                        searchBox.find('.search-results').append('<a class="list-group-item" href="/' + urlPrefix + '/' + d._id + '">' + d.name + '</a>');
+                        if (api.indexOf('cities') != -1) {
+                            searchBox.find('.search-results').append('<a class="list-group-item" href="' + d.url + '">' + d.name + '</a>');
+                        } else {
+                            searchBox.find('.search-results').append('<a class="list-group-item" href="/' + urlPrefix + '/' + d._id + '">' + d.name + '</a>');
+                        }
                     });
                 } else {
                     searchBox.find('.search-results').append('<a class="list-group-item">Search didn\'t return any results</a>');
