@@ -10,7 +10,7 @@ var schemaOptions = {
 
 var citySchema = new mongoose.Schema({
     name: String,
-    slug: { type: String, index: true },
+    slug: { type: String, index: true, unique: true },
     url: { type: String, unique: true },
     hits: { type: Number, default: 1, index: true },
     location: {

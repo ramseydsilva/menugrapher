@@ -25,15 +25,6 @@ middleware.restaurantExists = function(req, res, next) {
     }, function(err, results) {
         var restaurant = (results.id || results.slug);
         if (!!restaurant) {
-            if (!restaurant.slug) {
-                restaurant.makeSlug(0, false, function() {
-                    restaurant.save()
-                });
-            } else {
-                Restaurant.findById(restaurant.id).populate('_city').exec(function(err, doc) {
-                    doc.save();
-                });
-            }
             restaurant.update({ $inc: { hits: 1 }}).exec(); // Update the hits
             res.locals.restaurant = restaurant;
             next();

@@ -3,6 +3,7 @@
 var mongoose = require('mongoose'),
     nconf = require('nconf');
     _ = require('underscore'),
+    Category = require('../models/category'),
     Restaurant = require('../models/restaurant'),
     City = require('../models/city');
 
@@ -26,6 +27,12 @@ mongoose.connect(db, function(err) {
     });
 
     var restaurants = Restaurant.find({}).exec(function(err, docs) {
+        _.each(docs, function(doc) {
+            doc.save();
+        });
+    });
+
+    var categories = Category.find({}).exec(function(err, docs) {
         _.each(docs, function(doc) {
             doc.save();
         });
