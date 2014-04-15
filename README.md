@@ -11,6 +11,7 @@ TODO
 4. Design overhawl.
 5. Allow image or content posts
 6. Load more button to show more items
+7. Add show/collapse button on restaurant page and remember user's options in session
 
 ### Crawler
 1. Socialfinder/linker module: extend to grab
