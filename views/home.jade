@@ -5,17 +5,20 @@ block content
         div(class='panel-body')
             div.row
                 div(class='col-sm-12')
-                    legend.lead Welcome to Menugrapher
-                    ol(class='text-success')
-                        li Post, organize and share your food photography
-                        li Search local restaurant listings and menues
-                        li Place orders quickly with our multi-method ordering system
+                    h1.bottom-border Welcome to Menugrapher!
+                        h3.text-success Free, Open and Fair
+                        h4.text-info All the information you need to know about your favorite restaurants
+                        h4.text-warning Share and organize your food photography
+                        h4.text-danger Lookup menues and place orders
                     br
                     if !user
                         a(class="btn btn-success", href="signup")
                             i(class="fa fa-arrow-circle-o-right")
                             | Start now
                             a.btn.btn-link(href='/login') or Login
+                        br
+                        br
+                        br
 
             div.row
                 div(class='col-sm-12')
