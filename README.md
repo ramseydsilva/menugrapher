@@ -1,74 +1,34 @@
-Evented I/O for V8 javascript. [![Build Status](https://secure.travis-ci.org/joyent/node.png)](http://travis-ci.org/joyent/node)
-===
+Waitr.io
+========
 
-### To build:
+TODO
+----
 
-Prerequisites (Unix only):
+### Site
+1. Remove unnecessary sockets/connections and standardize data input/read methods.
+2. Have an API button on each page.
+3. Grab pictures from site if available and override google.
+4. Design overhawl.
+5. Allow image or content posts
+6. Load more button to show more items
+7. Add show/collapse button on restaurant page and remember user's options in session
 
-    * GCC 4.2 or newer
-    * Python 2.6 or 2.7
-    * GNU Make 3.81 or newer
-    * libexecinfo (FreeBSD and OpenBSD only)
+### Crawler
+1. Socialfinder/linker module: extend to grab
+   a) Social Links
+   b) Images
+   c) Website content
+   d) Menu items
+2. Run scripts to populate/clean up info.
+3. Disallow crawlers by enforcing timed IP blacklists
 
-Unix/Macintosh:
+### Ordering
+1. Add cart/checkout/my order page.
+2. Validate contact information for each restaurant.
+3. Validate some menu items/price.
+4. Make contact restaurant button prominent.
+5. Optinally, grab info from yellow pages.
 
-    ./configure
-    make
-    make install
-
-If your python binary is in a non-standard location or has a
-non-standard name, run the following instead:
-
-    export PYTHON=/path/to/python
-    $PYTHON ./configure
-    make
-    make install
-
-Windows:
-
-    vcbuild.bat
-
-You can download pre-built binaries for various operating systems from
-[http://nodejs.org/download/](http://nodejs.org/download/).  The Windows
-and OS X installers will prompt you for the location to install to.
-The tarballs are self-contained; you can extract them to a local directory
-with:
-
-    tar xzf /path/to/node-<version>-<platform>-<arch>.tar.gz
-
-Or system-wide with:
-
-    cd /usr/local && tar --strip-components 1 -xzf \
-                         /path/to/node-<version>-<platform>-<arch>.tar.gz
-
-### To run the tests:
-
-Unix/Macintosh:
-
-    make test
-
-Windows:
-
-    vcbuild.bat test
-
-### To build the documentation:
-
-    make doc
-
-### To read the documentation:
-
-    man doc/node.1
-
-Resources for Newcomers
----
-  - [The Wiki](https://github.com/joyent/node/wiki)
-  - [nodejs.org](http://nodejs.org/)
-  - [how to install node.js and npm (node package manager)](http://www.joyent.com/blog/installing-node-and-npm/)
-  - [list of modules](https://github.com/joyent/node/wiki/modules)
-  - [searching the npm registry](http://npmjs.org/)
-  - [list of companies and projects using node](https://github.com/joyent/node/wiki/Projects,-Applications,-and-Companies-Using-Node)
-  - [node.js mailing list](http://groups.google.com/group/nodejs)
-  - irc chatroom, [#node.js on freenode.net](http://webchat.freenode.net?channels=node.js&uio=d4)
-  - [community](https://github.com/joyent/node/wiki/Community)
-  - [contributing](https://github.com/joyent/node/wiki/Contributing)
-  - [big list of all the helpful wiki pages](https://github.com/joyent/node/wiki/_pages)
+### Community
+1. Allow ownership of restaurant, city so as to administer content. Provide a edit this page link on each restaurant page so someone has an option to report/edit content appropriately.
+2. Call for contributors (Developers/Designers/Administrators)
