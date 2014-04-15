@@ -135,9 +135,9 @@ restaurantSchema.method({
         }
         if (!!next) next();
     },
-    addMenuItem: function(itemName, next) {
+    addMenuItem: function(item, next) {
         var that = this;
-        mongoose.model('item').findOneAndUpdate({ name: itemName, _restaurant: this._id }, {}, {upsert: true}, function(err, doc) {
+        mongoose.model('item').findOneAndUpdate({ name: item.name, info: item, _restaurant: this._id }, {}, {upsert: true}, function(err, doc) {
             if (err) throw err;
             mongoose.model('restaurant').update({_id: that._id}, { $addToSet: {menu: doc._id }}, function(err, _) {
                 if (err) throw err;
@@ -147,14 +147,14 @@ restaurantSchema.method({
     },
     crawl: function(next) {
         var doc = this;
-
+        var l = new linker();
         async.parallel({
             getItemKeywords: function(next) {
                 ItemKeywords.find({}).exec(function(err, items) {
                     var menuKeywords = _.map(items, function(item) {
                         return item.name;
                     });
-                    next(null, menuKeywords);
+                    next(null, _.union(menuKeywords, l.defaults.menuKeywords));
                 });
             },
             getItemKeywordsBlacklisted: function(next) {
@@ -162,16 +162,16 @@ restaurantSchema.method({
                     var menuKeywordsBlacklisted = _.map(items, function(item) {
                         return item.name;
                     });
-                    next(null, menuKeywordsBlacklisted);
+                    next(null, _.union(menuKeywordsBlacklisted, l.defaults.menuKeywordsBlacklisted));
                 });
             }
         }, function(err, results) {
             if (!!doc.website) {
-                var l = new linker({
-                    getMenu: true,
-                    menuKeywords: results.getItemKeywords,
-                    menuKeywordsBlacklisted: results.getItemKeywordsBlacklisted
-                });
+
+                l.defaults.getMenu = true;
+                l.defaults.menuKeywords = results.getItemKeywords;
+                l.defaults.menuKeywordsBlacklisted = results.getItemKeywordsBlacklisted;
+
                 l.crawl(doc.website)
                 .progressed(function(data) {
                     console.log('Progressed: ', data);

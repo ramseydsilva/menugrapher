@@ -9,6 +9,7 @@ var schemaOptions = {
 
 var itemSchema = new mongoose.Schema({
     name: String,
+    info: {},
     _restaurant: { type: mongoose.Schema.ObjectId, ref : 'restaurant' },
 }, schemaOptions);
 

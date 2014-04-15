@@ -64,7 +64,7 @@
     "redis": "0.8.3",
     "request": "~2.34.0",
     "slug": "^0.4.2",
-    "socialfinder": "0.0.4",
+    "socialfinder": "0.0.6",
     "socket.io": "~0.9.16",
     "socket.io-stream": "~0.5.3",
     "temboo": "^1.7.7",
