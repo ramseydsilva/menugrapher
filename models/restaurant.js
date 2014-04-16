@@ -28,6 +28,7 @@ var restaurantSchema = new mongoose.Schema({
     menu: [{type: mongoose.Schema.ObjectId, ref: 'item', unique: true}],
     image: {url: String, path: String},
     website: String,
+    infos: [{}],
     dateCrawledWebsite: Date,
     description: String,
     hours: String,
@@ -169,6 +170,8 @@ restaurantSchema.method({
             if (!!doc.website) {
 
                 l.defaults.getMenu = true;
+                l.defaults.getInfo = true;
+                l.defaults.infoWords = [doc.name.toLowerCase()];
                 l.defaults.menuKeywords = results.getItemKeywords;
                 l.defaults.menuKeywordsBlacklisted = results.getItemKeywordsBlacklisted;
 
@@ -179,6 +182,8 @@ restaurantSchema.method({
                         doc.addMenuItem(data.item, function(err, doc) {
                             console.log('Menu item added: ', doc.name);
                         });
+                    } else if (!!data.info) {
+                        doc.update({$addToSet: {infos: data.info}}, function() {});
                     } else {
                         doc.update({$addToSet: {links: data}}, function() {});
                     }

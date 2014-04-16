@@ -25,11 +25,18 @@ div.row
             div.clearfix
 
             div.google-photos.padded-10
+                - var counter = 0;
                 for photo in restaurant.photos.reverse().splice(0,3)
-                    img(class='padded-all-5', src='https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&maxheight=150&photoreference=#{photo.photo_reference}&key=#{secrets.google.clientKey}&sensor=false')
+                    - counter += 1;
+                    img(class='padded-all-5 #{counter > 2 ? "hidden-sm hidden-xs": ""}', src='https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&maxheight=150&photoreference=#{photo.photo_reference}&key=#{secrets.google.clientKey}&sensor=false')
 
         div.padded-10
         div.col-sm-5
             div#map-canvas.panel
             div.padded-10= restaurant.location.address
 
+        div.row.padded
+            for info in restaurant.infos
+                br
+                !{info.text}
+                br
