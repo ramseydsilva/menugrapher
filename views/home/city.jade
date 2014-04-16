@@ -17,16 +17,26 @@ block content
             div.row
                 div(class='col-sm-12')
                     legend.lead Restaurants in #{city.name}
-                    - var items = restaurants;
-                    - var search = true;
-                    - var placeholder = 'Search for restaurants in ' + city.name;
-                    - var api='/api/v1/restaurants';
-                    include ../includes/itemList
+                        - var button_text = 'Hide';
+                        - var button_rel = 'restaurant-search-panel';
+                        include ../includes/showhide
 
-            div.row.padded
+                    div.content-panel.restaurant-search-panel
+                        - var items = restaurants;
+                        - var search = true;
+                        - var placeholder = 'Search for restaurants in ' + city.name;
+                        - var api='/api/v1/restaurants';
+                        include ../includes/itemList
+
+            div.row
                 div(class='col-sm-12')
                     legend.lead Posts in #{city.name}
-                    - var cols = 3
-                    include ../includes/posts
+                        - var button_text = 'Hide';
+                        - var button_rel = 'posts-panel';
+                        include ../includes/showhide
+
+                    div.content-panel.posts-panel
+                        - var cols = 3
+                        include ../includes/posts
 
 

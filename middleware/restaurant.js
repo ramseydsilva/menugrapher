@@ -8,6 +8,9 @@ var Restaurant = require('../models/restaurant'),
     middleware = {};
 
 middleware.restaurantExists = function(req, res, next) {
+    // /restaurants/:id
+    // /:city/:slug
+    // /:slug
     async.parallel({
         id: function(next) {
             Restaurant.findOne({_id: req.param('restaurant')}, function(err, doc) {
@@ -70,7 +73,7 @@ middleware.getRestaurantData = function(req, res, cb) {
         },
         getLinksAndMenu: function(next) {
             Restaurant.findOne({_id: restaurant._id}).exec(function(err, doc) {
-                if (!doc.dateCrawledWebsite || Date.now() > (doc.dateCrawledWebsite + (30*60*60))) { // crawl every 30 mins
+                if (!doc.dateCrawledWebsite || Date.now() > (doc.dateCrawledWebsite + (24*60*60*1000))) { // crawl once every day
                     doc.crawl();
                 }
             });
@@ -87,4 +90,5 @@ middleware.getRestaurantData = function(req, res, cb) {
         }
     });
 }
+
 module.exports = middleware;

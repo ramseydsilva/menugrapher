@@ -22,24 +22,36 @@ block content
             div.row
                 div(class='col-sm-12')
                     legend.lead Cities
-                    - var items = cities;
-                    - var search = true;
-                    - var placeholder = 'Search a City';
-                    - var api='/api/v1/cities';
-                    include includes/itemList
+                        - var button_text = 'Hide';
+                        - var button_rel = 'city-search-panel';
+                        include includes/showhide
+                    div.content-panel.city-search-panel
+                        - var items = cities;
+                        - var search = true;
+                        - var placeholder = 'Search a City';
+                        - var api='/api/v1/cities';
+                        include includes/itemList
 
-            div.row.padded
+            div.row
                 div.col-sm-12
                     legend.lead Categories
-                    - items = categories
-                    - var search = true;
-                    - var placeholder = 'Search Categories';
-                    - var api='/api/v1/categories';
-                    include includes/itemList
+                       - var button_text = 'Hide';
+                        - var button_rel = 'category-search-panel';
+                        include includes/showhide
+                    div.content-panel.category-search-panel
+                        - items = categories
+                        - var search = true;
+                        - var placeholder = 'Search Categories';
+                        - var api='/api/v1/categories';
+                        include includes/itemList
 
-            div.row.padded
+            div.row
                 div(class='col-sm-12')
                     legend.lead Posts
-                    - var cols = 3
-                    include includes/posts
+                       - var button_text = 'Hide';
+                        - var button_rel = 'posts-panel';
+                        include includes/showhide
+                    div.content-panel.posts-panel
+                        - var cols = 3
+                        include includes/posts
 

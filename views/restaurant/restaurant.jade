@@ -11,22 +11,35 @@ block content
 
             div.row
                 legend.lead Menu
-                - var items = restaurant.nonEmptyMenu
-                include ../includes/itemList
+                    - var button_text = 'Hide';
+                    - var button_rel = 'menu-panel';
+                    include ../includes/showhide
+                div.content-panel.menu-panel
+                    - var items = restaurant.nonEmptyMenu
+                    include ../includes/itemList
 
-            div.row.padded
+            div.row
                 legend.lead Posts
-                - var cols = 3
-                include ../includes/posts
+                    - var button_text = 'Hide';
+                    - var button_rel = 'posts-panel';
+                    include ../includes/showhide
+                div.content-panel.posts-panel
+                    - var cols = 3
+                    include ../includes/posts
 
             if (!!restaurant.reviews.user_reviews.length)
                 div.row.review-container
                     legend.lead Google Reviews
-                    - var counter = 0;
-                    - for rv in restaurant.reviews.user_reviews.slice(0,4)
-                        - counter += 1;
-                        div(class='col-sm-3 #{counter > 2 ? "hidden-xs": ""}')
-                            div.panel
-                                a(target='blank', href=rv.author_url)= rv.author_name
-                                | : !{truncateWords_html(rv.text, 30)} 
-                                a(target='blank', href=restaurant.links.google) . . .
+                        - var button_text = 'Hide';
+                        - var button_rel = 'reviews-panel';
+                        include ../includes/showhide
+
+                    div.content-panel.reviews-panel
+                        - var counter = 0;
+                        - for rv in restaurant.reviews.user_reviews.slice(0,4)
+                            - counter += 1;
+                            div(class='col-sm-3 #{counter > 2 ? "hidden-xs": ""}')
+                                div.panel
+                                    a(target='blank', href=rv.author_url)= rv.author_name
+                                    | : !{truncateWords_html(rv.text, 30)} 
+                                    a(target='blank', href=restaurant.links.google) . . .

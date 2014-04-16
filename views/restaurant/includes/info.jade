@@ -1,31 +1,35 @@
 div.row
     legend.lead= restaurant.name
+        - var button_text = 'Hide';
+        - var button_rel = 'main-panel';
+        include ../../includes/showhide
         img(class='pull-right', src='/img/powered-by-google.png')
 
-    div.col-sm-7
-        if restaurant.website
-            a(href='#{restaurant.website}', target='blank') #{restaurant.website}
-            br
-            br
-        if restaurant.reviews.price
-            | Price: #{restaurant.reviews.price}
-            br
-        if restaurant.reviews.rating
-            | Rating: #{restaurant.reviews.rating}
-            br
+    div.main-panel
+        div.col-sm-7
+            if restaurant.website
+                a(href='#{restaurant.website}', target='blank') #{restaurant.website}
+                br
+                br
+            if restaurant.reviews.price
+                | Price: #{restaurant.reviews.price}
+                br
+            if restaurant.reviews.rating
+                | Rating: #{restaurant.reviews.rating}
+                br
 
-        for link in restaurant.links
-            a(href=(link.link||link.href), target="blank")
-                i(class="social fa fa-#{link.source}")
+            for link in restaurant.links
+                a(href=(link.link||link.href), target="blank")
+                    i(class="social fa fa-#{link.source}")
 
-        div.clearfix
+            div.clearfix
 
-        div.google-photos.padded-10
-            for photo in restaurant.photos.reverse().splice(0,3)
-                img(class='padded-all-5', src='https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&maxheight=150&photoreference=#{photo.photo_reference}&key=#{secrets.google.clientKey}&sensor=false')
+            div.google-photos.padded-10
+                for photo in restaurant.photos.reverse().splice(0,3)
+                    img(class='padded-all-5', src='https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&maxheight=150&photoreference=#{photo.photo_reference}&key=#{secrets.google.clientKey}&sensor=false')
 
-    div.padded-10
-    div.col-sm-5
-        div#map-canvas.panel
-        div.padded-10= restaurant.location.address
+        div.padded-10
+        div.col-sm-5
+            div#map-canvas.panel
+            div.padded-10= restaurant.location.address
 

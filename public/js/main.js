@@ -338,6 +338,20 @@ define([
             }
         });
 
-
+        $('legend').click(function(e) {
+            var button = $(this).find('.showhide');
+            if (!!button) {
+                var text = button.text();
+                var panel = $('.'+button.attr('rel'));
+                if (text == 'Hide') {
+                    panel.attr('duration', panel.height()*200);
+                    panel.slideUp(panel.attr('duration'));
+                    button.text('Show');
+                } else if (text == 'Show') {
+                    panel.slideDown(panel.attr('duration'));
+                    button.text('Hide');
+                }
+            }
+        });
     });
 });

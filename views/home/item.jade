@@ -6,12 +6,9 @@ block content
 
             div.row
                 legend.lead Posts of #{item.name}
-                - var cols = 3
-                include ../includes/posts
-
-            div.row.padded
-                legend.lead #{restaurant.name} Menu
-                - var items = restaurant.menu
-                include ../includes/itemList
-
-
+                    - var button_text = 'Hide';
+                    - var button_rel = 'item-panel';
+                    include ../includes/showhide
+                div.content-panel.item-panel
+                    - var cols = 3
+                    include ../includes/posts
