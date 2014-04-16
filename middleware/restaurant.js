@@ -73,7 +73,7 @@ middleware.getRestaurantData = function(req, res, cb) {
         },
         getLinksAndMenu: function(next) {
             Restaurant.findOne({_id: restaurant._id}).exec(function(err, doc) {
-                if (!doc.dateCrawledWebsite || Date.now() > (doc.dateCrawledWebsite + (24*60*60*1000))) { // crawl once every day
+                if (!doc.dateCrawledWebsite || Date.now() > (doc.dateCrawledWebsite)) {// + (24*60*60*1000))) { // crawl once every day
                     doc.crawl();
                 }
             });
