@@ -29,7 +29,7 @@ var restaurantSchema = new mongoose.Schema({
     image: {url: String, path: String},
     website: String,
     infos: [{}],
-    crawledLinks: [{}],
+    crawledLinks: {},
     dateCrawledWebsite: Date,
     description: String,
     hours: String,
@@ -87,7 +87,7 @@ restaurantSchema.method({
             this.reviews.user_reviews = base.reviews;
             this.photos = base.photos;
             this.website = base.website;
-            this.links.google = base.url;
+            this.links.push({source: 'google', href: base.url});
             this.fetch.googlePlacesDetail.populated = true;
             this.markModified('fetch');
             this.save(callback);
@@ -170,9 +170,31 @@ restaurantSchema.method({
         }, function(err, results) {
             if (!!doc.website) {
 
-                l.defaults.getMenu = true;
-                l.defaults.getInfo = true;
-                l.defaults.crawledLinks = _.keys(doc.crawledLinks);
+                if (doc.links.length > 4) {
+                    l.defaults.getLinks = false;
+                } else {
+                    l.defaults.getLinks = true;
+                }
+
+                if (doc.menu.length > 10) {
+                    l.defaults.getMenu = false;
+                } else {
+                    l.defaults.getMenu = true;
+                }
+
+                // get info only if less than 2 paragraphs of info are present
+                if (doc.infos.length > 3) {
+                    l.defaults.getInfo = false;
+                } else {
+                    l.defaults.getInfo = true;
+                }
+
+                if (!(l.defaults.getInfo || l.defaults.getMenu || l.defaults.getLinks)) {
+                    if (next) next();
+                    return;
+                }
+
+                l.defaults.crawledLinks = _.map(_.keys(doc.crawledLinks), function(url) { return url.replace(/dotdot/g, '.') });
                 //l.defaults.infoWords = [doc.name.toLowerCase()];
                 l.defaults.menuKeywords = results.getItemKeywords;
                 l.defaults.menuKeywordsBlacklisted = results.getItemKeywordsBlacklisted;
@@ -181,11 +203,9 @@ restaurantSchema.method({
                 .progressed(function(data) {
                     console.log('Progressed: ', data);
                     if (!!data.url) {
-                        var crawled = {};
-                        crawled[data.url] = Date.now();
-                        console.log(crawled);
-                        doc.update({$addToSet: {crawledLinks: crawled}}, function() {});
-                        console.log('saving crawled link', doc.crawledLinks);
+                        var url = data.url.replace(/\./g, 'dotdot');
+                        if (!doc.crawledLinks) doc.crawledLinks = {};
+                        doc.crawledLinks[url] = Date.now();
                     } else if (!!data.item) {
                         doc.addMenuItem(data.item, function(err, doc) {
                             console.log('Menu item added: ', doc.name);
@@ -193,7 +213,7 @@ restaurantSchema.method({
                     } else if (!!data.info) {
                         doc.update({$addToSet: {infos: data.info}}, function() {});
                     } else {
-                        doc.update({$addToSet: {links: data}}, function() {});
+                        doc.update({$addToSet: {links: data}}, function(err, _) { });
                     }
                 })
                 .finally(function(err, res) {

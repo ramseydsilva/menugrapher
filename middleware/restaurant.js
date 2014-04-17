@@ -65,9 +65,9 @@ middleware.getRestaurantData = function(req, res, cb) {
             fetch.googlePlacesDetail(restaurant, function(err, doc) {
                 if (!err && !!doc) {
                     updated = true;
-                    doc.populateData('fetch.googlePlacesDetail', true, next);
+                    doc.populateData('fetch.googlePlacesDetail', false, next);
                 } else {
-                    doc.populateData('fetch.googlePlacesDetail', true, next);
+                    doc.populateData('fetch.googlePlacesDetail', false, next);
                 }
             });
         },
