@@ -29,6 +29,7 @@ var restaurantSchema = new mongoose.Schema({
     image: {url: String, path: String},
     website: String,
     infos: [{}],
+    crawledLinks: [{}],
     dateCrawledWebsite: Date,
     description: String,
     hours: String,
@@ -171,14 +172,21 @@ restaurantSchema.method({
 
                 l.defaults.getMenu = true;
                 l.defaults.getInfo = true;
-                l.defaults.infoWords = [doc.name.toLowerCase()];
+                l.defaults.crawledLinks = _.keys(doc.crawledLinks);
+                //l.defaults.infoWords = [doc.name.toLowerCase()];
                 l.defaults.menuKeywords = results.getItemKeywords;
                 l.defaults.menuKeywordsBlacklisted = results.getItemKeywordsBlacklisted;
 
                 l.crawl(doc.website)
                 .progressed(function(data) {
                     console.log('Progressed: ', data);
-                    if (!!data.item) {
+                    if (!!data.url) {
+                        var crawled = {};
+                        crawled[data.url] = Date.now();
+                        console.log(crawled);
+                        doc.update({$addToSet: {crawledLinks: crawled}}, function() {});
+                        console.log('saving crawled link', doc.crawledLinks);
+                    } else if (!!data.item) {
                         doc.addMenuItem(data.item, function(err, doc) {
                             console.log('Menu item added: ', doc.name);
                         });
