@@ -1,3 +1,5 @@
+Please note: This repo was supposed to be private. Is quite badly written. But I am temporarily putting the project on hold hence open sourcing. If anyone so wants to browse the repo, feel free!
+
 Waitr.io
 ========
 
