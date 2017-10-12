@@ -96,7 +96,8 @@ fetch.save = function(data, source, callback) {
  */
 fetch.googleMaps = function(restaurant, callback) {
     if (!restaurant.fetch || !restaurant.fetch.googleMaps) {
-        var query = restaurant.name + ', ' + restaurant._city.name;
+        var query = restaurant.name + ', ' + restaurant.city.name;
+        console.log(query);
         geocoder.geocode(query, function(err, res) {
             if (!err) {
                 fetch.save({

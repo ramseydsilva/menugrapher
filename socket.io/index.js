@@ -30,6 +30,7 @@ module.exports.socketio = function(app) {
         });
 
     io.configure(function() {
+        io.set("transports", ["xhr-polling", "jsonp-polling"]);
         io.set("authorization", passportAuthorization);
     });
 

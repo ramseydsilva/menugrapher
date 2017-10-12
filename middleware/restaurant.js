@@ -44,7 +44,9 @@ middleware.getRestaurantData = function(req, res, cb) {
         updated = false;
     async.series({
         googleMaps: function(next) {
+                console.log(restaurant);
             fetch.googleMaps(restaurant, function(err, doc) {
+                console.log(err);
                 doc.populateData('fetch.googleMaps', function(err, doc) {
                     updated = true;
                     next(err, doc);

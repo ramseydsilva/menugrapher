@@ -28,7 +28,7 @@
     "github-api": "~0.7.0",
     "gm": "^1.14.2",
     "google-places": "0.0.2",
-    "googleplacesapi": "0.0.1",
+    "googleplacesapi": "0.0.2",
     "hiredis": "~0.1.15",
     "htmlparser2": "^3.7.1",
     "imagemagick": "~0.1.3",
